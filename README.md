@@ -1,13 +1,13 @@
 ![](https://github.com/ROBOTIS-GIT/ROBOTIS-Documents/blob/master/wiki-images/AutoRace/autorace_pics/autorace_rbiz_challenge_2017_robots_1.png)
 
-# TurtleBot3 Auto on AutoRace 2017 - Source codes
-Sources for TurtleBot3 Auto - AutoRace 2017
+# TurtleBot3 AutoRace on RBiz AutoRace 2017 - Source codes
+Sources for TurtleBot3 AutoRace - RBiz AutoRace 2017
 
 <!--
 ![Picture of Pi Camera mounted TurtleBot3 Burger]
 -->
 
-This source code is for AutoRace 2017. 
+This source code is for RBiz AutoRace 2017. 
 
 <!--
 ![](https://youtu.be/sp02Q4FHOWo)
