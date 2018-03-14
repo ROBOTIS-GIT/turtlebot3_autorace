@@ -1,0 +1,3 @@
+camera:
+  extrinsic_camera_calibration:
+    clip_hist_percent: 1.0

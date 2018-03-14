@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package>
+  <name>turtlebot3_autorace</name>
+  <version>1.0.0</version>
+  <description>
+    TurtleBot3 Auto ROS packages for AutoRace 2017 (meta package)
+  </description>
+  <license>Apache License 2.0</license>
+  <author email="rwjung@robotis.com">Leon RyuWoon Jung</author>
+  <maintainer email="rwjung@robotis.com">Leon RyuWoon Jung</maintainer>
+  <url type="bugtracker">https://github.com/ROBOTIS-GIT/turtlebot3_autorace/issues</url>
+  <url type="repository">https://github.com/ROBOTIS-GIT/turtlebot3_autorace</url>
+  <url type="website">http://emanual.robotis.com/docs/en/platform/turtlebot3/autonomous_driving/#autonomous-driving</url>
+  <buildtool_depend>catkin</buildtool_depend>
+  <export><metapackage/></export>
+</package>

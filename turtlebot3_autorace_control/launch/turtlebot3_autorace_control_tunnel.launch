@@ -1,0 +1,5 @@
+<launch>
+  <!-- do export TURTLEBOT3_MODEL=burger before launch turtlebot3_autorace_core.launch -->
+  <!-- tunnel control -->
+  <include file="$(find turtlebot3_navigation)/launch/turtlebot3_navigation.launch" />
+</launch>

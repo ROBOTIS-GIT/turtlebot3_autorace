@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package>
+  <name>turtlebot3_autorace_core</name>
+  <version>1.0.0</version>
+  <description> The package for node control in TurtleBot3 Auto</description>
+  <license>Apache License 2.0</license>
+  <author email="rwjung@robotis.com">Leon RyuWoon Jung</author>
+  <maintainer email="rwjung@robotis.com">Leon RyuWoon Jung</maintainer>
+  <url type="bugtracker">https://github.com/ROBOTIS-GIT/turtlebot3_autorace/issues</url>
+  <url type="repository">https://github.com/ROBOTIS-GIT/turtlebot3_autorace</url>
+  <url type="website">http://emanual.robotis.com/docs/en/platform/turtlebot3/autonomous_driving/#autonomous-driving</url>
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>dynamic_reconfigure</run_depend>
+  <export></export>
+</package>
+

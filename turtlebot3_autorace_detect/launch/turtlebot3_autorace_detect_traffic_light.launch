@@ -1,0 +1,22 @@
+<launch>
+  <!-- launch turtlebot3_autorace_extrinsic_camera_calibration.launch before launch this file -->
+
+  <arg name="calibration_mode" default="$(env AUTO_DT_CALIB)" doc="calibration_mode type [calibration, action]"/>
+
+  <!-- traffic_light detection -->
+  <node pkg="turtlebot3_autorace_detect" type="detect_traffic_light.py" name="detect_traffic_light" output="screen">
+    <rosparam command="load" file="$(find turtlebot3_autorace_detect)/param/traffic_light/traffic_light.yaml" />
+    <param if="$(eval calibration_mode == 'calibration')" name="/is_detection_calibration_mode" value="True"/>
+    <param if="$(eval calibration_mode == 'action')" name="/is_detection_calibration_mode" value="False"/>     
+    <remap from="/detect/image_input" to="/camera/image_compensated" />
+    <remap from="/detect/image_input/compressed" to="/camera/image_compensated/compressed" />
+    <remap from="/detect/image_output" to="/detect/image_traffic_light" />
+    <remap from="/detect/image_output/compressed" to="/detect/image_traffic_light/compressed" />
+    <remap from="/detect/image_output_sub1" to="/detect/image_red_light" />
+    <remap from="/detect/image_output_sub1/compressed" to="/detect/image_red_light/compressed" />
+    <remap from="/detect/image_output_sub2" to="/detect/image_yellow_light" />
+    <remap from="/detect/image_output_sub2/compressed" to="/detect/image_yellow_light/compressed" />
+    <remap from="/detect/image_output_sub3" to="/detect/image_green_light" />
+    <remap from="/detect/image_output_sub3/compressed" to="/detect/image_green_light/compressed" />  
+  </node>
+</launch>

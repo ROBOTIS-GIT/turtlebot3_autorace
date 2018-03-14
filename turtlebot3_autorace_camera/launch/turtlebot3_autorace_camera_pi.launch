@@ -1,0 +1,13 @@
+<launch>
+  <!-- raspicam_node package should be downloaded and be launched in the raspberry pi before launch this file -->
+
+  <!-- run pi camera -->
+  <node pkg="raspicam_node" type="raspicam_node" name="camera" output="screen">
+    <rosparam command="load" file="$(find turtlebot3_autorace_camera)/calibration/camera_calibration/camera.yaml" />
+    <param name="camera_info_url" value="package://turtlebot3_autorace_camera/calibration/intrinsic_calibration/camerav2_320x240_30fps.yaml"/>
+    <param name="width" value="320"/>
+    <param name="height" value="240"/>
+    <param name="framerate" value="30"/>
+    <param name="camera_frame_id" value="camera"/>
+  </node>
+</launch>

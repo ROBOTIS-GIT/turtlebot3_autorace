@@ -1,0 +1,130 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+################################################################################
+# Copyright 2018 ROBOTIS CO., LTD.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+################################################################################
+
+# Author: Ryu Woon Jung (Leon)
+
+import rospy
+import numpy as np
+import cv2
+from cv_bridge import CvBridge
+from sensor_msgs.msg import Image, CompressedImage
+
+from dynamic_reconfigure.server import Server
+from turtlebot3_autorace_camera.cfg import ImageCompensationParamsConfig
+
+class ImageCompensation():
+    def __init__(self):
+        self.clip_hist_percent = rospy.get_param("/camera/extrinsic_camera_calibration/clip_hist_percent", 1.)
+
+        self.is_calibration_mode = rospy.get_param("~is_extrinsic_camera_calibration_mode", False)
+        if self.is_calibration_mode == True:
+            srv_image_compensation = Server(ImageCompensationParamsConfig, self.cbGetImageCompensationParam)
+
+        self.sub_image_type = "compressed"  # "compressed" / "raw"
+        self.pub_image_type = "raw"         # "compressed" / "raw"
+
+        if self.sub_image_type == "compressed":
+            # subscribes compressed image 
+            self.sub_image_original = rospy.Subscriber('/camera/image_input/compressed', CompressedImage, self.cbImageCompensation, queue_size = 1)
+        elif self.sub_image_type == "raw":
+            # subscribes raw image 
+            self.sub_image_original = rospy.Subscriber('/camera/image_input', Image, self.cbImageCompensation, queue_size = 1)
+
+        if self.pub_image_type == "compressed":
+            # publishes compensated image in compressed type 
+            self.pub_image_compensated = rospy.Publisher('/camera/image_output/compressed', CompressedImage, queue_size = 1)
+        elif self.pub_image_type == "raw":
+            # publishes compensated image in raw type
+            self.pub_image_compensated = rospy.Publisher('/camera/image_output', Image, queue_size = 1)
+
+        self.cvBridge = CvBridge()
+
+    def cbGetImageCompensationParam(self, config, level):
+        rospy.loginfo("[Image Compensation] Extrinsic Camera Calibration Parameter reconfigured to")
+        rospy.loginfo("clip_hist_percent : %f", config.clip_hist_percent)
+
+        self.clip_hist_percent = config.clip_hist_percent
+
+        return config
+
+    def cbImageCompensation(self, msg_img):
+        if self.sub_image_type == "compressed":
+            # converts compressed image to opencv image
+            np_image_original = np.fromstring(msg_img.data, np.uint8)
+            cv_image_original = cv2.imdecode(np_image_original, cv2.IMREAD_COLOR)
+        elif self.sub_image_type == "raw":
+            # converts raw image to opencv image
+            cv_image_original = self.cvBridge.imgmsg_to_cv2(msg_img, "bgr8")
+
+        cv_image_compensated = np.copy(cv_image_original)
+
+        ## Image compensation based on pseudo histogram equalization
+        clip_hist_percent = self.clip_hist_percent
+        
+        hist_size = 256
+        min_gray = 0
+        max_gray = 0
+        alpha = 0
+        beta = 0
+
+        gray = cv2.cvtColor(cv_image_compensated, cv2.COLOR_BGR2GRAY)
+
+        # histogram calculation
+        if clip_hist_percent == 0.0:
+            min_gray, max_gray, _, _ = cv2.minMaxLoc(gray)
+        else:
+            hist = cv2.calcHist([gray], [0], None, [hist_size], [0, hist_size])
+
+            accumulator = np.cumsum(hist)
+
+            max = accumulator[hist_size - 1]
+
+            clip_hist_percent *= (max / 100.)
+            clip_hist_percent /= 2.
+
+            min_gray = 0
+            while accumulator[min_gray] < clip_hist_percent:
+                min_gray += 1
+            
+            max_gray = hist_size - 1
+            while accumulator[max_gray] >= (max - clip_hist_percent):
+                max_gray -= 1
+
+        input_range = max_gray - min_gray
+
+        alpha = (hist_size - 1) / input_range
+        beta = -min_gray * alpha
+
+        cv_image_compensated = cv2.convertScaleAbs(cv_image_compensated, -1, alpha, beta)
+
+        if self.pub_image_type == "compressed":
+            # publishes compensated image in compressed type
+            self.pub_image_compensated.publish(self.cvBridge.cv2_to_compressed_imgmsg(cv_image_compensated, "jpg"))
+
+        elif self.pub_image_type == "raw":
+            # publishes compensated image in raw type
+            self.pub_image_compensated.publish(self.cvBridge.cv2_to_imgmsg(cv_image_compensated, "bgr8"))
+
+    def main(self):
+        rospy.spin()
+
+if __name__ == '__main__':
+    rospy.init_node('image_compensation')
+    node = ImageCompensation()
+    node.main()
