@@ -19,14 +19,13 @@
 
 # Author: Ryu Woon Jung (Leon)
  
-import numpy as np
 import rospy
+import numpy as np
 import cv2
-from cv_bridge import CvBridge, CvBridgeError
+from enum import Enum
 from std_msgs.msg import UInt8, Float64
 from sensor_msgs.msg import Image, CompressedImage
-from enum import Enum
-
+from cv_bridge import CvBridge, CvBridgeError
 from dynamic_reconfigure.server import Server
 from turtlebot3_autorace_detect.cfg import DetectTrafficLightParamsConfig
 

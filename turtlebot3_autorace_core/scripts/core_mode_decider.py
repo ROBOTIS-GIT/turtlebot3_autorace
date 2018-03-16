@@ -21,9 +21,8 @@
 
 import rospy, roslaunch
 import numpy as np
-from std_msgs.msg import UInt8
-
 from enum import Enum
+from std_msgs.msg import UInt8
 
 class CoreModeDecider():
     def __init__(self):

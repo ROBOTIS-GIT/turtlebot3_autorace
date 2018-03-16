@@ -21,15 +21,14 @@
 
 import rospy, roslaunch
 import numpy as np
-import cv2
-from cv_bridge import CvBridge
-from std_msgs.msg import UInt8
-from sensor_msgs.msg import Image, CompressedImage
-
-from enum import Enum
 import subprocess
 import os
 import sys
+import cv2
+from enum import Enum
+from std_msgs.msg import UInt8
+from sensor_msgs.msg import Image, CompressedImage
+from cv_bridge import CvBridge
  
 class CoreNodeController():
     def __init__(self):

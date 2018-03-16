@@ -19,19 +19,18 @@
 
 # Author: Ryu Woon Jung (Leon)
  
-import numpy as np
 import rospy
-from nav_msgs.msg import Odometry
-from sensor_msgs.msg import LaserScan
-from std_msgs.msg import UInt8, Float64, String
-from enum import Enum
-from geometry_msgs.msg import Twist
-import cv2
-from cv_bridge import CvBridge, CvBridgeError
-from sensor_msgs.msg import Image, CompressedImage
+import numpy as np
 import math
 import tf
 import os 
+import cv2
+from enum import Enum
+from std_msgs.msg import UInt8, Float64, String
+from sensor_msgs.msg import LaserScan, Image, CompressedImage
+from geometry_msgs.msg import Twist
+from nav_msgs.msg import Odometry
+from cv_bridge import CvBridge, CvBridgeError
 
 class DetectParking():
     def __init__(self):
