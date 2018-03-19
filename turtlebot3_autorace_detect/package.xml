@@ -3,26 +3,26 @@
   <name>turtlebot3_autorace_detect</name>
   <version>1.0.0</version>
   <description>
-    The package for feature detection with turtlebot3 auto
+    AutoRace ROS packages for feature detection with TurtleBot3 Auto
   </description>
   <license>Apache 2.0</license>
   <author email="rwjung@robotis.com">Leon Jung</author>
   <maintainer email="pyo@robotis.com">Pyo</maintainer>
   <url type="website">http://wiki.ros.org/turtlebot3_autorace_detect</url>
-  <url type="emanual">http://emanual.robotis.com/docs/en/platform/turtlebot3/autonomous_driving/#autonomous-driving</url>
+  <url type="emanual">http://turtlebot3.robotis.com</url>
   <url type="repository">https://github.com/ROBOTIS-GIT/turtlebot3_autorace</url>
   <url type="bugtracker">https://github.com/ROBOTIS-GIT/turtlebot3_autorace/issues</url>
   <buildtool_depend>catkin</buildtool_depend>
-  <depend>rospy</depend>
-  <depend>std_msgs</depend>
-  <depend>sensor_msgs</depend>
-  <depend>geometry_msgs</depend>
-  <depend>nav_msgs</depend>
-  <depend>move_base_msgs</depend>
-  <depend>tf</depend>
   <depend>dynamic_reconfigure</depend>
-  <depend>cv_bridge</depend>
-  <depend>opencv</depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>move_base_msgs</exec_depend>
+  <exec_depend>tf</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>opencv</exec_depend>
   <exec_depend>python-numpy</exec_depend>
   <exec_depend>python-enum</exec_depend>
 </package>

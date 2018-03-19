@@ -17,7 +17,7 @@
 # limitations under the License.
 ################################################################################
 
-# Author: Ryu Woon Jung (Leon), [AuTURBO] Kihoon Kim (https://github.com/auturbo)
+# Authors: Leon Jung, [AuTURBO] Kihoon Kim (https://github.com/auturbo)
  
 import rospy
 import numpy as np

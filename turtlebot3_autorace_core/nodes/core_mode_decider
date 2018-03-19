@@ -17,9 +17,9 @@
 # limitations under the License.
 ################################################################################
 
-# Author: Ryu Woon Jung (Leon)
+# Author: Leon Jung
 
-import rospy, roslaunch
+import rospy
 import numpy as np
 from enum import Enum
 from std_msgs.msg import UInt8

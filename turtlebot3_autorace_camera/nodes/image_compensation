@@ -17,14 +17,13 @@
 # limitations under the License.
 ################################################################################
 
-# Author: Ryu Woon Jung (Leon)
+# Author: Leon Jung
 
 import rospy
 import numpy as np
 import cv2
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image, CompressedImage
-
 from dynamic_reconfigure.server import Server
 from turtlebot3_autorace_camera.cfg import ImageCompensationParamsConfig
 

@@ -17,7 +17,7 @@
 # limitations under the License.
 ################################################################################
 
-# Author: Ryu Woon Jung (Leon), Special Thanks : Roger Sacchelli
+# Authors: Leon Jung, Special Thanks : Roger Sacchelli
 
 import rospy
 import numpy as np
