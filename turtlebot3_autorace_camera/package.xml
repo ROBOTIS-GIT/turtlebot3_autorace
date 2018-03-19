@@ -16,7 +16,7 @@
   <depend>dynamic_reconfigure</depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
-  <exec_depend>vision_opencv</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
   <exec_depend>python-opencv</exec_depend>
   <exec_depend>python-numpy</exec_depend>
   <exec_depend>python-enum</exec_depend>

@@ -21,7 +21,7 @@
   <exec_depend>nav_msgs</exec_depend>
   <exec_depend>move_base_msgs</exec_depend>
   <exec_depend>tf</exec_depend>
-  <exec_depend>vision_opencv</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
   <exec_depend>python-opencv</exec_depend>
   <exec_depend>python-numpy</exec_depend>
   <exec_depend>python-enum</exec_depend>

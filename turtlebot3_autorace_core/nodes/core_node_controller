@@ -26,7 +26,6 @@ import os
 import sys
 from enum import Enum
 from std_msgs.msg import UInt8
-from sensor_msgs.msg import Image, CompressedImage
  
 class CoreNodeController():
     def __init__(self):
