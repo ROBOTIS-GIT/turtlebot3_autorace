@@ -1,13 +1,32 @@
 ![](https://github.com/ROBOTIS-GIT/ROBOTIS-Documents/blob/master/wiki-images/AutoRace/autorace_pics/autorace_rbiz_challenge_2017_robots_1.png)
 
-# turtlebot3_autorace meta-package
+# TurtleBot3 AutoRace Metapackage
 |[![GitHub version](https://badge.fury.io/gh/ROBOTIS-GIT%2Fturtlebot3_autorace.svg)](https://badge.fury.io/gh/ROBOTIS-GIT%2Fturtlebot3_autorace) [![Build Status](https://travis-ci.org/ROBOTIS-GIT/turtlebot3_autorace.svg?branch=master)](https://travis-ci.org/ROBOTIS-GIT/turtlebot3_autorace)
 
-# TurtleBot3 AutoRace on RBiz AutoRace 2017 - Source codes
+# Documents for TurtleBot3 AutoRace Packages
+- [ROBOTIS e-Manual](http://emanual.robotis.com/docs/en/platform/turtlebot3/autonomous_driving/)
+- http://wiki.ros.org/turtlebot3_autorace
+- http://wiki.ros.org/turtlebot3_autorace_camera
+- http://wiki.ros.org/turtlebot3_autorace_control
+- http://wiki.ros.org/turtlebot3_autorace_core
+- http://wiki.ros.org/turtlebot3_autorace_detect
+
+# ROS packages related to TurtleBot3
+- [turtlebot3](https://github.com/ROBOTIS-GIT/turtlebot3)
+- [turtlebot3_msgs](https://github.com/ROBOTIS-GIT/turtlebot3_msgs)
+- [turtlebot3_simulations](https://github.com/ROBOTIS-GIT/turtlebot3_simulations)
+- [turtlebot3_applications](https://github.com/ROBOTIS-GIT/turtlebot3_applications)
+- [turtlebot3_autorace](https://github.com/ROBOTIS-GIT/turtlebot3_autorace)
+
+# Documents and Videos for TurtleBot3
+- http://turtlebot3.robotis.com/
+- http://www.turtlebot.com/
+- [TurtleBot3 Videos](https://www.youtube.com/playlist?list=PLRG6WP3c31_XI3wlvHlx2Mp8BYqgqDURU)
+
+# TurtleBot3 AutoRace on RBiz AutoRace 2017
 Sources for TurtleBot3 AutoRace - RBiz AutoRace 2017
 
 <!--
-![Picture of Pi Camera mounted TurtleBot3 Burger]
 -->
 
 This source code is for RBiz AutoRace 2017. 
