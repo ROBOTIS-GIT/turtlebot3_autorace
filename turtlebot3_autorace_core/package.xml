@@ -17,6 +17,5 @@
   <exec_depend>roslaunch</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>python-numpy</exec_depend>
-  <exec_depend>python-enum</exec_depend>
 </package>
 
