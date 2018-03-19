@@ -19,4 +19,5 @@
   <exec_depend>cv_bridge</exec_depend>
   <exec_depend>python-opencv</exec_depend>
   <exec_depend>python-numpy</exec_depend>
+  <exec_depend>ppython-enum34</exec_depend>
 </package>
