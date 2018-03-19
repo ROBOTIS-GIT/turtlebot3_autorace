@@ -17,17 +17,17 @@
 # limitations under the License.
 ################################################################################
 
-# Author: Ryu Woon Jung (Leon)
+# Author: Leon Jung
 
 import rospy
 import numpy as np
+import math
+import os
 import cv2
-from cv_bridge import CvBridge, CvBridgeError
+from enum import Enum
 from std_msgs.msg import UInt8
 from sensor_msgs.msg import Image, CompressedImage
-import math
-from enum import Enum
-import os
+from cv_bridge import CvBridge, CvBridgeError
 
 class DetectSign():
     def __init__(self):

@@ -19,16 +19,16 @@
 
 # Author: Ryu Woon Jung (Leon)
  
-import numpy as np
 import rospy
-from nav_msgs.msg import Odometry
-from sensor_msgs.msg import LaserScan
-from std_msgs.msg import UInt8, Float64, String
-from enum import Enum
-from geometry_msgs.msg import Twist, PoseStamped
-from move_base_msgs.msg import MoveBaseActionResult
+import numpy as np
 import math
 import tf
+from enum import Enum
+from std_msgs.msg import UInt8, Float64, String
+from sensor_msgs.msg import LaserScan
+from geometry_msgs.msg import Twist, PoseStamped
+from nav_msgs.msg import Odometry
+from move_base_msgs.msg import MoveBaseActionResult
 
 class DetectTunnel():
     def __init__(self):
