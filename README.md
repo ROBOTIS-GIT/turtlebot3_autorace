@@ -1,7 +1,7 @@
 ![](https://github.com/ROBOTIS-GIT/ROBOTIS-Documents/blob/master/wiki-images/AutoRace/autorace_pics/autorace_rbiz_challenge_2017_robots_1.png)
 
 # TurtleBot3 AutoRace Metapackage
-|[![GitHub version](https://badge.fury.io/gh/ROBOTIS-GIT%2Fturtlebot3_autorace.svg)](https://badge.fury.io/gh/ROBOTIS-GIT%2Fturtlebot3_autorace) [![Build Status](https://travis-ci.org/ROBOTIS-GIT/turtlebot3_autorace.svg?branch=master)](https://travis-ci.org/ROBOTIS-GIT/turtlebot3_autorace)
+[![GitHub version](https://badge.fury.io/gh/ROBOTIS-GIT%2Fturtlebot3_autorace.svg)](https://badge.fury.io/gh/ROBOTIS-GIT%2Fturtlebot3_autorace) [![Build Status](https://travis-ci.org/ROBOTIS-GIT/turtlebot3_autorace.svg?branch=master)](https://travis-ci.org/ROBOTIS-GIT/turtlebot3_autorace)
 
 # Documents for TurtleBot3 AutoRace Packages
 - [ROBOTIS e-Manual](http://emanual.robotis.com/docs/en/platform/turtlebot3/autonomous_driving/)
