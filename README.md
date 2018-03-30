@@ -1,4 +1,5 @@
-![](https://github.com/ROBOTIS-GIT/ROBOTIS-Documents/blob/master/wiki-images/AutoRace/autorace_pics/autorace_rbiz_challenge_2017_robots_1.png)
+# TurtleBot3
+<img src="https://github.com/ROBOTIS-GIT/emanual/blob/master/assets/images/platform/turtlebot3/logo_turtlebot3.png" width="300">
 
 ## ROS Packages for TurtleBot3 AutoRace
 |Version|Kinetic + Ubuntu Xenial|Melodic + Ubuntu Bionic|
@@ -38,16 +39,9 @@
 
 
 # TurtleBot3 AutoRace on RBiz AutoRace 2017
-Sources for TurtleBot3 AutoRace - RBiz AutoRace 2017
+![](https://github.com/ROBOTIS-GIT/ROBOTIS-Documents/blob/master/wiki-images/AutoRace/autorace_pics/autorace_rbiz_challenge_2017_robots_1.png)
 
-<!--
--->
-
-This source code is for RBiz AutoRace 2017. 
-
-<!--
-![](https://youtu.be/sp02Q4FHOWo)
--->
+This source code is TurtleBot3 AutoRace - RBiz AutoRace 2017
 
 ## 1. Preparations
 
