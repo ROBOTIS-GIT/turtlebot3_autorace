@@ -30,7 +30,7 @@ from std_msgs.msg import UInt8
 class CoreNodeController():
     def __init__(self):
         self.ros_package_path = os.path.dirname(os.path.realpath(__file__))
-        self.ros_package_path = self.ros_package_path.replace('turtlebot3_autorace_core/src', '')
+        self.ros_package_path = self.ros_package_path.replace('turtlebot3_autorace_core/nodes', '')
 
         self.sub_mode_control = rospy.Subscriber('/core/decided_mode', UInt8, self.cbReceiveMode, queue_size=1)
 
