@@ -39,7 +39,7 @@ include_directories(
 # Install
 ################################################################################
 catkin_install_python(PROGRAMS
-  nodes/mission_control
+  nodes/core_node_mission
   nodes/core_mode_decider
   nodes/core_node_controller
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
