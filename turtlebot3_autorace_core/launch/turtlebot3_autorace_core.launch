@@ -3,7 +3,7 @@
   <!-- launch turtlebot3_bringup pkg - turtlebot3_robot.launch in the raspberry pi before launch this file -->
 
     <!-- image brightness & contrast compensation of ground-projected image -->
-    <node pkg="turtlebot3_autorace_core" type="core_node_controller.py" name="core_node_controller" output="screen" />
+    <node pkg="turtlebot3_autorace_core" type="core_node_controller" name="core_node_controller" output="screen" />
 
-    <node pkg="turtlebot3_autorace_core" type="core_mode_decider.py" name="core_mode_decider" output="screen" />
+    <node pkg="turtlebot3_autorace_core" type="core_mode_decider" name="core_mode_decider" output="screen" />
 </launch>

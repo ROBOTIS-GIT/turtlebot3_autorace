@@ -5,7 +5,7 @@
 
   <group ns="camera">
     <!-- image brightness & contrast compensation of ground-projected image -->
-    <node pkg="turtlebot3_autorace_camera" type="image_compensation.py" name="image_compensation" output="screen">
+    <node pkg="turtlebot3_autorace_camera" type="image_compensation" name="image_compensation" output="screen">
       <rosparam command="load" file="$(find turtlebot3_autorace_camera)/calibration/extrinsic_calibration/compensation.yaml" />
       <param if="$(eval calibration_mode == 'calibration')" name="/is_extrinsic_camera_calibration_mode" value="True"/>
       <param if="$(eval calibration_mode == 'action')" name="/is_extrinsic_camera_calibration_mode" value="False"/>    
@@ -16,7 +16,7 @@
     </node>
 
     <!-- image ground projection -->
-    <node pkg="turtlebot3_autorace_camera" type="image_projection.py" name="image_projection" output="screen">
+    <node pkg="turtlebot3_autorace_camera" type="image_projection" name="image_projection" output="screen">
       <rosparam command="load" file="$(find turtlebot3_autorace_camera)/calibration/extrinsic_calibration/projection.yaml" />
       <param if="$(eval calibration_mode == 'calibration')" name="/is_extrinsic_camera_calibration_mode" value="True"/>
       <param if="$(eval calibration_mode == 'action')" name="/is_extrinsic_camera_calibration_mode" value="False"/>    
@@ -29,7 +29,7 @@
     </node>
 
     <!-- image brightness & contrast compensation of ground-projected image -->
-    <node pkg="turtlebot3_autorace_camera" type="image_compensation.py" name="image_compensation_projection" output="screen">
+    <node pkg="turtlebot3_autorace_camera" type="image_compensation" name="image_compensation_projection" output="screen">
       <rosparam command="load" file="$(find turtlebot3_autorace_camera)/calibration/extrinsic_calibration/compensation.yaml" />
       <param if="$(eval calibration_mode == 'calibration')" name="/is_extrinsic_camera_calibration_mode" value="True"/>
       <param if="$(eval calibration_mode == 'action')" name="/is_extrinsic_camera_calibration_mode" value="False"/>    

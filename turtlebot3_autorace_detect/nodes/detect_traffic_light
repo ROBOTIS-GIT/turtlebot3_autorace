@@ -17,40 +17,39 @@
 # limitations under the License.
 ################################################################################
 
-# Author: Ryu Woon Jung (Leon)
+# Author: Leon Jung
  
-import numpy as np
 import rospy
+import numpy as np
 import cv2
-from cv_bridge import CvBridge, CvBridgeError
+from enum import Enum
 from std_msgs.msg import UInt8, Float64
 from sensor_msgs.msg import Image, CompressedImage
-from enum import Enum
-
+from cv_bridge import CvBridge, CvBridgeError
 from dynamic_reconfigure.server import Server
 from turtlebot3_autorace_detect.cfg import DetectTrafficLightParamsConfig
 
 class DetectTrafficLight():
     def __init__(self):
-        self.hue_red_l = rospy.get_param("~detect/lane/red/hue_l", 90)
-        self.hue_red_h = rospy.get_param("~detect/lane/red/hue_h", 180)
-        self.saturation_red_l = rospy.get_param("~detect/lane/red/saturation_l", 128)
+        self.hue_red_l = rospy.get_param("~detect/lane/red/hue_l", 0)
+        self.hue_red_h = rospy.get_param("~detect/lane/red/hue_h", 10)
+        self.saturation_red_l = rospy.get_param("~detect/lane/red/saturation_l", 30)
         self.saturation_red_h = rospy.get_param("~detect/lane/red/saturation_h", 255)
-        self.lightness_red_l = rospy.get_param("~detect/lane/red/lightness_l", 128)
+        self.lightness_red_l = rospy.get_param("~detect/lane/red/lightness_l", 48)
         self.lightness_red_h = rospy.get_param("~detect/lane/red/lightness_h", 255)
 
-        self.hue_yellow_l = rospy.get_param("~detect/lane/yellow/hue_l", 90)
-        self.hue_yellow_h = rospy.get_param("~detect/lane/yellow/hue_h", 180)
-        self.saturation_yellow_l = rospy.get_param("~detect/lane/yellow/saturation_l", 128)
+        self.hue_yellow_l = rospy.get_param("~detect/lane/yellow/hue_l", 20)
+        self.hue_yellow_h = rospy.get_param("~detect/lane/yellow/hue_h", 35)
+        self.saturation_yellow_l = rospy.get_param("~detect/lane/yellow/saturation_l", 100)
         self.saturation_yellow_h = rospy.get_param("~detect/lane/yellow/saturation_h", 255)
-        self.lightness_yellow_l = rospy.get_param("~detect/lane/yellow/lightness_l", 128)
+        self.lightness_yellow_l = rospy.get_param("~detect/lane/yellow/lightness_l", 50)
         self.lightness_yellow_h = rospy.get_param("~detect/lane/yellow/lightness_h", 255)
 
-        self.hue_green_l = rospy.get_param("~detect/lane/green/hue_l", 90)
-        self.hue_green_h = rospy.get_param("~detect/lane/green/hue_h", 180)
-        self.saturation_green_l = rospy.get_param("~detect/lane/green/saturation_l", 128)
+        self.hue_green_l = rospy.get_param("~detect/lane/green/hue_l", 46)
+        self.hue_green_h = rospy.get_param("~detect/lane/green/hue_h", 76)
+        self.saturation_green_l = rospy.get_param("~detect/lane/green/saturation_l", 86)
         self.saturation_green_h = rospy.get_param("~detect/lane/green/saturation_h", 255)
-        self.lightness_green_l = rospy.get_param("~detect/lane/green/lightness_l", 128)
+        self.lightness_green_l = rospy.get_param("~detect/lane/green/lightness_l", 50)
         self.lightness_green_h = rospy.get_param("~detect/lane/green/lightness_h", 255)
 
         self.is_calibration_mode = rospy.get_param("~is_detection_calibration_mode", False)
@@ -183,7 +182,6 @@ class DetectTrafficLight():
         cv_image_mask = cv2.GaussianBlur(cv_image_mask,(5,5),0)
 
         status1 = self.fnFindCircleOfTrafficLight(cv_image_mask, 'green')
-
         if status1 == 1 or status1 == 5:
             self.stop_count = 0
             self.green_count += 1
@@ -393,7 +391,6 @@ class DetectTrafficLight():
         for i in range(len(keypts)):
             self.point_col = int(keypts[i].pt[0])
             self.point_low = int(keypts[i].pt[1])
-
             if self.point_col > col1 and self.point_col < col2 and self.point_low > low1 and self.point_low < low2:
                 if find_color == 'green':
                     status = 1

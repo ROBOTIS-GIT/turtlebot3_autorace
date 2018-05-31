@@ -1,16 +1,21 @@
 <?xml version="1.0"?>
-<package>
+<package format="2">
   <name>turtlebot3_autorace</name>
   <version>1.0.0</version>
   <description>
-    TurtleBot3 Auto ROS packages for AutoRace 2017 (meta package)
+    AutoRace ROS packages for AutoRace with TurtleBot3 (meta package)
   </description>
-  <license>Apache License 2.0</license>
-  <author email="rwjung@robotis.com">Leon RyuWoon Jung</author>
-  <maintainer email="rwjung@robotis.com">Leon RyuWoon Jung</maintainer>
-  <url type="bugtracker">https://github.com/ROBOTIS-GIT/turtlebot3_autorace/issues</url>
+  <license>Apache 2.0</license>
+  <author email="rwjung@robotis.com">Leon Jung</author>
+  <maintainer email="pyo@robotis.com">Pyo</maintainer>
+  <url type="website">http://wiki.ros.org/turtlebot3_autorace</url>
+  <url type="emanual">http://turtlebot3.robotis.com</url>
   <url type="repository">https://github.com/ROBOTIS-GIT/turtlebot3_autorace</url>
-  <url type="website">http://emanual.robotis.com/docs/en/platform/turtlebot3/autonomous_driving/#autonomous-driving</url>
+  <url type="bugtracker">https://github.com/ROBOTIS-GIT/turtlebot3_autorace/issues</url>
   <buildtool_depend>catkin</buildtool_depend>
+  <exec_depend>turtlebot3_autorace_camera</exec_depend>
+  <exec_depend>turtlebot3_autorace_control</exec_depend>
+  <exec_depend>turtlebot3_autorace_core</exec_depend>
+  <exec_depend>turtlebot3_autorace_detect</exec_depend>
   <export><metapackage/></export>
 </package>

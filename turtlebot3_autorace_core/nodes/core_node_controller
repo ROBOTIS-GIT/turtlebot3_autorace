@@ -17,24 +17,20 @@
 # limitations under the License.
 ################################################################################
 
-# Author: Ryu Woon Jung (Leon), [AuTURBO] Kihoon Kim (https://github.com/auturbo)
+# Authors: Leon Jung, [AuTURBO] Kihoon Kim (https://github.com/auturbo)
 
 import rospy, roslaunch
 import numpy as np
-import cv2
-from cv_bridge import CvBridge
-from std_msgs.msg import UInt8
-from sensor_msgs.msg import Image, CompressedImage
-
-from enum import Enum
 import subprocess
 import os
 import sys
+from enum import Enum
+from std_msgs.msg import UInt8
  
 class CoreNodeController():
     def __init__(self):
         self.ros_package_path = os.path.dirname(os.path.realpath(__file__))
-        self.ros_package_path = self.ros_package_path.replace('turtlebot3_autorace_core/src', '')
+        self.ros_package_path = self.ros_package_path.replace('turtlebot3_autorace_core/nodes', '')
 
         self.sub_mode_control = rospy.Subscriber('/core/decided_mode', UInt8, self.cbReceiveMode, queue_size=1)
 

@@ -17,17 +17,17 @@
 # limitations under the License.
 ################################################################################
 
-# Author: Ryu Woon Jung (Leon)
+# Author: Leon Jung
 
 import rospy
 import numpy as np
+import math
+import tf
+from enum import Enum
 from std_msgs.msg import UInt8, Float64
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
-from enum import Enum
-import math
-import tf
 
 def callback(x):    
     pass
@@ -285,7 +285,6 @@ class ControlParking():
 
     def main(self):
         rospy.spin()
-
 
 if __name__ == '__main__':
     rospy.init_node('control_parking')

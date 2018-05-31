@@ -17,20 +17,19 @@
 # limitations under the License.
 ################################################################################
 
-# Author: Ryu Woon Jung (Leon), [AuTURBO] Kihoon Kim (https://github.com/auturbo)
+# Authors: Leon Jung, [AuTURBO] Kihoon Kim (https://github.com/auturbo)
  
-import numpy as np
 import rospy
-from nav_msgs.msg import Odometry
-from std_msgs.msg import UInt8, Float64
-from geometry_msgs.msg import Twist
-from sensor_msgs.msg import Image, CompressedImage
+import numpy as np
 import cv2
-from cv_bridge import CvBridge, CvBridgeError
-from enum import Enum
 import math
 import tf
-
+from enum import Enum
+from std_msgs.msg import UInt8, Float64
+from sensor_msgs.msg import Image, CompressedImage
+from geometry_msgs.msg import Twist
+from nav_msgs.msg import Odometry
+from cv_bridge import CvBridge, CvBridgeError
 from dynamic_reconfigure.server import Server
 from turtlebot3_autorace_detect.cfg import DetectLevelParamsConfig
 

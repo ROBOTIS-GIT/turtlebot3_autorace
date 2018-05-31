@@ -17,7 +17,7 @@
 # limitations under the License.
 ################################################################################
 
-# Author: Ryu Woon Jung (Leon)
+# Author: Leon Jung
  
 import rospy
 import numpy as np
@@ -43,14 +43,14 @@ class ControlLane():
 
         error = center - 500
 
-        Kp = 0.0035
+        Kp = 0.003
         Kd = 0.007
 
         angular_z = Kp * error + Kd * (error - self.lastError)
         self.lastError = error
 
         twist = Twist()
-        twist.linear.x = self.MAX_VEL * ((1 - abs(error) / 500) ** 2) 
+        twist.linear.x = self.MAX_VEL * ((1 - abs(error) / 500) ** 2)
         twist.linear.y = 0
         twist.linear.z = 0
         twist.angular.x = 0

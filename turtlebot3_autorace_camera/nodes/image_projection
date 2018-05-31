@@ -17,14 +17,13 @@
 # limitations under the License.
 ################################################################################
 
-# Author: Ryu Woon Jung (Leon), [AuTURBO] Ki Hoon Kim (https://github.com/auturbo)
+# Authors: Leon Jung, [AuTURBO] Ki Hoon Kim (https://github.com/auturbo)
 
 import rospy
 import numpy as np
 import cv2
-from cv_bridge import CvBridge
 from sensor_msgs.msg import Image, CompressedImage
-
+from cv_bridge import CvBridge
 from dynamic_reconfigure.server import Server
 from turtlebot3_autorace_camera.cfg import ImageProjectionParamsConfig
 
