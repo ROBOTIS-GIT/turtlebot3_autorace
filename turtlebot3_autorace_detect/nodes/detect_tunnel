@@ -72,7 +72,7 @@ class DetectTunnel():
             self.start_pos_y = self.current_pos_y
 
             while True:
-                error = self.fnStraight(0.6)
+                error = self.fnStraight(0.55)
 
                 if math.fabs(error) < 0.005:
                     break
@@ -154,8 +154,8 @@ class DetectTunnel():
         goalPoseStamped.header.frame_id = "map"
         goalPoseStamped.header.stamp = rospy.Time.now()
 
-        goalPoseStamped.pose.position.x = -0.22
-        goalPoseStamped.pose.position.y = -1.7
+        goalPoseStamped.pose.position.x = -0.15
+        goalPoseStamped.pose.position.y = -1.75
         goalPoseStamped.pose.position.z = 0.0
 
         goalPoseStamped.pose.orientation.x = 0.0

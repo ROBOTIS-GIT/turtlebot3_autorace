@@ -219,7 +219,7 @@ class DetectTrafficLight():
 
         if self.yellow_count > 10:
             msg_pub_max_vel = Float64()
-            msg_pub_max_vel.data = 0.1
+            msg_pub_max_vel.data = 0.06
             self.pub_max_vel.publish(msg_pub_max_vel)
             rospy.loginfo("YELLOW")
             cv2.putText(self.cv_image,"YELLOW", (self.point_col, self.point_low), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0, 255, 255))
