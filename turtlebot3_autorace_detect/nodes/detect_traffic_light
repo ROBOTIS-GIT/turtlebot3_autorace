@@ -210,16 +210,16 @@ class DetectTrafficLight():
                     self.red_count = 0
                     self.stop_count = 0
 
-        if self.green_count > 10:
+        if self.green_count > 15:
             msg_pub_max_vel = Float64()
-            msg_pub_max_vel.data = 0.19
+            msg_pub_max_vel.data = 0.12
             self.pub_max_vel.publish(msg_pub_max_vel)
             rospy.loginfo("GREEN")
             cv2.putText(self.cv_image,"GREEN", (self.point_col, self.point_low), cv2.FONT_HERSHEY_DUPLEX, 0.5, (80, 255, 0))
 
         if self.yellow_count > 10:
             msg_pub_max_vel = Float64()
-            msg_pub_max_vel.data = 0.05
+            msg_pub_max_vel.data = 0.1
             self.pub_max_vel.publish(msg_pub_max_vel)
             rospy.loginfo("YELLOW")
             cv2.putText(self.cv_image,"YELLOW", (self.point_col, self.point_low), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0, 255, 255))

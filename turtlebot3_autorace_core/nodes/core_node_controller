@@ -116,14 +116,13 @@ class CoreNodeController():
 
         rospy.loginfo("into %d", self.current_step_level_crossing)
 
-        if self.current_step_level_crossing == self.StepOfLevelCrossing.searching_stop_sign.value:
+        if self.current_step_level_crossing == 5:#self.StepOfLevelCrossing.searching_stop_sign.value:
+            print("testsdadsadsad", self.is_triggered)
             self.current_mode = self.CurrentMode.level_crossing.value
             msg_mode_return = UInt8()
             msg_mode_return.data = self.current_mode
             self.pub_mode_return.publish(msg_mode_return)
-
         self.is_triggered = True
-
     # Which step is in Tunnel
     def cbTunnelStamped(self, tunnel_msg):
         rospy.loginfo("Tunnel Step changed from %d", self.current_step_tunnel)
@@ -324,13 +323,13 @@ class CoreNodeController():
                 self.fnLaunch(self.Launcher.launch_detect_sign.value, True)
                 self.fnLaunch(self.Launcher.launch_detect_lane.value, True)
                 self.fnLaunch(self.Launcher.launch_control_lane.value, True)
-                self.fnLaunch(self.Launcher.launch_detect_level.value, False)
-                self.fnLaunch(self.Launcher.launch_detect_traffic_light.value, True)
+                self.fnLaunch(self.Launcher.launch_detect_level.value, True)
+                self.fnLaunch(self.Launcher.launch_detect_traffic_light.value, False)
 
             rospy.sleep(2)
 
             self.pub_level_crossing_order.publish(msg_pub_level_crossing_order)
-        
+
         # tunnel
         elif self.current_mode == self.CurrentMode.tunnel.value:
             rospy.loginfo("New trigger for tunnel")
@@ -573,7 +572,7 @@ class CoreNodeController():
                     self.launch_control_tunnel_launched = False
                     self.launch_control_tunnel.shutdown()
                 else:
-                    pass                 
+                    pass
 
     def main(self):
         rospy.spin()

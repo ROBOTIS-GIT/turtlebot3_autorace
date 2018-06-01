@@ -46,7 +46,7 @@ class ControlMission():
         elif abs(pose_x + 1.8) < 0.15 and abs(pose_y - 1.45) < 0.02 and self.traffic_state == 4:
             self.traffic_state = 5
 
-        elif abs(pose_x + 1.8) < 0.15 and pose_y < 0.9 and self.traffic_state == 6:
+        elif abs(pose_x + 1.8) < 0.15 and pose_y < 1 and self.traffic_state == 6:
             self.traffic_state = 7
             self.current_time = time.time()
 

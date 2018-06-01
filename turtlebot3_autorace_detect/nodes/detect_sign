@@ -170,7 +170,6 @@ class DetectSign():
         for m,n in matches4:
             if m.distance < 0.7*n.distance:
                 good4.append(m)
-
         if len(good4)>MIN_MATCH_COUNT:
             src_pts = np.float32([ kp1[m.queryIdx].pt for m in good4 ]).reshape(-1,1,2)
             dst_pts = np.float32([ self.kp4[m.trainIdx].pt for m in good4 ]).reshape(-1,1,2)
