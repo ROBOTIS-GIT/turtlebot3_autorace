@@ -246,7 +246,7 @@ class DetectLevel():
             rospy.loginfo("GO~~")
 
             msg_pub_max_vel = Float64()
-            msg_pub_max_vel.data = 0.07
+            msg_pub_max_vel.data = 0.04
             self.pub_max_vel.publish(msg_pub_max_vel)
 
             pub_level_crossing_return.data = self.StepOfLevelCrossing.stop.value

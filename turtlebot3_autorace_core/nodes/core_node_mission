@@ -21,6 +21,7 @@
 import rospy
 import os
 import time
+import numpy as np
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Pose
 from std_srvs.srv import Empty
@@ -43,10 +44,10 @@ class ControlMission():
         if abs(pose_x - 0.5) < 0.02 and abs(pose_y + 1.75) < 0.15 and self.traffic_state == 0:
             self.traffic_state = 1
 
-        elif abs(pose_x + 1.8) < 0.15 and abs(pose_y - 1.45) < 0.02 and self.traffic_state == 4:
+        elif abs(pose_x + 1.75) < 0.15 and abs(pose_y - 1.45) < 0.02 and self.traffic_state == 4:
             self.traffic_state = 5
 
-        elif abs(pose_x + 1.8) < 0.15 and pose_y < 1 and self.traffic_state == 6:
+        elif abs(pose_x + 1.75) < 0.15 and pose_y < 1 and self.traffic_state == 6:
             self.traffic_state = 7
             self.current_time = time.time()
 
@@ -88,8 +89,9 @@ class ControlMission():
         spawn_model_prox('traffic_light_green', self.green_light_model, "robotos_name_space", self.initial_pose, "world")
         spawn_model_prox('up_bar', self.up_bar_model, "robotos_name_space", self.initial_pose, "world")
         parking_pose = Pose()
-        parking_pose.position.x = 1.25
-        parking_pose.position.y = 1.45
+        parking_stop = np.random.rand()
+        parking_pose.position.x = 1.13 if parking_stop < 0.5 else 0.69
+        parking_pose.position.y = 1.50
         parking_pose.position.z = 0.03
         parking_pose.orientation.x = 0
         parking_pose.orientation.y = 0

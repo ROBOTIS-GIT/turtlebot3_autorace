@@ -104,7 +104,7 @@ class DetectTrafficLight():
         self.yellow_count = 0
         self.red_count = 0
         self.stop_count = 0
-
+        self.off_traffic = False
         rospy.sleep(1)
 
         loop_rate = rospy.Rate(10)
@@ -210,16 +210,16 @@ class DetectTrafficLight():
                     self.red_count = 0
                     self.stop_count = 0
 
-        if self.green_count > 15:
+        if self.green_count > 20:
             msg_pub_max_vel = Float64()
             msg_pub_max_vel.data = 0.12
             self.pub_max_vel.publish(msg_pub_max_vel)
             rospy.loginfo("GREEN")
             cv2.putText(self.cv_image,"GREEN", (self.point_col, self.point_low), cv2.FONT_HERSHEY_DUPLEX, 0.5, (80, 255, 0))
 
-        if self.yellow_count > 10:
+        if self.yellow_count > 12:
             msg_pub_max_vel = Float64()
-            msg_pub_max_vel.data = 0.06
+            msg_pub_max_vel.data = 0.06 if not self.off_traffic else 0.12
             self.pub_max_vel.publish(msg_pub_max_vel)
             rospy.loginfo("YELLOW")
             cv2.putText(self.cv_image,"YELLOW", (self.point_col, self.point_low), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0, 255, 255))
@@ -231,11 +231,12 @@ class DetectTrafficLight():
             rospy.loginfo("RED")
             cv2.putText(self.cv_image,"RED", (self.point_col, self.point_low), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0, 0, 255))
 
-        if self.stop_count > 4:
+        if self.stop_count > 8:
             msg_pub_max_vel = Float64()
             msg_pub_max_vel.data = 0.0
             self.pub_max_vel.publish(msg_pub_max_vel)  
             rospy.loginfo("STOP")
+            self.off_traffic = True
             cv2.putText(self.cv_image,"STOP", (self.point_col, self.point_low), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0, 0, 255))
 
         if self.pub_image_type == "compressed":
