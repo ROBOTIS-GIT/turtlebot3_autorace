@@ -154,8 +154,8 @@ class DetectTunnel():
         goalPoseStamped.header.frame_id = "map"
         goalPoseStamped.header.stamp = rospy.Time.now()
 
-        goalPoseStamped.pose.position.x = -0.15
-        goalPoseStamped.pose.position.y = -1.75
+        goalPoseStamped.pose.position.x = 0.15
+        goalPoseStamped.pose.position.y = -1.76
         goalPoseStamped.pose.position.z = 0.0
 
         goalPoseStamped.pose.orientation.x = 0.0

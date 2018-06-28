@@ -43,13 +43,13 @@ class ControlLane():
 
         error = center - 500
 
-        Kp = 0.0034
+        Kp = 0.0025
         Kd = 0.007
 
         angular_z = Kp * error + Kd * (error - self.lastError)
         self.lastError = error
         twist = Twist()
-        twist.linear.x = min(self.MAX_VEL * ((1 - abs(error) / 500) ** 2), 0.2)
+        twist.linear.x = min(self.MAX_VEL * ((1 - abs(error) / 500) ** 2.2), 0.2)
         twist.linear.y = 0
         twist.linear.z = 0
         twist.angular.x = 0
