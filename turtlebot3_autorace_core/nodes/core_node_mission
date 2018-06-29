@@ -91,7 +91,7 @@ class ControlMission():
         spawn_model_prox('up_bar', self.up_bar_model, "robotos_name_space", self.initial_pose, "world")
         parking_pose = Pose()
         parking_stop = np.random.rand()
-        parking_pose.position.x = 1.13 #if parking_stop < 0.5 else 0.69
+        parking_pose.position.x = 1.13 if parking_stop < 0.5 else 0.69
         parking_pose.position.y = 1.50
         parking_pose.position.z = 0.03
         parking_pose.orientation.x = 0
