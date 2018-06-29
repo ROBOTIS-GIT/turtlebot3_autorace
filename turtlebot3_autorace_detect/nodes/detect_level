@@ -17,7 +17,7 @@
 # limitations under the License.
 ################################################################################
 
-# Authors: Leon Jung, [AuTURBO] Kihoon Kim (https://github.com/auturbo)
+# Authors: Leon Jung, [AuTURBO] Kihoon Kim (https://github.com/auturbo), Gilbert
  
 import rospy
 import numpy as np
@@ -246,7 +246,7 @@ class DetectLevel():
             rospy.loginfo("GO~~")
 
             msg_pub_max_vel = Float64()
-            msg_pub_max_vel.data = 0.19
+            msg_pub_max_vel.data = 0.04
             self.pub_max_vel.publish(msg_pub_max_vel)
 
             pub_level_crossing_return.data = self.StepOfLevelCrossing.stop.value
@@ -379,7 +379,7 @@ class DetectLevel():
 
                 # publishing topic
                 self.stop_bar_count = 40
-                if distance_bar2car > 1.5:
+                if distance_bar2car > 0.8:
                     is_level_detected = True
                     self.stop_bar_state = 'slowdown'
                     self.state = "detected"

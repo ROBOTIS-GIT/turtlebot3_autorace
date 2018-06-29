@@ -17,7 +17,7 @@
 # limitations under the License.
 ################################################################################
 
-# Author: Leon Jung
+# Author: Leon Jung, Gilbert
 
 import rospy
 import numpy as np
@@ -63,7 +63,7 @@ class DetectSign():
         self.sift = cv2.xfeatures2d.SIFT_create()
 
         dir_path = os.path.dirname(os.path.realpath(__file__))
-        dir_path = dir_path.replace('turtlebot3_autorace_detect/src', 'turtlebot3_autorace_detect/')
+        dir_path = dir_path.replace('turtlebot3_autorace_detect/nodes', 'turtlebot3_autorace_detect/')
         dir_path += 'file/detect_sign/'
 
         self.img2 = cv2.imread(dir_path + 'stop.png',0)         # trainImage1
@@ -170,7 +170,6 @@ class DetectSign():
         for m,n in matches4:
             if m.distance < 0.7*n.distance:
                 good4.append(m)
-
         if len(good4)>MIN_MATCH_COUNT:
             src_pts = np.float32([ kp1[m.queryIdx].pt for m in good4 ]).reshape(-1,1,2)
             dst_pts = np.float32([ self.kp4[m.trainIdx].pt for m in good4 ]).reshape(-1,1,2)

@@ -37,6 +37,7 @@ catkin_package()
 catkin_install_python(PROGRAMS
   nodes/core_mode_decider
   nodes/core_node_controller
+  nodes/core_node_mission
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

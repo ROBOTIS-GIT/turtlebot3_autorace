@@ -17,7 +17,7 @@
 # limitations under the License.
 ################################################################################
 
-# Authors: Leon Jung, [AuTURBO] Kihoon Kim (https://github.com/auturbo)
+# Authors: Leon Jung, [AuTURBO] Kihoon Kim (https://github.com/auturbo), Gilbert
 
 import rospy, roslaunch
 import numpy as np
@@ -116,7 +116,7 @@ class CoreNodeController():
 
         rospy.loginfo("into %d", self.current_step_level_crossing)
 
-        if self.current_step_level_crossing == self.StepOfLevelCrossing.searching_stop_sign.value:
+        if self.current_step_level_crossing == self.StepOfLevelCrossing.pass_level.value:
             self.current_mode = self.CurrentMode.level_crossing.value
             msg_mode_return = UInt8()
             msg_mode_return.data = self.current_mode
@@ -324,13 +324,13 @@ class CoreNodeController():
                 self.fnLaunch(self.Launcher.launch_detect_sign.value, True)
                 self.fnLaunch(self.Launcher.launch_detect_lane.value, True)
                 self.fnLaunch(self.Launcher.launch_control_lane.value, True)
-                self.fnLaunch(self.Launcher.launch_detect_level.value, False)
-                self.fnLaunch(self.Launcher.launch_detect_traffic_light.value, True)
+                self.fnLaunch(self.Launcher.launch_detect_level.value, True)
+                self.fnLaunch(self.Launcher.launch_detect_traffic_light.value, False)
 
             rospy.sleep(2)
 
             self.pub_level_crossing_order.publish(msg_pub_level_crossing_order)
-        
+
         # tunnel
         elif self.current_mode == self.CurrentMode.tunnel.value:
             rospy.loginfo("New trigger for tunnel")
@@ -573,7 +573,7 @@ class CoreNodeController():
                     self.launch_control_tunnel_launched = False
                     self.launch_control_tunnel.shutdown()
                 else:
-                    pass                 
+                    pass
 
     def main(self):
         rospy.spin()
