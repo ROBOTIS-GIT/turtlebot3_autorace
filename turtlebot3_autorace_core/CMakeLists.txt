@@ -30,18 +30,14 @@ catkin_package()
 ################################################################################
 # Build
 ################################################################################
-include_directories(
-  include
-  ${catkin_INCLUDE_DIRS}
-)
 
 ################################################################################
 # Install
 ################################################################################
 catkin_install_python(PROGRAMS
-  nodes/core_node_mission
   nodes/core_mode_decider
   nodes/core_node_controller
+  nodes/core_node_mission
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
