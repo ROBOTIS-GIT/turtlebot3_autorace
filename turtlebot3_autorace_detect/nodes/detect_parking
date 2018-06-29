@@ -17,7 +17,7 @@
 # limitations under the License.
 ################################################################################
 
-# Author: Leon Jung
+# Author: Leon Jung, Gilbert
  
 import rospy
 import numpy as np
@@ -86,21 +86,24 @@ class DetectParking():
         self.img2 = cv2.imread(dir_path + 'parking_allowed.png', -1)
 
     def cbGetImage(self, image_msg):
-        if self.sub_image_type == "compressed":
-            np_arr = np.fromstring(image_msg.data, np.uint8)
-            self.cv_image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        if image_msg is not None:
+            if self.sub_image_type == "compressed":
+                np_arr = np.fromstring(image_msg.data, np.uint8)
+                self.cv_image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+            else:
+                self.cv_image = self.cvBridge.imgmsg_to_cv2(image_msg, "bgr8")
+
+            self.fnBlinkParkSign()
+
+            if self.pub_image_type == "compressed":
+                # publishes parking image in compressed type
+                self.pub_image_parking.publish(self.cvBridge.cv2_to_compressed_imgmsg(self.cv_image, "jpg"))
+
+            elif self.pub_image_type == "raw":
+                # publishes parking image in raw type
+                self.pub_image_parking.publish(self.cvBridge.cv2_to_imgmsg(self.cv_image, "bgr8"))
         else:
-            self.cv_image = self.cvBridge.imgmsg_to_cv2(image_msg, "bgr8")
-
-        self.fnBlinkParkSign()
-
-        if self.pub_image_type == "compressed":
-            # publishes parking image in compressed type
-            self.pub_image_parking.publish(self.cvBridge.cv2_to_compressed_imgmsg(self.cv_image, "jpg"))
-
-        elif self.pub_image_type == "raw":
-            # publishes parking image in raw type
-            self.pub_image_parking.publish(self.cvBridge.cv2_to_imgmsg(self.cv_image, "bgr8"))
+            pass
 
     def cbParkingLotOrder(self, order):
         msg_pub_parking_lot_return = UInt8()
@@ -207,7 +210,7 @@ class DetectParking():
 
         det = cv2.SimpleBlobDetector_create(params)
         keypts = det.detect(self.cv_bitn_img)
-        frame = cv2.drawKeypoints(self.cv_bitn_img, keypts, np.array([]), (0, 0, 255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+        # frame = cv2.drawKeypoints(self.cv_bitn_img, keypts, np.array([]), (0, 0, 255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
         count = 0
         for i in range(len(keypts)):
@@ -228,37 +231,6 @@ class DetectParking():
             if self.blink_count % 8 == 0:
                 self.blink_trigger = 1 - self.blink_trigger
                 self.blink_count = 0
-
-            if self.is_parking_allowed == False:
-                if self.blink_trigger == 1:
-                    x_offset = 874
-                    y_offset = 0
-
-                    y1, y2 = y_offset, y_offset + self.img1.shape[0]
-                    x1, x2 = x_offset, x_offset + self.img1.shape[1]
-
-                    alpha_s = self.img1[:, :, 3] / 255.0
-                    alpha_l = 1.0 - alpha_s
-
-                    for c in range(0, 3):
-                        self.cv_image[y1:y2, x1:x2, c] = (alpha_s * self.img1[:, :, c] +
-                                                alpha_l * self.cv_image[y1:y2, x1:x2, c])
-
-            else:
-                if self.blink_trigger == 1:
-                    x_offset = 874
-                    y_offset = 0
-
-                    y1, y2 = y_offset, y_offset + self.img2.shape[0]
-                    x1, x2 = x_offset, x_offset + self.img2.shape[1]
-
-                    alpha_s = self.img2[:, :, 3] / 255.0
-                    alpha_l = 1.0 - alpha_s
-
-                    for c in range(0, 3):
-                        self.cv_image[y1:y2, x1:x2, c] = (alpha_s * self.img2[:, :, c] +
-                                                alpha_l * self.cv_image[y1:y2, x1:x2, c])
-
 
     def main(self):
         rospy.spin()
