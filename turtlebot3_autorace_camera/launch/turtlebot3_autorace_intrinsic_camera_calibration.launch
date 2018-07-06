@@ -3,9 +3,23 @@
   <!-- launch this in remote pc when you are doing calibration-->
 
   <arg name="calibration_mode" default="$(env AUTO_IN_CALIB)" doc="calibration_mode type [calibration, action]"/>
+  
+  <arg name="use_gazebo" default="$(env GAZEBO_MODE)" doc="gazebo_mode type [true, false]"/>
 
-  <!-- image transport from compressed to raw -->
-  <node pkg="image_transport" type="republish" name="republish" args="compressed in:=camera/image raw out:=camera/image" />
+    <group if="$(arg use_gazebo)">
+      <!-- image transport from compressed to raw -->
+      <node pkg="image_transport" type="republish" name="republish" args="compressed">
+        <remap from="in"  to="camera/rgb/image_raw" />
+        <remap from="out"   to="camera/image"/>
+      </node>
+      <node pkg="topic_tools" type="relay" name="relay_camera_info" args="/camera/rgb/camera_info /camera/camera_info"/>
+    </group>
+
+    <group unless="$(arg use_gazebo)">
+      <!-- image transport from compressed to raw -->
+      <node pkg="image_transport" type="republish" name="republish" args="compressed in:=camera/image raw out:=camera/image" />
+    </group>
+
 
   <!-- run the following under calibration mode -->
   <!-- camera calibration uses raw image -->
