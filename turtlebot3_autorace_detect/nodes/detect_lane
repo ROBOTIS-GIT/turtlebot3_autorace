@@ -17,7 +17,7 @@
 # limitations under the License.
 ################################################################################
 
-# Authors: Leon Jung, Special Thanks : Roger Sacchelli
+# Authors: Leon Jung, Gilbert, Special Thanks : Roger Sacchelli
 
 import rospy
 import numpy as np
@@ -30,18 +30,18 @@ from turtlebot3_autorace_detect.cfg import DetectLaneParamsConfig
 
 class DetectLane():
     def __init__(self):
-        self.hue_white_l = rospy.get_param("~detect/lane/white/hue_l", 90)
-        self.hue_white_h = rospy.get_param("~detect/lane/white/hue_h", 180)
-        self.saturation_white_l = rospy.get_param("~detect/lane/white/saturation_l", 128)
-        self.saturation_white_h = rospy.get_param("~detect/lane/white/saturation_h", 255)
-        self.lightness_white_l = rospy.get_param("~detect/lane/white/lightness_l", 128)
+        self.hue_white_l = rospy.get_param("~detect/lane/white/hue_l", 0)
+        self.hue_white_h = rospy.get_param("~detect/lane/white/hue_h", 25)
+        self.saturation_white_l = rospy.get_param("~detect/lane/white/saturation_l", 0)
+        self.saturation_white_h = rospy.get_param("~detect/lane/white/saturation_h", 36)
+        self.lightness_white_l = rospy.get_param("~detect/lane/white/lightness_l", 180)
         self.lightness_white_h = rospy.get_param("~detect/lane/white/lightness_h", 255)
 
-        self.hue_yellow_l = rospy.get_param("~detect/lane/yellow/hue_l", 90)
-        self.hue_yellow_h = rospy.get_param("~detect/lane/yellow/hue_h", 180)
-        self.saturation_yellow_l = rospy.get_param("~detect/lane/yellow/saturation_l", 128)
+        self.hue_yellow_l = rospy.get_param("~detect/lane/yellow/hue_l", 27)
+        self.hue_yellow_h = rospy.get_param("~detect/lane/yellow/hue_h", 41)
+        self.saturation_yellow_l = rospy.get_param("~detect/lane/yellow/saturation_l", 130)
         self.saturation_yellow_h = rospy.get_param("~detect/lane/yellow/saturation_h", 255)
-        self.lightness_yellow_l = rospy.get_param("~detect/lane/yellow/lightness_l", 128)
+        self.lightness_yellow_l = rospy.get_param("~detect/lane/yellow/lightness_l", 160)
         self.lightness_yellow_h = rospy.get_param("~detect/lane/yellow/lightness_h", 255)
 
         self.is_calibration_mode = rospy.get_param("~is_detection_calibration_mode", False)
@@ -101,7 +101,6 @@ class DetectLane():
         rospy.loginfo("saturation_white_h : %d", config.saturation_white_h)
         rospy.loginfo("lightness_white_l : %d", config.lightness_white_l)
         rospy.loginfo("lightness_white_h : %d", config.lightness_white_h)
-
         rospy.loginfo("hue_yellow_l : %d", config.hue_yellow_l)
         rospy.loginfo("hue_yellow_h : %d", config.hue_yellow_h)
         rospy.loginfo("saturation_yellow_l : %d", config.saturation_yellow_l)

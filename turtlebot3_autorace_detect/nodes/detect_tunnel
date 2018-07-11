@@ -17,7 +17,7 @@
 # limitations under the License.
 ################################################################################
 
-# Author: Ryu Woon Jung (Leon)
+# Author: Ryu Woon Jung (Leon), Gilbert
  
 import rospy
 import numpy as np
@@ -26,7 +26,7 @@ import tf
 from enum import Enum
 from std_msgs.msg import UInt8, Float64, String
 from sensor_msgs.msg import LaserScan
-from geometry_msgs.msg import Twist, PoseStamped
+from geometry_msgs.msg import Twist, PoseStamped, PoseWithCovarianceStamped
 from nav_msgs.msg import Odometry
 from move_base_msgs.msg import MoveBaseActionResult
 
@@ -38,6 +38,7 @@ class DetectTunnel():
 
         self.pub_tunnel_return = rospy.Publisher('/detect/tunnel_stamped', UInt8, queue_size=1)
         self.pub_goal_pose_stamped = rospy.Publisher("/move_base_simple/goal", PoseStamped, queue_size=1)
+        self.pub_init_pose = rospy.Publisher("/initialpose", PoseWithCovarianceStamped, queue_size=1)
         self.pub_cmd_vel = rospy.Publisher('/control/cmd_vel', Twist, queue_size = 1)
         self.pub_max_vel = rospy.Publisher('/control/max_vel', Float64, queue_size = 1)
 
@@ -71,7 +72,7 @@ class DetectTunnel():
             self.start_pos_y = self.current_pos_y
 
             while True:
-                error = self.fnStraight(0.35)
+                error = self.fnStraight(0.55)
 
                 if math.fabs(error) < 0.005:
                     break
@@ -85,6 +86,12 @@ class DetectTunnel():
 
         elif order.data == self.StepOfTunnel.navigation.value:
             rospy.loginfo("Now navigation")
+            initialPose = PoseWithCovarianceStamped()
+            initialPose.header.frame_id = "map"
+            initialPose.header.stamp = rospy.Time.now()
+            initialPose.pose.pose = self.odom_msg.pose.pose
+
+            self.pub_init_pose.publish(initialPose)
 
             self.fnPubGoalPose()
 
@@ -124,7 +131,7 @@ class DetectTunnel():
     def cbOdom(self, odom_msg):
         quaternion = (odom_msg.pose.pose.orientation.x, odom_msg.pose.pose.orientation.y, odom_msg.pose.pose.orientation.z, odom_msg.pose.pose.orientation.w)
         self.current_theta = self.euler_from_quaternion(quaternion)
-
+        self.odom_msg = odom_msg
         if (self.current_theta - self.last_current_theta) < -math.pi:
             self.current_theta = 2. * math.pi + self.current_theta
             self.last_current_theta = math.pi
@@ -147,14 +154,14 @@ class DetectTunnel():
         goalPoseStamped.header.frame_id = "map"
         goalPoseStamped.header.stamp = rospy.Time.now()
 
-        goalPoseStamped.pose.position.x = 1.50108861923
-        goalPoseStamped.pose.position.y = 1.36013686657
+        goalPoseStamped.pose.position.x = 0.15
+        goalPoseStamped.pose.position.y = -1.76
         goalPoseStamped.pose.position.z = 0.0
 
         goalPoseStamped.pose.orientation.x = 0.0
         goalPoseStamped.pose.orientation.y = 0.0
-        goalPoseStamped.pose.orientation.z = 0.707669819124
-        goalPoseStamped.pose.orientation.w = 0.70654329457
+        goalPoseStamped.pose.orientation.z = 0.0
+        goalPoseStamped.pose.orientation.w = 1.0
 
         self.pub_goal_pose_stamped.publish(goalPoseStamped)
 

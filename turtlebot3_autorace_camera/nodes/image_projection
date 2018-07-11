@@ -17,7 +17,7 @@
 # limitations under the License.
 ################################################################################
 
-# Authors: Leon Jung, [AuTURBO] Ki Hoon Kim (https://github.com/auturbo)
+# Authors: Leon Jung, [AuTURBO] Ki Hoon Kim (https://github.com/auturbo), Gilbert
 
 import rospy
 import numpy as np
@@ -29,9 +29,9 @@ from turtlebot3_autorace_camera.cfg import ImageProjectionParamsConfig
 
 class ImageProjection():
     def __init__(self):
-        self.top_x = rospy.get_param("/camera/extrinsic_camera_calibration/top_x", 60)
-        self.top_y = rospy.get_param("/camera/extrinsic_camera_calibration/top_y", 50)
-        self.bottom_x = rospy.get_param("/camera/extrinsic_camera_calibration/bottom_x", 140)
+        self.top_x = rospy.get_param("/camera/extrinsic_camera_calibration/top_x", 75)
+        self.top_y = rospy.get_param("/camera/extrinsic_camera_calibration/top_y", 35)
+        self.bottom_x = rospy.get_param("/camera/extrinsic_camera_calibration/bottom_x", 165)
         self.bottom_y = rospy.get_param("/camera/extrinsic_camera_calibration/bottom_y", 120)
 
         self.is_calibration_mode = rospy.get_param("~is_extrinsic_camera_calibration_mode", False)

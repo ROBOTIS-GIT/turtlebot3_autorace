@@ -46,12 +46,11 @@ catkin_package(
 catkin_install_python(PROGRAMS
   nodes/detect_lane
   nodes/detect_level
-  nodes/detect_obstacle
   nodes/detect_parking
   nodes/detect_sign
   nodes/detect_traffic_light
   nodes/detect_tunnel
- 	DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 install(DIRECTORY cfg file launch param

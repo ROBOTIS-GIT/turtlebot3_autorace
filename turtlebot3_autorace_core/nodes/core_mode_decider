@@ -17,7 +17,7 @@
 # limitations under the License.
 ################################################################################
 
-# Author: Leon Jung
+# Author: Leon Jung, Gilbert
 
 import rospy
 import numpy as np
@@ -45,7 +45,6 @@ class CoreModeDecider():
     def cbInvokedByTrafficSign(self, traffic_sign_type_msg):
         self.fnDecideMode(self.InvokedObject.traffic_sign.value, traffic_sign_type_msg)
         rospy.loginfo("Traffic sign detected")
-
     # Invoke if traffic light is detected
     # def cbInvokedByTrafficLight(self, traffic_light_type_msg):
     #     self.fnDecideMode(self.InvokedObject.traffic_light.value, traffic_light_type_msg)

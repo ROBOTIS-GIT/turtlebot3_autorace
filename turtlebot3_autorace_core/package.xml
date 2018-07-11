@@ -6,7 +6,7 @@
     TurtleBot3 AutoRace ROS package that TurtleBot3 Auto's core
   </description>
   <license>Apache 2.0</license>
-  <author>Leon Jung</author>
+  <author email="kkjong@robotis.com">Gilbert</author>
   <maintainer email="pyo@robotis.com">Pyo</maintainer>
   <url type="website">http://wiki.ros.org/turtlebot3_autorace_core</url>
   <url type="emanual">http://turtlebot3.robotis.com</url>
