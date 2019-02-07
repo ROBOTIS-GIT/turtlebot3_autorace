@@ -2,6 +2,14 @@
 Changelog for package turtlebot3_autorace_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.0 (2019-02-07)
+------------------
+* modified for gazebo mode
+* added node_mission
+* added travis for ROS Melodic version
+* updated the CHANGELOG and version to release binary packages
+* Contributors: Gilbert, Pyo
+
 1.1.0 (2018-05-30)
 ------------------
 * modified system configuration related with the .py extensions & core launch launches
