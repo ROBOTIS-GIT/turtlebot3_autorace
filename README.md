@@ -1,10 +1,8 @@
 # TurtleBot3
 <img src="https://github.com/ROBOTIS-GIT/emanual/blob/master/assets/images/platform/turtlebot3/logo_turtlebot3.png" width="300">
 
-## ROS Packages for TurtleBot3 AutoRace
-|Version|Kinetic + Ubuntu Xenial|Melodic + Ubuntu Bionic|
-|:---:|:---:|:---:|
-|[![GitHub version](https://badge.fury.io/gh/ROBOTIS-GIT%2Fturtlebot3_autorace.svg)](https://badge.fury.io/gh/ROBOTIS-GIT%2Fturtlebot3_autorace)|[![Build Status](https://travis-ci.org/ROBOTIS-GIT/turtlebot3_autorace.svg?branch=kinetic-devel)](https://travis-ci.org/ROBOTIS-GIT/turtlebot3_autorace)|[![Build Status](https://travis-ci.org/ROBOTIS-GIT/turtlebot3_autorace.svg?branch=melodic-devel)](https://travis-ci.org/ROBOTIS-GIT/turtlebot3_autorace)|
+- Active Branches: noetic, main
+- Legacy Branches: *-devel
 
 ## ROBOTIS e-Manual for TurtleBot3
 - [ROBOTIS e-Manual for TurtleBot3](http://turtlebot3.robotis.com/)
