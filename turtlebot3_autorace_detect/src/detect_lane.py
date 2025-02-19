@@ -21,12 +21,12 @@
 #   - Special Thanks : Roger Sacchelli
 
 import cv2
-import numpy as np
 from cv_bridge import CvBridge
-import rclpy
+import numpy as np
 from rcl_interfaces.msg import IntegerRange
 from rcl_interfaces.msg import ParameterDescriptor
 from rcl_interfaces.msg import SetParametersResult
+import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import CompressedImage
 from sensor_msgs.msg import Image

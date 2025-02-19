@@ -21,10 +21,10 @@
 import math
 
 import cv2
-import numpy as np
 from cv_bridge import CvBridge
-import rclpy
+import numpy as np
 from geometry_msgs.msg import Twist
+import rclpy
 from nav_msgs.msg import Odometry
 from rclpy.node import Node
 from sensor_msgs.msg import Image
