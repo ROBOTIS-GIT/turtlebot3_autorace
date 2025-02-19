@@ -1,57 +1,41 @@
-################################################################################
-# Set minimum required version of cmake, project name and compile options
-################################################################################
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.8)
 project(turtlebot3_autorace_camera)
 
-################################################################################
-# Find catkin packages and libraries for catkin and system dependencies
-################################################################################
-find_package(catkin REQUIRED COMPONENTS
-  dynamic_reconfigure
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(rclpy REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(cv_bridge REQUIRED)
+find_package(sensor_msgs REQUIRED)
+
+install(PROGRAMS
+  src/image_compensation.py
+  src/image_projection.py
+  DESTINATION lib/${PROJECT_NAME}
 )
 
-################################################################################
-# Setup for python modules and scripts
-################################################################################
-catkin_python_setup()
-
-################################################################################
-# Declare ROS messages, services and actions
-################################################################################
-
-################################################################################
-# Declare ROS dynamic reconfigure parameters
-################################################################################
-generate_dynamic_reconfigure_options(
-  cfg/ImageProjectionParams.cfg
-  cfg/ImageCompensationParams.cfg
+install(DIRECTORY launch/
+  DESTINATION share/${PROJECT_NAME}/launch
+)
+install(DIRECTORY calibration
+  DESTINATION share/${PROJECT_NAME}
 )
 
-################################################################################
-# Declare catkin specific configuration to be passed to dependent projects
-################################################################################
-catkin_package(
-  CATKIN_DEPENDS dynamic_reconfigure
-)
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  # the following line skips the linter which checks for copyrights
+  # comment the line when a copyright and license is added to all source files
+  set(ament_cmake_copyright_FOUND TRUE)
+  # the following line skips cpplint (only works in a git repo)
+  # comment the line when this package is in a git repo and when
+  # a copyright and license is added to all source files
+  set(ament_cmake_cpplint_FOUND TRUE)
+  ament_lint_auto_find_test_dependencies()
+endif()
 
-################################################################################
-# Build
-################################################################################
-
-################################################################################
-# Install
-################################################################################
-catkin_install_python(PROGRAMS
-  nodes/image_compensation
-  nodes/image_projection
- 	DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-
-install(DIRECTORY calibration cfg data launch
-	DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-)
-
-################################################################################
-# Test
-################################################################################
+ament_package()

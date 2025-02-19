@@ -1,11 +1,12 @@
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Changelog for package turtlebot3_autorace_camera
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Changelog for package turtlebot3_autorace
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 2.0.0 (2025-02-28)
 ------------------
 * Support for ROS2 Humble version
 * Renewal of package structure and functionality
+* New update for the construction mission algorithm
 * Contributors: ChanHyeong Lee, Hyungyu Kim, Jun
 
 1.2.0 (2019-02-07)
@@ -25,6 +26,7 @@ Changelog for package turtlebot3_autorace_camera
 1.0.0 (2018-03-20)
 ------------------
 * refactoring to release
+* updated control_parking.py
 * fixed the dependencies
 * first upload of turtlebot3_autorace
 * Contributors: Leon Jung, Pyo

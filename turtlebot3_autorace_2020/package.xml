@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>turtlebot3_autorace_camera</name>
+  <name>turtlebot3_autorace_2020</name>
   <version>2.0.0</version>
   <description>
-    ROS 2 packages for camera calibration and image processing in TurtleBot AutoRace
+    ROS 2 meta packages for turtlebot3_autorace_2020
   </description>
   <maintainer email="pyo@robotis.com">Pyo</maintainer>
   <license>Apache 2.0</license>
@@ -14,13 +14,12 @@
   <author email="kkjong@robotis.com">Gilbert</author>
   <author>Leon Jung</author>
   <author email="kimhg@robotis.com">Hyungyu Kim</author>
+  <author email="dddoggi1207@gmail.com">ChanHyeong Lee</author>
+  <author email="junyeong4321@gmail.com">Jun</author>
   <buildtool_depend>ament_cmake</buildtool_depend>
-  <depend>rclpy</depend>
-  <depend>rclcpp</depend>
-  <depend>std_msgs</depend>
-  <depend>cv_bridge</depend>
-  <depend>sensor_msgs</depend>
-  <exec_depend>ament_python</exec_depend>
+  <exec_depend>turtlebot3_autorace_camera</exec_depend>
+  <exec_depend>turtlebot3_autorace_detect</exec_depend>
+  <exec_depend>turtlebot3_autorace_mission</exec_depend>
   <export>
     <build_type>ament_cmake</build_type>
   </export>

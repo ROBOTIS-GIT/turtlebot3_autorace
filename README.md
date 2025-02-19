@@ -1,18 +1,22 @@
 # TurtleBot3
-<img src="https://github.com/ROBOTIS-GIT/emanual/blob/master/assets/images/platform/turtlebot3/logo_turtlebot3.png" width="300">
+<img src="https://raw.githubusercontent.com/ROBOTIS-GIT/emanual/master/assets/images/platform/turtlebot3/logo_turtlebot3.png" width="300">
 
 - Active Branches: noetic, main
 - Legacy Branches: *-devel
 
+## Simulation (ROS 1 Noetic)
+- Youtube playlist [TurtleBot3 AutoRace 2020 for Noetic](https://www.youtube.com/watch?v=d2cP8OTMbwI&list=PLRG6WP3c31_WsNjwmYID2ulX5g4WcjKbI)
+
 ## ROBOTIS e-Manual for TurtleBot3
-- [ROBOTIS e-Manual for TurtleBot3](http://turtlebot3.robotis.com/)
+- [TurtleBot3 Autonomous Driving](https://emanual.robotis.com/docs/en/platform/turtlebot3/autonomous_driving/#autonomous-driving)
 
 ## Wiki for turtlebot3_autorace Packages
 - http://wiki.ros.org/turtlebot3_autorace (metapackage)
 - http://wiki.ros.org/turtlebot3_autorace_camera
-- http://wiki.ros.org/turtlebot3_autorace_control
 - http://wiki.ros.org/turtlebot3_autorace_core
 - http://wiki.ros.org/turtlebot3_autorace_detect
+- http://wiki.ros.org/turtlebot3_autorace_driving
+- http://wiki.ros.org/turtlebot3_autorace_msgs
 
 ## Open Source related to TurtleBot3
 - [turtlebot3](https://github.com/ROBOTIS-GIT/turtlebot3)
@@ -27,9 +31,8 @@
 - [open_manipulator](https://github.com/ROBOTIS-GIT/open_manipulator)
 - [open_manipulator_simulations](https://github.com/ROBOTIS-GIT/open_manipulator_simulations)
 - [open_manipulator_perceptions](https://github.com/ROBOTIS-GIT/open_manipulator_perceptions)
-- [open_manipulator_with_tb3_msgs](https://github.com/ROBOTIS-GIT/open_manipulator_with_tb3_msgs)
-- [open_manipulator_with_tb3](https://github.com/ROBOTIS-GIT/open_manipulator_with_tb3)
-- [open_manipulator_with_tb3_simulations](https://github.com/ROBOTIS-GIT/open_manipulator_with_tb3_simulations)
+- [turtlebot3_manipulation](https://github.com/ROBOTIS-GIT/turtlebot3_manipulation)
+- [turtlebot3_manipulation_simulations](https://github.com/ROBOTIS-GIT/turtlebot3_manipulation_simulations)
 - [dynamixel_sdk](https://github.com/ROBOTIS-GIT/DynamixelSDK)
 - [dynamixel_workbench](https://github.com/ROBOTIS-GIT/dynamixel-workbench)
 - [OpenCR-Hardware](https://github.com/ROBOTIS-GIT/OpenCR-Hardware)
