@@ -23,8 +23,8 @@ import math
 import cv2
 from cv_bridge import CvBridge
 from geometry_msgs.msg import Twist
-import numpy as np
 from nav_msgs.msg import Odometry
+import numpy as np
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image
