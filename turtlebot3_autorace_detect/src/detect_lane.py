@@ -22,8 +22,8 @@
 
 import cv2
 import numpy as np
-import rclpy
 from cv_bridge import CvBridge
+import rclpy
 from rcl_interfaces.msg import IntegerRange
 from rcl_interfaces.msg import ParameterDescriptor
 from rcl_interfaces.msg import SetParametersResult
@@ -35,6 +35,7 @@ from std_msgs.msg import UInt8
 
 
 class DetectLane(Node):
+
     def __init__(self):
         super().__init__('detect_lane')
 
@@ -84,66 +85,66 @@ class DetectLane(Node):
         )
 
         self.hue_white_l = self.get_parameter(
-            "detect.lane.white.hue_l").get_parameter_value().integer_value
+            'detect.lane.white.hue_l').get_parameter_value().integer_value
         self.hue_white_h = self.get_parameter(
-            "detect.lane.white.hue_h").get_parameter_value().integer_value
+            'detect.lane.white.hue_h').get_parameter_value().integer_value
         self.saturation_white_l = self.get_parameter(
-            "detect.lane.white.saturation_l").get_parameter_value().integer_value
+            'detect.lane.white.saturation_l').get_parameter_value().integer_value
         self.saturation_white_h = self.get_parameter(
-            "detect.lane.white.saturation_h").get_parameter_value().integer_value
+            'detect.lane.white.saturation_h').get_parameter_value().integer_value
         self.lightness_white_l = self.get_parameter(
-            "detect.lane.white.lightness_l").get_parameter_value().integer_value
+            'detect.lane.white.lightness_l').get_parameter_value().integer_value
         self.lightness_white_h = self.get_parameter(
-            "detect.lane.white.lightness_h").get_parameter_value().integer_value
+            'detect.lane.white.lightness_h').get_parameter_value().integer_value
 
         self.hue_yellow_l = self.get_parameter(
-            "detect.lane.yellow.hue_l").get_parameter_value().integer_value
+            'detect.lane.yellow.hue_l').get_parameter_value().integer_value
         self.hue_yellow_h = self.get_parameter(
-            "detect.lane.yellow.hue_h").get_parameter_value().integer_value
+            'detect.lane.yellow.hue_h').get_parameter_value().integer_value
         self.saturation_yellow_l = self.get_parameter(
-            "detect.lane.yellow.saturation_l").get_parameter_value().integer_value
+            'detect.lane.yellow.saturation_l').get_parameter_value().integer_value
         self.saturation_yellow_h = self.get_parameter(
-            "detect.lane.yellow.saturation_h").get_parameter_value().integer_value
+            'detect.lane.yellow.saturation_h').get_parameter_value().integer_value
         self.lightness_yellow_l = self.get_parameter(
-            "detect.lane.yellow.lightness_l").get_parameter_value().integer_value
+            'detect.lane.yellow.lightness_l').get_parameter_value().integer_value
         self.lightness_yellow_h = self.get_parameter(
-            "detect.lane.yellow.lightness_h").get_parameter_value().integer_value
+            'detect.lane.yellow.lightness_h').get_parameter_value().integer_value
 
         self.is_calibration_mode = self.get_parameter(
-            "is_detection_calibration_mode").get_parameter_value().bool_value
+            'is_detection_calibration_mode').get_parameter_value().bool_value
         if self.is_calibration_mode:
             self.add_on_set_parameters_callback(self.cbGetDetectLaneParam)
 
-        self.sub_image_type = "raw"         # you can choose image type "compressed", "raw"
-        self.pub_image_type = "compressed"  # you can choose image type "compressed", "raw"
+        self.sub_image_type = 'raw'         # you can choose image type 'compressed', 'raw'
+        self.pub_image_type = 'compressed'  # you can choose image type 'compressed', 'raw'
 
-        if self.sub_image_type == "compressed":
+        if self.sub_image_type == 'compressed':
             self.sub_image_original = self.create_subscription(
                 CompressedImage, '/detect/image_input/compressed', self.cbFindLane, 1
                 )
-        elif self.sub_image_type == "raw":
+        elif self.sub_image_type == 'raw':
             self.sub_image_original = self.create_subscription(
                 Image, '/detect/image_input', self.cbFindLane, 1
                 )
 
-        if self.pub_image_type == "compressed":
+        if self.pub_image_type == 'compressed':
             self.pub_image_lane = self.create_publisher(
                 CompressedImage, '/detect/image_output/compressed', 1
                 )
-        elif self.pub_image_type == "raw":
+        elif self.pub_image_type == 'raw':
             self.pub_image_lane = self.create_publisher(
                 Image, '/detect/image_output', 1
                 )
 
         if self.is_calibration_mode:
-            if self.pub_image_type == "compressed":
+            if self.pub_image_type == 'compressed':
                 self.pub_image_white_lane = self.create_publisher(
                     CompressedImage, '/detect/image_output_sub1/compressed', 1
                     )
                 self.pub_image_yellow_lane = self.create_publisher(
                     CompressedImage, '/detect/image_output_sub2/compressed', 1
                     )
-            elif self.pub_image_type == "raw":
+            elif self.pub_image_type == 'raw':
                 self.pub_image_white_lane = self.create_publisher(
                     Image, '/detect/image_output_sub1', 1
                     )
@@ -178,9 +179,9 @@ class DetectLane(Node):
 
     def cbGetDetectLaneParam(self, parameters):
         for param in parameters:
-            self.get_logger().info(f"Parameter name: {param.name}")
-            self.get_logger().info(f"Parameter value: {param.value}")
-            self.get_logger().info(f"Parameter type: {param.type_}")
+            self.get_logger().info(f'Parameter name: {param.name}')
+            self.get_logger().info(f'Parameter value: {param.value}')
+            self.get_logger().info(f'Parameter type: {param.type_}')
             if param.name == 'detect.lane.white.hue_l':
                 self.hue_white_l = param.value
             elif param.name == 'detect.lane.white.hue_h':
@@ -217,11 +218,11 @@ class DetectLane(Node):
         else:
             self.counter = 1
 
-        if self.sub_image_type == "compressed":
+        if self.sub_image_type == 'compressed':
             np_arr = np.frombuffer(image_msg.data, np.uint8)
             cv_image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-        elif self.sub_image_type == "raw":
-            cv_image = self.cvBridge.imgmsg_to_cv2(image_msg, "bgr8")
+        elif self.sub_image_type == 'raw':
+            cv_image = self.cvBridge.imgmsg_to_cv2(image_msg, 'bgr8')
 
         white_fraction, cv_white_lane = self.maskWhiteLane(cv_image)
         yellow_fraction, cv_yellow_lane = self.maskYellowLane(cv_image)
@@ -315,14 +316,14 @@ class DetectLane(Node):
         self.pub_white_line_reliability.publish(msg_white_line_reliability)
 
         if self.is_calibration_mode:
-            if self.pub_image_type == "compressed":
+            if self.pub_image_type == 'compressed':
                 self.pub_image_white_lane.publish(
-                    self.cvBridge.cv2_to_compressed_imgmsg(mask, "jpg")
+                    self.cvBridge.cv2_to_compressed_imgmsg(mask, 'jpg')
                     )
 
-            elif self.pub_image_type == "raw":
+            elif self.pub_image_type == 'raw':
                 self.pub_image_white_lane.publish(
-                    self.cvBridge.cv2_to_imgmsg(mask, "bgr8")
+                    self.cvBridge.cv2_to_imgmsg(mask, 'bgr8')
                     )
 
         return fraction_num, mask
@@ -372,14 +373,14 @@ class DetectLane(Node):
         self.pub_yellow_line_reliability.publish(msg_yellow_line_reliability)
 
         if self.is_calibration_mode:
-            if self.pub_image_type == "compressed":
+            if self.pub_image_type == 'compressed':
                 self.pub_image_yellow_lane.publish(
-                    self.cvBridge.cv2_to_compressed_imgmsg(mask, "jpg")
+                    self.cvBridge.cv2_to_compressed_imgmsg(mask, 'jpg')
                     )
 
-            elif self.pub_image_type == "raw":
+            elif self.pub_image_type == 'raw':
                 self.pub_image_yellow_lane.publish(
-                    self.cvBridge.cv2_to_imgmsg(mask, "bgr8")
+                    self.cvBridge.cv2_to_imgmsg(mask, 'bgr8')
                     )
 
         return fraction_num, mask
@@ -588,29 +589,29 @@ class DetectLane(Node):
             pass
 
         self.pub_lane_state.publish(lane_state)
-        self.get_logger().info(f"Lane state: {lane_state.data}")
+        self.get_logger().info(f'Lane state: {lane_state.data}')
 
         # Combine the result with the original image
         final = cv2.addWeighted(cv_image, 1, color_warp, 0.2, 0)
         final = cv2.addWeighted(final, 1, color_warp_lines, 1, 0)
 
-        if self.pub_image_type == "compressed":
+        if self.pub_image_type == 'compressed':
             if self.is_center_x_exist:
                 # publishes lane center
                 msg_desired_center = Float64()
                 msg_desired_center.data = centerx.item(350)
                 self.pub_lane.publish(msg_desired_center)
 
-            self.pub_image_lane.publish(self.cvBridge.cv2_to_compressed_imgmsg(final, "jpg"))
+            self.pub_image_lane.publish(self.cvBridge.cv2_to_compressed_imgmsg(final, 'jpg'))
 
-        elif self.pub_image_type == "raw":
+        elif self.pub_image_type == 'raw':
             if self.is_center_x_exist:
                 # publishes lane center
                 msg_desired_center = Float64()
                 msg_desired_center.data = centerx.item(350)
                 self.pub_lane.publish(msg_desired_center)
 
-            self.pub_image_lane.publish(self.cvBridge.cv2_to_imgmsg(final, "bgr8"))
+            self.pub_image_lane.publish(self.cvBridge.cv2_to_imgmsg(final, 'bgr8'))
 
 
 def main(args=None):

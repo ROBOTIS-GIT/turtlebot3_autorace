@@ -20,8 +20,8 @@
 
 import cv2
 import numpy as np
-import rclpy
 from geometry_msgs.msg import Point
+import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import LaserScan
 from sklearn.cluster import DBSCAN
@@ -31,6 +31,7 @@ from turtlebot3_autorace_msgs.msg import Tracker
 
 
 class LidarTracker(Node):
+
     def __init__(self):
         super().__init__('lidar_node')
 

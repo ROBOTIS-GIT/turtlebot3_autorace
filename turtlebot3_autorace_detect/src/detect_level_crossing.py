@@ -21,13 +21,13 @@
 #   - [AuTURBO] Kihoon Kim (https://github.com/auturbo)
 
 import math
-import time
 from enum import Enum
+import time
 
 import cv2
 import numpy as np
-import rclpy
 from cv_bridge import CvBridge
+import rclpy
 from rcl_interfaces.msg import IntegerRange
 from rcl_interfaces.msg import ParameterDescriptor
 from rcl_interfaces.msg import SetParametersResult
@@ -85,62 +85,63 @@ def fnCheckDistanceIsEqual(point1, point2, point3):
 # ROS2 Node: DetectLevelNode
 # ------------------------
 class DetectLevelNode(Node):
+
     def __init__(self):
         super().__init__('detect_level')
-        self.get_logger().info("Starting detect_level node (ROS2)")
+        self.get_logger().info('Starting detect_level node (ROS2)')
 
         hue_range = IntegerRange(from_value=0, to_value=179, step=1)
         sat_range = IntegerRange(from_value=0, to_value=255, step=1)
         light_range = IntegerRange(from_value=0, to_value=255, step=1)
 
         hue_l_descriptor = ParameterDescriptor(
-            description="Lower hue threshold",
+            description='Lower hue threshold',
             integer_range=[hue_range]
         )
         hue_h_descriptor = ParameterDescriptor(
-            description="Upper hue threshold",
+            description='Upper hue threshold',
             integer_range=[hue_range]
         )
         sat_l_descriptor = ParameterDescriptor(
-            description="Lower saturation threshold",
+            description='Lower saturation threshold',
             integer_range=[sat_range]
         )
         sat_h_descriptor = ParameterDescriptor(
-            description="Upper saturation threshold",
+            description='Upper saturation threshold',
             integer_range=[sat_range]
         )
         light_l_descriptor = ParameterDescriptor(
-            description="Lower value (lightness) threshold",
+            description='Lower value (lightness) threshold',
             integer_range=[light_range]
         )
         light_h_descriptor = ParameterDescriptor(
-            description="Upper value (lightness) threshold",
+            description='Upper value (lightness) threshold',
             integer_range=[light_range]
         )
 
         # delcare parameters
-        self.declare_parameter("detect.level.red.hue_l", 0, descriptor=hue_l_descriptor)
-        self.declare_parameter("detect.level.red.hue_h", 179, descriptor=hue_h_descriptor)
-        self.declare_parameter("detect.level.red.saturation_l", 24, descriptor=sat_l_descriptor)
-        self.declare_parameter("detect.level.red.saturation_h", 255, descriptor=sat_h_descriptor)
-        self.declare_parameter("detect.level.red.lightness_l", 207, descriptor=light_l_descriptor)
-        self.declare_parameter("detect.level.red.lightness_h", 162, descriptor=light_h_descriptor)
+        self.declare_parameter('detect.level.red.hue_l', 0, descriptor=hue_l_descriptor)
+        self.declare_parameter('detect.level.red.hue_h', 179, descriptor=hue_h_descriptor)
+        self.declare_parameter('detect.level.red.saturation_l', 24, descriptor=sat_l_descriptor)
+        self.declare_parameter('detect.level.red.saturation_h', 255, descriptor=sat_h_descriptor)
+        self.declare_parameter('detect.level.red.lightness_l', 207, descriptor=light_l_descriptor)
+        self.declare_parameter('detect.level.red.lightness_h', 162, descriptor=light_h_descriptor)
 
-        self.declare_parameter("is_detection_calibration_mode", False)
-        self.declare_parameter("sub_image_type", "compressed")  # "raw" or "compressed"
-        self.declare_parameter("pub_image_type", "compressed")  # "raw" or "compressed"
+        self.declare_parameter('is_detection_calibration_mode', False)
+        self.declare_parameter('sub_image_type', 'compressed')  # 'raw' or 'compressed'
+        self.declare_parameter('pub_image_type', 'compressed')  # 'raw' or 'compressed'
 
         # get parameters
-        self.hue_red_l = self.get_parameter("detect.level.red.hue_l").value
-        self.hue_red_h = self.get_parameter("detect.level.red.hue_h").value
-        self.saturation_red_l = self.get_parameter("detect.level.red.saturation_l").value
-        self.saturation_red_h = self.get_parameter("detect.level.red.saturation_h").value
-        self.lightness_red_l = self.get_parameter("detect.level.red.lightness_l").value
-        self.lightness_red_h = self.get_parameter("detect.level.red.lightness_h").value
-        self.is_calibration_mode = self.get_parameter("is_detection_calibration_mode").value
+        self.hue_red_l = self.get_parameter('detect.level.red.hue_l').value
+        self.hue_red_h = self.get_parameter('detect.level.red.hue_h').value
+        self.saturation_red_l = self.get_parameter('detect.level.red.saturation_l').value
+        self.saturation_red_h = self.get_parameter('detect.level.red.saturation_h').value
+        self.lightness_red_l = self.get_parameter('detect.level.red.lightness_l').value
+        self.lightness_red_h = self.get_parameter('detect.level.red.lightness_h').value
+        self.is_calibration_mode = self.get_parameter('is_detection_calibration_mode').value
 
-        self.sub_image_type = self.get_parameter("sub_image_type").value
-        self.pub_image_type = self.get_parameter("pub_image_type").value
+        self.sub_image_type = self.get_parameter('sub_image_type').value
+        self.pub_image_type = self.get_parameter('pub_image_type').value
 
         self.add_on_set_parameters_callback(self.on_parameter_change)
 
@@ -154,7 +155,7 @@ class DetectLevelNode(Node):
         self.cv_bridge = CvBridge()
 
         # create publishers
-        if self.pub_image_type == "compressed":
+        if self.pub_image_type == 'compressed':
             self.pub_image_level = self.create_publisher(
                 CompressedImage, '/detect/image_output/compressed', 10)
             if self.is_calibration_mode:
@@ -173,7 +174,7 @@ class DetectLevelNode(Node):
             Float64, '/control/max_vel',)
 
         # create subscribers
-        if self.sub_image_type == "compressed":
+        if self.sub_image_type == 'compressed':
             self.create_subscription(
                 CompressedImage,
                 '/detect/image_input/compressed',
@@ -201,19 +202,19 @@ class DetectLevelNode(Node):
 
     def on_parameter_change(self, params):
         for param in params:
-            if param.name == "detect.level.red.hue_l":
+            if param.name == 'detect.level.red.hue_l':
                 self.hue_red_l = param.value
-            elif param.name == "detect.level.red.hue_h":
+            elif param.name == 'detect.level.red.hue_h':
                 self.hue_red_h = param.value
-            elif param.name == "detect.level.red.saturation_l":
+            elif param.name == 'detect.level.red.saturation_l':
                 self.saturation_red_l = param.value
-            elif param.name == "detect.level.red.saturation_h":
+            elif param.name == 'detect.level.red.saturation_h':
                 self.saturation_red_h = param.value
-            elif param.name == "detect.level.red.lightness_l":
+            elif param.name == 'detect.level.red.lightness_l':
                 self.lightness_red_l = param.value
-            elif param.name == "detect.level.red.lightness_h":
+            elif param.name == 'detect.level.red.lightness_h':
                 self.lightness_red_h = param.value
-        self.get_logger().info("Dynamic parameters updated.")
+        self.get_logger().info('Dynamic parameters updated.')
         return SetParametersResult(successful=True)
 
     def timer_callback(self):
@@ -227,14 +228,14 @@ class DetectLevelNode(Node):
         else:
             self.counter = 1
 
-        if self.sub_image_type == "compressed":
+        if self.sub_image_type == 'compressed':
             np_arr = np.frombuffer(image_msg.data, np.uint8)
             self.cv_image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
         else:
             try:
-                self.cv_image = self.cv_bridge.imgmsg_to_cv2(image_msg, desired_encoding="bgr8")
+                self.cv_image = self.cv_bridge.imgmsg_to_cv2(image_msg, desired_encoding='bgr8')
             except Exception as e:
-                self.get_logger().error("CV Bridge error: %s" % str(e))
+                self.get_logger().error('CV Bridge error: %s' % str(e))
 
     def level_crossing_order(self, order_msg):
         pub_level_crossing_return = UInt8()
@@ -243,7 +244,7 @@ class DetectLevelNode(Node):
                 is_level_detected, _, _ = self.find_level()
                 rclpy.spin_once(self, timeout_sec=0.01)
                 if is_level_detected:
-                    self.get_logger().info("Level Detected")
+                    self.get_logger().info('Level Detected')
                     max_vel_msg = Float64()
                     max_vel_msg.data = 0.03
                     self.pub_max_vel.publish(max_vel_msg)
@@ -253,7 +254,7 @@ class DetectLevelNode(Node):
                 _, is_level_close, _ = self.find_level()
                 rclpy.spin_once(self, timeout_sec=0.01)
                 if is_level_close:
-                    self.get_logger().info("STOP")
+                    self.get_logger().info('STOP')
                     max_vel_msg = Float64()
                     max_vel_msg.data = 0.0
                     self.pub_max_vel.publish(max_vel_msg)
@@ -263,7 +264,7 @@ class DetectLevelNode(Node):
                 _, _, is_level_opened = self.find_level()
                 rclpy.spin_once(self, timeout_sec=0.01)
                 if is_level_opened:
-                    self.get_logger().info("GO")
+                    self.get_logger().info('GO')
                     max_vel_msg = Float64()
                     max_vel_msg.data = 0.05
                     self.pub_max_vel.publish(max_vel_msg)
@@ -291,11 +292,11 @@ class DetectLevelNode(Node):
         mask = cv2.inRange(hsv, lower_red, upper_red)
 
         if self.is_calibration_mode:
-            if self.pub_image_type == "compressed":
-                comp_img_msg = self.cv_bridge.cv2_to_compressed_imgmsg(mask, dst_format="jpg")
+            if self.pub_image_type == 'compressed':
+                comp_img_msg = self.cv_bridge.cv2_to_compressed_imgmsg(mask, dst_format='jpg')
                 self.pub_image_color_filtered.publish(comp_img_msg)
             else:
-                img_msg = self.cv_bridge.cv2_to_imgmsg(mask, encoding="mono8")
+                img_msg = self.cv_bridge.cv2_to_imgmsg(mask, encoding='mono8')
                 self.pub_image_color_filtered.publish(img_msg)
 
         mask = cv2.bitwise_not(mask)
@@ -385,11 +386,11 @@ class DetectLevelNode(Node):
             is_level_opened = True
             self.stop_bar_state = 'go'
 
-        if self.pub_image_type == "compressed":
-            comp_img_msg = self.cv_bridge.cv2_to_compressed_imgmsg(frame, dst_format="jpg")
+        if self.pub_image_type == 'compressed':
+            comp_img_msg = self.cv_bridge.cv2_to_compressed_imgmsg(frame, dst_format='jpg')
             self.pub_image_level.publish(comp_img_msg)
         else:
-            img_msg = self.cv_bridge.cv2_to_imgmsg(frame, encoding="bgr8")
+            img_msg = self.cv_bridge.cv2_to_imgmsg(frame, encoding='bgr8')
             self.pub_image_level.publish(img_msg)
 
         return is_level_detected, is_level_close, is_level_opened

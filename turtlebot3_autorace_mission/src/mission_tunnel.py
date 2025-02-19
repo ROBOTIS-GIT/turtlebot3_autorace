@@ -20,13 +20,14 @@
 
 import math
 
-import rclpy
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import PoseWithCovarianceStamped
+import rclpy
 from rclpy.node import Node
 
 
 class Nav2GoalPublisher(Node):
+
     def __init__(self):
         super().__init__('nav2_goal_publisher')
         # Create publisher for initial pose (/initialpose topic, PoseWithCovarianceStamped type)

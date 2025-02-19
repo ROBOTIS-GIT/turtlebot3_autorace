@@ -18,14 +18,15 @@
 
 # Author: Leon Jung, Gilbert, Ashe Kim, Hyungyu Kim, ChanHyeong Lee
 
-import rclpy
 from geometry_msgs.msg import Twist
+import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Bool
 from std_msgs.msg import Float64
 
 
 class ControlLane(Node):
+
     def __init__(self):
         super().__init__('control_lane')
 
@@ -94,7 +95,6 @@ class ControlLane(Node):
         twist.linear.x = min(self.MAX_VEL * (max(1 - abs(error) / 500, 0) ** 2.2), 0.05)
         twist.angular.z = -max(angular_z, -2.0) if angular_z < 0 else -min(angular_z, 2.0)
         self.pub_cmd_vel.publish(twist)
-        self.get_logger().debug(f"cmd_vel=({twist.linear.x:.3f}, {twist.angular.z:.3f})")
 
     def callback_avoid_cmd(self, twist_msg):
         self.avoid_twist = twist_msg
@@ -105,12 +105,12 @@ class ControlLane(Node):
     def callback_avoid_active(self, bool_msg):
         self.avoid_active = bool_msg.data
         if self.avoid_active:
-            self.get_logger().info("Avoidance mode activated.")
+            self.get_logger().info('Avoidance mode activated.')
         else:
-            self.get_logger().info("Avoidance mode deactivated. Returning to lane following.")
+            self.get_logger().info('Avoidance mode deactivated. Returning to lane following.')
 
     def shut_down(self):
-        self.get_logger().info("Shutting down. cmd_vel will be 0")
+        self.get_logger().info('Shutting down. cmd_vel will be 0')
         twist = Twist()
         self.pub_cmd_vel.publish(twist)
 

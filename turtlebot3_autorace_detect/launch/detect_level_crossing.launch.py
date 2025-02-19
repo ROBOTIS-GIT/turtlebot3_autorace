@@ -31,7 +31,7 @@ def generate_launch_description():
     calibration_mode_arg = DeclareLaunchArgument(
         'calibration_mode',
         default_value='False',
-        description="calibration mode type [Ture, False]"
+        description='calibration mode type [Ture, False]'
         )
     calibration_mode = LaunchConfiguration('calibration_mode')
 
