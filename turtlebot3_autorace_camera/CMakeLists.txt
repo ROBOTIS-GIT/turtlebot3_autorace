@@ -20,7 +20,7 @@ install(PROGRAMS
 )
 
 install(DIRECTORY launch/
-  DESTINATION share/${PROJECT_NAME}/launch
+  DESTINATION share/${PROJECT_NAME}
 )
 install(DIRECTORY calibration
   DESTINATION share/${PROJECT_NAME}
