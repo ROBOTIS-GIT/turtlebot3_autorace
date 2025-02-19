@@ -16,7 +16,9 @@
 # limitations under the License.
 ################################################################################
 
-# Authors: Leon Jung, [AuTURBO] Kihoon Kim (https://github.com/auturbo), Gilbert, Ashe Kim, ChanHyeong Lee
+# Authors:
+#   - Leon Jung, Gilbert, Ashe Kim, ChanHyeong Lee
+#   - [AuTURBO] Kihoon Kim (https://github.com/auturbo)
 
 import math
 import time

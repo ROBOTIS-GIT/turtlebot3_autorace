@@ -16,7 +16,9 @@
 # limitations under the License.
 ################################################################################
 
-# Authors: Leon Jung, Gilbert, Ashe Kim, Hyungyu Kim, ChanHyeong Lee Special Thanks : Roger Sacchelli
+# Authors:
+#   - Leon Jung, Gilbert, Ashe Kim, Hyungyu Kim, ChanHyeong Lee
+#   - Special Thanks : Roger Sacchelli
 
 import cv2
 import numpy as np
