@@ -11,18 +11,20 @@ find_package(rclpy REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 
-find_package(ament_cmake REQUIRED)
-find_package(rclpy REQUIRED)
-find_package(std_msgs REQUIRED)
-find_package(sensor_msgs REQUIRED)
-
 install(PROGRAMS
+  src/avoid_construction.py
   src/control_lane.py
+  src/mission_tunnel.py
+  src/tracking_construction.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
-install(DIRECTORY launch/
-  DESTINATION share/${PROJECT_NAME}/launch
+install(DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
+install(DIRECTORY map
+  DESTINATION share/${PROJECT_NAME}
 )
 
 if(BUILD_TESTING)
