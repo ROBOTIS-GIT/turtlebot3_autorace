@@ -1,24 +1,26 @@
 ---
-detect:
-  traffic_light:
-    red:
-      hue_l: 0
-      hue_h: 26
-      saturation_l: 239
-      saturation_h: 255
-      lightness_l: 123
-      lightness_h: 250
-    yellow:
-      hue_l: 19
-      hue_h: 33
-      saturation_l: 237
-      saturation_h: 255
-      lightness_l: 231
-      lightness_h: 255
-    green:
-      hue_l: 40
-      hue_h: 113
-      saturation_l: 210
-      saturation_h: 255
-      lightness_l: 131
-      lightness_h: 255
+detect_traffic_light:
+  ros__parameters:
+    detect:
+      traffic_light:
+        red:
+          hue_l: 0
+          hue_h: 26
+          saturation_l: 239
+          saturation_h: 255
+          lightness_l: 123
+          lightness_h: 250
+        yellow:
+          hue_l: 19
+          hue_h: 33
+          saturation_l: 237
+          saturation_h: 255
+          lightness_l: 231
+          lightness_h: 255
+        green:
+          hue_l: 40
+          hue_h: 113
+          saturation_l: 210
+          saturation_h: 255
+          lightness_l: 131
+          lightness_h: 255
