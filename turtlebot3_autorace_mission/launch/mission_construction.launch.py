@@ -31,13 +31,6 @@ def generate_launch_description():
         'lane.yaml'
     )
 
-    lidar_tracker_node = Node(
-        package='turtlebot3_autorace_mission',
-        executable='tracking_construction.py',
-        name='tracking_construction',
-        output='screen'
-    )
-
     avoid_object_node = Node(
         package='turtlebot3_autorace_mission',
         executable='avoid_construction.py',
@@ -78,7 +71,6 @@ def generate_launch_description():
         )
 
     return LaunchDescription([
-        lidar_tracker_node,
         avoid_object_node,
         detect_lane_node,
         control_node,

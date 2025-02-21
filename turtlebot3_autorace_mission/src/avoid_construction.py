@@ -26,10 +26,9 @@ import numpy as np
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image
+from sensor_msgs.msg import LaserScan
 from std_msgs.msg import Bool
 from std_msgs.msg import UInt8
-
-from turtlebot3_autorace_msgs.msg import Objects
 
 
 def euler_from_quaternion(msg):
@@ -58,15 +57,16 @@ def euler_from_quaternion(msg):
     return roll, pitch, yaw
 
 
-class DangerZoneAvoidance(Node):
+class AvoidConstruction(Node):
 
     def __init__(self):
-        super().__init__('danger_zone_avoidance')
+        super().__init__('avoid_construction')
 
-        self.tracked_objects_sub = self.create_subscription(
-            Objects,
-            '/tracked_objects',
-            self.tracked_objects_callback,
+        # Subscribe
+        self.lidar_sub = self.create_subscription(
+            LaserScan,
+            '/scan',
+            self.lidar_callback,
             10
         )
         self.lane_state_sub = self.create_subscription(
@@ -88,9 +88,7 @@ class DangerZoneAvoidance(Node):
             10
         )
 
-        self.bridge = CvBridge()
-        self.lane_detected = False
-
+        # Publish
         self.image_pub = self.create_publisher(
             Image,
             '/lane_detection/image_result',
@@ -106,6 +104,9 @@ class DangerZoneAvoidance(Node):
             '/avoid_active',
             10
         )
+
+        self.bridge = CvBridge()
+        self.lane_detected = False
 
         # Parameter settings
         self.danger_distance = 0.24    # Danger zone y threshold (meters)
@@ -133,13 +134,25 @@ class DangerZoneAvoidance(Node):
         # lane_state value: 1 (left lane only), 2 (both), 3 (right lane only), 4 (not detected)
         self.lane_state = None
 
-        self.tracked = None
+        self.lidar_points = None
 
         self.timer = self.create_timer(0.1, self.process_loop)
 
-    def tracked_objects_callback(self, msg):
-        self.tracked = msg.objects
-        self.visualize_clusters(self.tracked)
+    def lidar_callback(self, msg):
+        self.lidar_points = self.convert_laserscan_to_points(msg)
+        self.visualization(self.lidar_points)
+
+    def convert_laserscan_to_points(self, msg):
+        angles = np.linspace(msg.angle_min, msg.angle_max, len(msg.ranges))
+        ranges = np.array(msg.ranges)
+        valid = (ranges >= msg.range_min) & (ranges <= msg.range_max)
+        ranges = ranges[valid]
+        angles = angles[valid]
+        if len(ranges) == 0:
+            return np.array([])
+        x = ranges * -np.sin(angles)
+        y = ranges * np.cos(angles)
+        return np.vstack((x, y)).T
 
     def lane_state_callback(self, msg):
         self.lane_state = msg.data
@@ -152,10 +165,8 @@ class DangerZoneAvoidance(Node):
         self.current_pos_y = msg.pose.pose.position.y
 
     def image_callback(self, msg):
-        # If avoidance mode is not active, do not perform lane detection.
         if self.state == 'NORMAL':
             return
-
         try:
             cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
         except Exception:
@@ -228,18 +239,12 @@ class DangerZoneAvoidance(Node):
             self.process_return_turn_state()
 
     def process_normal_state(self):
-        if self.tracked is not None:
+        if self.lidar_points is not None and self.lidar_points.size > 0:
             danger_detected = False
-            for obj in self.tracked:
-                for pt in obj.raw_points:
-                    if (
-                        pt.y > 0 and
-                        pt.y < self.danger_distance and
-                        abs(pt.x) < (self.danger_width / 2)
-                    ):
-                        danger_detected = True
-                        break
-                if danger_detected:
+            for pt in self.lidar_points:
+                x, y = pt[0], pt[1]
+                if 0 < y < self.danger_distance and abs(x) < (self.danger_width / 2):
+                    danger_detected = True
                     break
             if danger_detected:
                 self.get_logger().info('Danger zone intrusion detected.')
@@ -307,7 +312,7 @@ class DangerZoneAvoidance(Node):
         bool_msg.data = active
         self.avoid_active_pub.publish(bool_msg)
 
-    def visualize_clusters(self, tracked):
+    def visualization(self, points):
         img_vis = np.zeros((500, 500, 3), dtype=np.uint8)
         scale = 400.0  # 1 m = 400 pixels
         center = (img_vis.shape[1] // 2, img_vis.shape[0] // 2)
@@ -332,21 +337,11 @@ class DangerZoneAvoidance(Node):
         cv2.rectangle(overlay, dz_top_left, dz_bottom_right, (0, 0, 255), -1)
         alpha = 0.3
         img_vis = cv2.addWeighted(overlay, alpha, img_vis, 1 - alpha, 0)
-        if tracked is not None:
-            for obj in tracked:
-                centroid_x = obj.x
-                centroid_y = obj.y
-                obj_id = obj.id
-                raw_points = obj.raw_points
-                for pt in raw_points:
-                    x_pt = int(center[0] + pt.x * scale)
-                    y_pt = int(center[1] - pt.y * scale)
-                    cv2.circle(img_vis, (x_pt, y_pt), 2, (0, 255, 0), -1)
-                cx = int(center[0] + centroid_x * scale)
-                cy = int(center[1] - centroid_y * scale)
-                cv2.circle(img_vis, (cx, cy), 4, (0, 0, 255), -1)
-                cv2.putText(img_vis, f'ID:{obj_id}', (cx + 5, cy),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+        if points is not None:
+            for pt in points:
+                x = int(pt[0] * scale + center[0])
+                y = int(-pt[1] * scale + center[1])
+                cv2.circle(img_vis, (x, y), 2, (0, 255, 0), -1)
         cv2.imshow('Cluster Points & Danger Zone', img_vis)
         cv2.waitKey(1)
 
@@ -360,7 +355,7 @@ class DangerZoneAvoidance(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    node = DangerZoneAvoidance()
+    node = AvoidConstruction()
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
