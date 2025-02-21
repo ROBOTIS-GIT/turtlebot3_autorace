@@ -15,7 +15,6 @@ install(PROGRAMS
   src/avoid_construction.py
   src/control_lane.py
   src/mission_tunnel.py
-  src/tracking_construction.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
