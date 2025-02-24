@@ -4,7 +4,7 @@
   <name>turtlebot3_autorace_mission</name>
   <version>2.0.0</version>
   <description>
-    ROS 2 packages for turtlebot3_autorace_driving
+    ROS 2 packages for turtlebot3_autorace_mission
   </description>
   <maintainer email="pyo@robotis.com">Pyo</maintainer>
   <license>Apache 2.0</license>

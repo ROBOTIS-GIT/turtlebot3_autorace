@@ -15,22 +15,24 @@ install(PROGRAMS
   src/detect_construction_sign.py
   src/detect_intersection_sign.py
   src/detect_lane.py
-  src/detect_parking_sign.py
   src/detect_level_crossing_sign.py
+  src/detect_level_crossing.py
+  src/detect_parking_sign.py
+  src/detect_traffic_light.py
   src/detect_tunnel_sign.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
-install(DIRECTORY launch/
-  DESTINATION share/${PROJECT_NAME}/launch
+install(DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
 )
 
-install(DIRECTORY param/
-  DESTINATION share/${PROJECT_NAME}/param
+install(DIRECTORY param
+  DESTINATION share/${PROJECT_NAME}
 )
 
-install(DIRECTORY image/
-  DESTINATION share/${PROJECT_NAME}/image
+install(DIRECTORY image
+  DESTINATION share/${PROJECT_NAME}
 )
 
 if(BUILD_TESTING)
