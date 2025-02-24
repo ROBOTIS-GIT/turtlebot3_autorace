@@ -40,7 +40,7 @@ class MissionTunnel(Node):
         self.declare_parameter(
             'init_pose.orientation.y', 0.0)
         self.declare_parameter(
-            'init_pose.orientation.yaw', 0) # degree
+            'init_pose.orientation.yaw', 0)
         self.declare_parameter(
             'goal_pose.position.x', 0.0)
         self.declare_parameter(
@@ -52,7 +52,7 @@ class MissionTunnel(Node):
         self.declare_parameter(
             'goal_pose.orientation.y', 0.0)
         self.declare_parameter(
-            'goal_pose.orientation.yaw', 0) # degree
+            'goal_pose.orientation.yaw', 0)
 
         self.init_position_x = self.get_parameter(
             'init_pose.position.x').value
