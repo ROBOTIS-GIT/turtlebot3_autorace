@@ -20,22 +20,25 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import ExecuteProcess
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    # Get the share directory of turtlebot3_navigation2 package
     nav2_pkg_share = get_package_share_directory('turtlebot3_navigation2')
 
-    # Map file path
+    param_file = os.path.join(
+        get_package_share_directory('turtlebot3_autorace_mission'),
+        'param',
+        'navigation.yaml'
+    )
     map_file = os.path.join(
-            get_package_share_directory('turtlebot3_autorace_mission'),
-            'map',
-            'map.yaml')
+        get_package_share_directory('turtlebot3_autorace_mission'),
+        'map',
+        'map.yaml'
+    )
 
-    # Include the navigation2 launch file with required arguments
     nav2_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(nav2_pkg_share, 'launch', 'navigation2.launch.py')
@@ -46,13 +49,15 @@ def generate_launch_description():
         }.items()
     )
 
-    # Execute the set_init_pose.py node via ros2 run command
-    mission_tunnel = ExecuteProcess(
-        cmd=['ros2', 'run', 'turtlebot3_autorace_mission', 'mission_tunnel.py'],
-        output='screen'
+    mission_tunnel_node = Node(
+        package='turtlebot3_autorace_mission',
+        executable='mission_tunnel.py',
+        name='mission_tunnel',
+        output='screen',
+        parameters=[param_file]
     )
 
     return LaunchDescription([
         nav2_launch,
-        mission_tunnel,
+        mission_tunnel_node,
     ])

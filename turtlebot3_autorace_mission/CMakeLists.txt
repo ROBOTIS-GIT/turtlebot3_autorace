@@ -22,6 +22,10 @@ install(DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}
 )
 
+install(DIRECTORY param
+  DESTINATION share/${PROJECT_NAME}
+)
+
 install(DIRECTORY map
   DESTINATION share/${PROJECT_NAME}
 )

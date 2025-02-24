@@ -24,38 +24,83 @@ import rclpy
 from rclpy.node import Node
 
 
-class Nav2GoalPublisher(Node):
+class MissionTunnel(Node):
 
     def __init__(self):
-        super().__init__('nav2_goal_publisher')
-        # Create publisher for initial pose (/initialpose topic, PoseWithCovarianceStamped type)
-        self.init_pose_pub = self.create_publisher(PoseWithCovarianceStamped, '/initialpose', 10)
-        # Create publisher for goal pose (/goal_pose topic, PoseStamped type)
-        self.goal_pub = self.create_publisher(PoseStamped, '/goal_pose', 10)
+        super().__init__('mission_tunnel')
 
-        # Timer to delay the start of publishing by 5 seconds
+        self.declare_parameter(
+            'init_pose.position.x', 0.0)
+        self.declare_parameter(
+            'init_pose.position.y', 0.0)
+        self.declare_parameter(
+            'init_pose.position.z', 0.0)
+        self.declare_parameter(
+            'init_pose.orientation.x', 0.0)
+        self.declare_parameter(
+            'init_pose.orientation.y', 0.0)
+        self.declare_parameter(
+            'init_pose.orientation.yaw', 0) # degree
+        self.declare_parameter(
+            'goal_pose.position.x', 0.0)
+        self.declare_parameter(
+            'goal_pose.position.y', 0.0)
+        self.declare_parameter(
+            'goal_pose.position.z', 0.0)
+        self.declare_parameter(
+            'goal_pose.orientation.x', 0.0)
+        self.declare_parameter(
+            'goal_pose.orientation.y', 0.0)
+        self.declare_parameter(
+            'goal_pose.orientation.yaw', 0) # degree
+
+        self.init_position_x = self.get_parameter(
+            'init_pose.position.x').value
+        self.init_position_y = self.get_parameter(
+            'init_pose.position.y').value
+        self.init_position_z = self.get_parameter(
+            'init_pose.position.z').value
+        self.init_orientation_x = self.get_parameter(
+            'init_pose.orientation.x').value
+        self.init_orientation_y = self.get_parameter(
+            'init_pose.orientation.y').value
+        self.init_orientation_yaw = self.get_parameter(
+            'init_pose.orientation.yaw').value
+        self.goal_position_x = self.get_parameter(
+            'goal_pose.position.x').value
+        self.goal_position_y = self.get_parameter(
+            'goal_pose.position.y').value
+        self.goal_position_z = self.get_parameter(
+            'goal_pose.position.z').value
+        self.goal_orientation_x = self.get_parameter(
+            'goal_pose.orientation.x').value
+        self.goal_orientation_y = self.get_parameter(
+            'goal_pose.orientation.y').value
+        self.goal_orientation_yaw = self.get_parameter(
+            'goal_pose.orientation.yaw').value
+
+        self.init_pose_pub = self.create_publisher(
+            PoseWithCovarianceStamped, '/initialpose', 10)
+
+        self.goal_pub = self.create_publisher(
+            PoseStamped, '/goal_pose', 10)
+
         self.start_timer = self.create_timer(1.0, self.start_initial_phase)
-        # Ensure the timer runs only once by cancelling it in the callback
         self.started = False
 
-        # Goal publishing timer and shutdown timer are not created yet
         self.init_timer = None
         self.phase_timer = None
         self.goal_timer = None
         self.shutdown_timer = None
 
     def start_initial_phase(self):
-        # Make sure this callback runs only once
         if self.started:
             return
         self.started = True
 
-        # Cancel the start timer
         self.start_timer.cancel()
 
-        # Create a timer to publish initial pose every 0.1 seconds (runs for 1 second)
         self.init_timer = self.create_timer(0.1, self.publish_initial_pose)
-        # Create a timer to switch to goal publishing phase after 1 second
         self.phase_timer = self.create_timer(1.0, self.start_goal_phase)
 
     def publish_initial_pose(self):
@@ -63,14 +108,13 @@ class Nav2GoalPublisher(Node):
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.header.frame_id = 'map'
 
-        # Set initial pose
-        msg.pose.pose.position.x = 0.0
-        msg.pose.pose.position.y = 0.0
-        msg.pose.pose.position.z = 0.0
+        msg.pose.pose.position.x = self.init_position_x
+        msg.pose.pose.position.y = self.init_position_y
+        msg.pose.pose.position.z = self.init_position_z
 
-        yaw = math.radians(0)
-        msg.pose.pose.orientation.x = 0.0
-        msg.pose.pose.orientation.y = 0.0
+        yaw = math.radians(self.init_orientation_yaw)
+        msg.pose.pose.orientation.x = self.init_orientation_x
+        msg.pose.pose.orientation.y = self.init_orientation_y
         msg.pose.pose.orientation.z = math.sin(yaw / 2.0)
         msg.pose.pose.orientation.w = math.cos(yaw / 2.0)
 
@@ -79,15 +123,12 @@ class Nav2GoalPublisher(Node):
         self.init_pose_pub.publish(msg)
 
     def start_goal_phase(self):
-        # Cancel the initial pose timer and phase timer
         if self.init_timer is not None:
             self.init_timer.cancel()
         if self.phase_timer is not None:
             self.phase_timer.cancel()
 
-        # Create a timer to publish goal pose every 0.1 seconds (runs for 1 second)
         self.goal_timer = self.create_timer(0.1, self.publish_goal)
-        # Create a timer to shutdown the node after 1 second
         self.shutdown_timer = self.create_timer(2.0, self.shutdown_node)
 
     def publish_goal(self):
@@ -96,13 +137,13 @@ class Nav2GoalPublisher(Node):
         goal_msg.header.frame_id = 'map'
 
         # Set goal pose
-        goal_msg.pose.position.x = 1.4
-        goal_msg.pose.position.y = -1.4
-        goal_msg.pose.position.z = 0.0
+        goal_msg.pose.position.x = self.goal_position_x
+        goal_msg.pose.position.y = self.goal_position_y
+        goal_msg.pose.position.z = self.goal_position_z
 
-        yaw = math.radians(0)
-        goal_msg.pose.orientation.x = 0.0
-        goal_msg.pose.orientation.y = 0.0
+        yaw = math.radians(self.goal_orientation_yaw)
+        goal_msg.pose.orientation.x = self.goal_orientation_x
+        goal_msg.pose.orientation.y = self.goal_orientation_y
         goal_msg.pose.orientation.z = math.sin(yaw / 2.0)
         goal_msg.pose.orientation.w = math.cos(yaw / 2.0)
 
@@ -118,7 +159,7 @@ class Nav2GoalPublisher(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    node = Nav2GoalPublisher()
+    node = MissionTunnel()
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
