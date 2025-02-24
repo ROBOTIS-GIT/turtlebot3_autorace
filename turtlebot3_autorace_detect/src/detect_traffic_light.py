@@ -300,12 +300,13 @@ class DetectTrafficLight(Node):
 
         mask = cv2.inRange(hsv, lower_red, upper_red)
 
-        if self.pub_image_type == 'compressed':
-            self.pub_image_red_light.publish(
-                self.cvBridge.cv2_to_compressed_imgmsg(mask, 'jpg'))
-        else:
-            self.pub_image_red_light.publish(
-                self.cvBridge.cv2_to_imgmsg(mask, 'mono8'))
+        if self.is_calibration_mode:
+            if self.pub_image_type == 'compressed':
+                self.pub_image_red_light.publish(
+                    self.cvBridge.cv2_to_compressed_imgmsg(mask, 'jpg'))
+            else:
+                self.pub_image_red_light.publish(
+                    self.cvBridge.cv2_to_imgmsg(mask, 'mono8'))
 
         mask = cv2.bitwise_not(mask)
         return mask
@@ -323,12 +324,13 @@ class DetectTrafficLight(Node):
 
         mask = cv2.inRange(hsv, lower_yellow, upper_yellow)
 
-        if self.pub_image_type == 'compressed':
-            self.pub_image_yellow_light.publish(
-                self.cvBridge.cv2_to_compressed_imgmsg(mask, 'jpg'))
-        else:
-            self.pub_image_yellow_light.publish(
-                self.cvBridge.cv2_to_imgmsg(mask, 'mono8'))
+        if self.is_calibration_mode:
+            if self.pub_image_type == 'compressed':
+                self.pub_image_yellow_light.publish(
+                    self.cvBridge.cv2_to_compressed_imgmsg(mask, 'jpg'))
+            else:
+                self.pub_image_yellow_light.publish(
+                    self.cvBridge.cv2_to_imgmsg(mask, 'mono8'))
 
         mask = cv2.bitwise_not(mask)
         return mask
@@ -342,12 +344,13 @@ class DetectTrafficLight(Node):
 
         mask = cv2.inRange(hsv, lower_green, upper_green)
 
-        if self.pub_image_type == 'compressed':
-            self.pub_image_green_light.publish(
-                self.cvBridge.cv2_to_compressed_imgmsg(mask, 'jpg'))
-        else:
-            self.pub_image_green_light.publish(
-                self.cvBridge.cv2_to_imgmsg(mask, 'mono8'))
+        if self.is_calibration_mode:
+            if self.pub_image_type == 'compressed':
+                self.pub_image_green_light.publish(
+                    self.cvBridge.cv2_to_compressed_imgmsg(mask, 'jpg'))
+            else:
+                self.pub_image_green_light.publish(
+                    self.cvBridge.cv2_to_imgmsg(mask, 'mono8'))
 
         mask = cv2.bitwise_not(mask)
         return mask

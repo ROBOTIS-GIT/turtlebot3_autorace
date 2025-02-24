@@ -1,15 +1,13 @@
 ---
-detect_traffic_light:
+/detect_traffic_light:
   ros__parameters:
-    detect:
-      traffic_light:
         red:
           hue_l: 0
-          hue_h: 26
-          saturation_l: 239
+          hue_h: 24
+          saturation_l: 200
           saturation_h: 255
-          lightness_l: 123
-          lightness_h: 250
+          lightness_l: 200
+          lightness_h: 255
         yellow:
           hue_l: 19
           hue_h: 33
