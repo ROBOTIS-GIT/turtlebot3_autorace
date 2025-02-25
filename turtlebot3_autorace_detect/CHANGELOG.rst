@@ -2,10 +2,11 @@
 Changelog for package turtlebot3_autorace_detect
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-2.0.0 (2025-02-28)
+1.2.1 (2025-02-25)
 ------------------
 * Support for ROS2 Humble version
 * Renewal of package structure and functionality
+* New update for the construction mission algorithm
 * Contributors: ChanHyeong Lee, Hyungyu Kim, Jun
 
 1.2.0 (2019-02-07)
