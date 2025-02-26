@@ -1,6 +1,5 @@
 ---
-detect:
-  level:
+/detect_level:
     ros__parameters:
       red:
         hue_l: 0
