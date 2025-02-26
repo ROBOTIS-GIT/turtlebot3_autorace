@@ -126,8 +126,6 @@ class DetectLevelNode(Node):
         self.declare_parameter('detect.level.red.lightness_h', 162, descriptor=light_h_descriptor)
 
         self.declare_parameter('is_detection_calibration_mode', False)
-        self.declare_parameter('sub_image_type', 'compressed')  # 'raw' or 'compressed'
-        self.declare_parameter('pub_image_type', 'compressed')  # 'raw' or 'compressed'
 
         # get parameters
         self.hue_red_l = self.get_parameter('detect.level.red.hue_l').value
@@ -138,10 +136,10 @@ class DetectLevelNode(Node):
         self.lightness_red_h = self.get_parameter('detect.level.red.lightness_h').value
         self.is_calibration_mode = self.get_parameter('is_detection_calibration_mode').value
 
-        self.sub_image_type = self.get_parameter('sub_image_type').value
-        self.pub_image_type = self.get_parameter('pub_image_type').value
-
         self.add_on_set_parameters_callback(self.on_parameter_change)
+
+        self.sub_image_type = 'raw'  # 'raw' or 'compressed'
+        self.pub_image_type = 'compressed'  # 'raw' or 'compressed'
 
         self.StepOfLevelCrossing = Enum('StepOfLevelCrossing', 'pass_level exit')
 
@@ -169,25 +167,13 @@ class DetectLevelNode(Node):
         # create subscribers
         if self.sub_image_type == 'compressed':
             self.create_subscription(
-                CompressedImage,
-                '/detect/image_input/compressed',
-                self.get_image,
-                10
-                )
+                CompressedImage, '/detect/image_input/compressed', self.get_image, 10)
         else:  # raw
             self.create_subscription(
-                Image,
-                '/detect/image_input',
-                self.get_image,
-                10
-                )
+                Image, '/detect/image_input', self.get_image, 10)
 
         self.create_subscription(
-            UInt8,
-            '/detect/level_crossing_order',
-            self.level_crossing_order,
-            10
-            )
+            UInt8, '/detect/level_crossing_order', self.level_crossing_order, 10)
 
         self.timer = self.create_timer(1.0/15.0, self.timer_callback)
 
@@ -265,7 +251,6 @@ class DetectLevelNode(Node):
 
             pub_level_crossing_return.data = self.StepOfLevelCrossing.exit.value
 
-        self.pub_level_crossing_return.publish(pub_level_crossing_return)
         self.get_logger().info(pub_level_crossing_return.data)
         time.sleep(3.0)
 
@@ -304,12 +289,10 @@ class DetectLevelNode(Node):
         params.minThreshold = 0
         params.maxThreshold = 255
         params.filterByArea = True
-        params.minArea = 250
-        params.maxArea = 2000
-        params.filterByCircularity = True
-        params.minCircularity = 0.3
+        params.minArea = 150
+        params.maxArea = 500
         params.filterByConvexity = True
-        params.minConvexity = 0.9
+        params.minConvexity = 0.7
 
         # create blob detector
         detector = cv2.SimpleBlobDetector_create(params)
