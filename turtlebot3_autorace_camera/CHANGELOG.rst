@@ -4,7 +4,7 @@ Changelog for package turtlebot3_autorace_camera
 
 1.2.1 (2025-02-26)
 ------------------
-* Support for ROS2 Humble version
+* Support for ROS 2 Humble version
 * Renewal of package structure and functionality
 * Contributors: ChanHyeong Lee, Hyungyu Kim, Jun
 

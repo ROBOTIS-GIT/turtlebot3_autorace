@@ -18,6 +18,8 @@ setup(
     ],
     install_requires=['setuptools', 'launch'],
     zip_safe=True,
+    author='Gilbert, Leon Jung, Hyungyu Kim',
+    author_email='kkjong@robotis.com, , kimhg@robotis.com',
     maintainer='Pyo',
     maintainer_email='pyo@robotis.com',
     description='ROS 2 packages for camera calibration and image processing in TurtleBot AutoRace',
