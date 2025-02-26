@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 package_name = 'turtlebot3_autorace'
 authors_info = [
     ('Gilbert', 'kkjong@robotis.com'),
-    ('Leon Jung', ''),
+    ('Leon Jung', 'N/A'),
     ('Hyungyu Kim', 'kimhg@robotis.com'),
     ('ChanHyeong Lee', 'dddoggi1207@gmail.com'),
     ('Jun', 'junyeong4321@gmail.com'),

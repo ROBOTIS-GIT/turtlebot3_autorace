@@ -6,7 +6,7 @@ from setuptools import setup
 package_name = 'turtlebot3_autorace_camera'
 authors_info = [
     ('Gilbert', 'kkjong@robotis.com'),
-    ('Leon Jung', ''),
+    ('Leon Jung', 'N/A'),
     ('Hyungyu Kim', 'kimhg@robotis.com'),
 ]
 authors = ', '.join(author for author, _ in authors_info)
