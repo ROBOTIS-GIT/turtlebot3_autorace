@@ -21,8 +21,8 @@ setup(
     zip_safe=True,
     maintainer='gyu',
     maintainer_email='kimhg@robotis.com',
-    description='TODO: Package description',
-    license='TODO: License declaration',
+    description='ROS 2 packages for turtlebot3_autorace_detect',
+    license='Apache 2.0',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [

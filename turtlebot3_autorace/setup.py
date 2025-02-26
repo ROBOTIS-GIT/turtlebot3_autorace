@@ -4,7 +4,7 @@ package_name = 'turtlebot3_autorace'
 
 setup(
     name=package_name,
-    version='0.0.0',
+    version='1.2.1',
     packages=find_packages(exclude=['test']),
     data_files=[
         ('share/ament_index/resource_index/packages',
@@ -15,8 +15,8 @@ setup(
     zip_safe=True,
     maintainer='gyu',
     maintainer_email='kimhg@robotis.com',
-    description='TODO: Package description',
-    license='TODO: License declaration',
+    description='ROS 2 meta packages for turtlebot3_autorace',
+    license='Apache 2.0',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
