@@ -1,6 +1,15 @@
 from setuptools import find_packages, setup
 
 package_name = 'turtlebot3_autorace'
+authors_info = [
+    ('Gilbert', 'kkjong@robotis.com'),
+    ('Leon Jung', ''),
+    ('Hyungyu Kim', 'kimhg@robotis.com'),
+    ('ChanHyeong Lee', 'dddoggi1207@gmail.com'),
+    ('Jun', 'junyeong4321@gmail.com'),
+]
+authors = ', '.join(author for author, _ in authors_info)
+author_emails = ', '.join(email for _, email in authors_info)
 
 setup(
     name=package_name,
@@ -13,8 +22,8 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    author='Gilbert, Leon Jung, Hyungyu Kim, ChanHyeong Lee, Jun',
-    author_email='kkjong@robotis.com, , kimhg@robotis.com, dddoggi1207@gmail.com, junyeong4321@gmail.com',
+    author=authors_info,
+    author_email=author_emails,
     maintainer='Pyo',
     maintainer_email='pyo@robotis.com',
     description='ROS 2 meta packages for turtlebot3_autorace',
