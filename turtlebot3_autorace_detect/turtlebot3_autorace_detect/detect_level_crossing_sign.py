@@ -75,9 +75,8 @@ class DetectSign(Node):
         # Initiate SIFT detector
         self.sift = cv2.SIFT_create()
 
-
         dir_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-        dir_path = os.path.join(dir_path, "image")
+        dir_path = os.path.join(dir_path, 'image')
 
         self.img_stop = cv2.imread(dir_path + '/stop.png', 0)  # trainImage1
         self.kp_stop, self.des_stop = self.sift.detectAndCompute(self.img_stop, None)

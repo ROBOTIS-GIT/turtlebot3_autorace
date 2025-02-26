@@ -76,7 +76,7 @@ class DetectSign(Node):
         self.sift = cv2.SIFT_create()
 
         dir_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-        dir_path = os.path.join(dir_path, "image")
+        dir_path = os.path.join(dir_path, 'image')
 
         self.img_intersection = cv2.imread(dir_path + '/intersection.png', 0)
         self.img_left = cv2.imread(dir_path + '/left.png', 0)

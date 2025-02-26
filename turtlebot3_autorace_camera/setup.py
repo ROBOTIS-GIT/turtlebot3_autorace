@@ -1,6 +1,7 @@
+from glob import glob
+
 from setuptools import find_packages
 from setuptools import setup
-from glob import glob
 
 package_name = 'turtlebot3_autorace_camera'
 
@@ -12,7 +13,8 @@ setup(
         ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + '/launch', glob('launch/*.py')),
-        ('share/' + package_name + '/calibration/extrinsic_calibration', glob('calibration/extrinsic_calibration/*.yaml')),
+        ('share/' + package_name + '/calibration/extrinsic_calibration',
+            glob('calibration/extrinsic_calibration/*.yaml')),
     ],
     install_requires=['setuptools', 'launch'],
     zip_safe=True,

@@ -1,6 +1,7 @@
+from glob import glob
+
 from setuptools import find_packages
 from setuptools import setup
-from glob import glob
 
 package_name = 'turtlebot3_autorace_detect'
 
@@ -30,7 +31,8 @@ setup(
             'detect_intersection_sign = turtlebot3_autorace_detect.detect_intersection_sign:main',
             'detect_lane = turtlebot3_autorace_detect.detect_lane:main',
             'detect_level_crossing = turtlebot3_autorace_detect.detect_level_crossing:main',
-            'detect_level_crossing_sign = turtlebot3_autorace_detect.detect_level_crossing_sign:main',
+            'detect_level_crossing_sign = \
+                turtlebot3_autorace_detect.detect_level_crossing_sign:main',
             'detect_parking_sign = turtlebot3_autorace_detect.detect_parking_sign:main',
             'detect_traffic_light = turtlebot3_autorace_detect.detect_traffic_light:main',
             'detect_tunnel_sign = turtlebot3_autorace_detect.detect_tunnel_sign:main',

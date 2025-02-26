@@ -1,6 +1,7 @@
+from glob import glob
+
 from setuptools import find_packages
 from setuptools import setup
-from glob import glob
 
 package_name = 'turtlebot3_autorace_mission'
 
