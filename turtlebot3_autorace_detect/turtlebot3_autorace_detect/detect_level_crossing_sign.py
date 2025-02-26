@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Author: Leon Jung, Gilbert, Ashe Kimm Jun
+# Author: Leon Jung, Gilbert, Ashe Kim, Jun
 
 from enum import Enum
 import os
@@ -64,7 +64,7 @@ class DetectSign(Node):
             )
 
         self.cvBridge = CvBridge()
-        self.TrafficSign = Enum('TrafficSign', 'construction')
+        self.TrafficSign = Enum('TrafficSign', 'stop')
         self.counter = 1
 
         self.fnPreproc()
@@ -75,16 +75,12 @@ class DetectSign(Node):
         # Initiate SIFT detector
         self.sift = cv2.SIFT_create()
 
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        dir_path = dir_path.replace(
-            'turtlebot3_autorace_detect/src', 'turtlebot3_autorace_detect/'
-        )
-        dir_path += 'image/'
 
-        self.img_construction = cv2.imread(dir_path + 'construction.png', 0)
-        self.kp_construction, self.des_construction = self.sift.detectAndCompute(
-            self.img_construction, None
-        )
+        dir_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+        dir_path = os.path.join(dir_path, "image")
+
+        self.img_stop = cv2.imread(dir_path + '/stop.png', 0)  # trainImage1
+        self.kp_stop, self.des_stop = self.sift.detectAndCompute(self.img_stop, None)
 
         FLANN_INDEX_KDTREE = 0
         index_params = {
@@ -121,41 +117,42 @@ class DetectSign(Node):
         elif self.sub_image_type == 'raw':
             cv_image_input = self.cvBridge.imgmsg_to_cv2(image_msg, 'bgr8')
 
-        MIN_MATCH_COUNT = 8
+        MIN_MATCH_COUNT = 4
         MIN_MSE_DECISION = 50000
 
         # find the keypoints and descriptors with SIFT
         kp1, des1 = self.sift.detectAndCompute(cv_image_input, None)
 
-        matches_construction = self.flann.knnMatch(des1, self.des_construction, k=2)
+        matches_stop = self.flann.knnMatch(des1, self.des_stop, k=2)
 
         image_out_num = 1
 
-        good_construction = []
-        for m, n in matches_construction:
+        good_stop = []
+        for m, n in matches_stop:
             if m.distance < 0.7*n.distance:
-                good_construction.append(m)
-        if len(good_construction) > MIN_MATCH_COUNT:
-            src_pts = np.float32([kp1[m.queryIdx].pt for m in good_construction]).reshape(-1, 1, 2)
+                good_stop.append(m)
+
+        if len(good_stop) > MIN_MATCH_COUNT:
+            src_pts = np.float32([kp1[m.queryIdx].pt for m in good_stop]).reshape(-1, 1, 2)
             dst_pts = np.float32([
-                self.kp_construction[m.trainIdx].pt for m in good_construction
+                self.kp_stop[m.trainIdx].pt for m in good_stop
             ]).reshape(-1, 1, 2)
 
             M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
-            matches_construction = mask.ravel().tolist()
+            matches_stop = mask.ravel().tolist()
 
             mse = self.fnCalcMSE(src_pts, dst_pts)
             if mse < MIN_MSE_DECISION:
                 msg_sign = UInt8()
-                msg_sign.data = self.TrafficSign.construction.value
+                msg_sign.data = self.TrafficSign.stop.value
 
                 self.pub_traffic_sign.publish(msg_sign)
 
-                self.get_logger().info('construction')
+                self.get_logger().info('stop')
                 image_out_num = 2
         else:
-            matches_construction = None
-            # self.get_logger().info('not found')
+            matches_stop = None
+            # self.get_logger().info('nothing')
 
         if image_out_num == 1:
             if self.pub_image_type == 'compressed':
@@ -172,32 +169,33 @@ class DetectSign(Node):
                     )
                 )
         elif image_out_num == 2:
-            draw_params_construction = {
-                'matchColor': (255, 0, 0),  # draw matches in green color
+            draw_params2 = {
+                'matchColor': (0, 0, 255),  # draw matches in green color
                 'singlePointColor': None,
-                'matchesMask': matches_construction,  # draw only inliers
+                'matchesMask': matches_stop,  # draw only inliers
                 'flags': 2
             }
-            final_construction = cv2.drawMatches(
+
+            final_stop = cv2.drawMatches(
                 cv_image_input,
                 kp1,
-                self.img_construction,
-                self.kp_construction,
-                good_construction,
+                self.img_stop,
+                self.kp_stop,
+                good_stop,
                 None,
-                **draw_params_construction
+                **draw_params2
             )
 
             if self.pub_image_type == 'compressed':
                 self.pub_image_traffic_sign.publish(
                     self.cvBridge.cv2_to_compressed_imgmsg(
-                        final_construction, 'jpg'
+                        final_stop, 'jpg'
                     )
                 )
             elif self.pub_image_type == 'raw':
                 self.pub_image_traffic_sign.publish(
                     self.cvBridge.cv2_to_imgmsg(
-                        final_construction, 'bgr8'
+                        final_stop, 'bgr8'
                     )
                 )
 

@@ -48,7 +48,7 @@ def generate_launch_description():
 
     image_projection_node = Node(
         package='turtlebot3_autorace_camera',
-        executable='image_projection.py',
+        executable='image_projection',
         namespace='camera',
         name='image_projection',
         output='screen',
@@ -69,7 +69,7 @@ def generate_launch_description():
 
     image_compensation_node = Node(
         package='turtlebot3_autorace_camera',
-        executable='image_compensation.py',
+        executable='image_compensation',
         namespace='camera',
         name='image_compensation',
         output='screen',

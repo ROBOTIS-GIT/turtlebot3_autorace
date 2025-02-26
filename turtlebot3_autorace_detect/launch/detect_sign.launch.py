@@ -33,7 +33,7 @@ def generate_launch_description():
 
     detect_sign_node = Node(
         package='turtlebot3_autorace_detect',
-        executable=['detect_', mission, '_sign.py'],
+        executable=['detect_', mission, '_sign'],
         name=['detect_', mission, '_sign'],
         output='screen',
         remappings=[

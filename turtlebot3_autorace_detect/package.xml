@@ -17,12 +17,12 @@
   <author email="dddoggi1207@gmail.com">ChanHyeong Lee</author>
   <author email="junyeong4321@gmail.com">Jun</author>
   <author>Leon Jung</author>
-  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_python</buildtool_depend>
   <depend>rclpy</depend>
   <depend>std_msgs</depend>
   <depend>sensor_msgs</depend>
   <exec_depend>ament_python</exec_depend>
   <export>
-    <build_type>ament_cmake</build_type>
+    <build_type>ament_python</build_type>
   </export>
 </package>

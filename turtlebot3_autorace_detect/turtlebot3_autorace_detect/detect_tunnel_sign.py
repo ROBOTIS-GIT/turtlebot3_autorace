@@ -75,13 +75,11 @@ class DetectSign(Node):
         # Initiate SIFT detector
         self.sift = cv2.SIFT_create()
 
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        dir_path = dir_path.replace(
-            'turtlebot3_autorace_detect/src', 'turtlebot3_autorace_detect/'
-        )
-        dir_path += 'image/'
 
-        self.img_tunnel = cv2.imread(dir_path + 'tunnel.png', 0)  # trainImage3
+        dir_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+        dir_path = os.path.join(dir_path, "image")
+
+        self.img_tunnel = cv2.imread(dir_path + '/tunnel.png', 0)  # trainImage3
         self.kp_tunnel, self.des_tunnel = self.sift.detectAndCompute(self.img_tunnel, None)
 
         FLANN_INDEX_KDTREE = 0

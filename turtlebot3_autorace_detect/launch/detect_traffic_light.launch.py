@@ -41,7 +41,7 @@ def generate_launch_description():
     # Define the traffic light detection node
     detect_traffic_light_node = Node(
         package='turtlebot3_autorace_detect',
-        executable='detect_traffic_light.py',
+        executable='detect_traffic_light',
         name='detect_traffic_light',
         output='screen',
         parameters=[

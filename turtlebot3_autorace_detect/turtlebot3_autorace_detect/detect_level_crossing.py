@@ -166,11 +166,6 @@ class DetectLevelNode(Node):
                 self.pub_image_color_filtered = self.create_publisher(
                     Image, '/detect/image_output_sub1', 10)
 
-        self.pub_level_crossing_return = self.create_publisher(
-            UInt8, '/detect/level_crossing_stamped', 10)
-        self.pub_max_vel = self.create_publisher(
-            Float64, '/control/max_vel',)
-
         # create subscribers
         if self.sub_image_type == 'compressed':
             self.create_subscription(

@@ -42,7 +42,7 @@ def generate_launch_description():
 
     detect_lane_node = Node(
         package='turtlebot3_autorace_detect',
-        executable='detect_lane.py',
+        executable='detect_lane',
         name='detect_lane',
         output='screen',
         parameters=[

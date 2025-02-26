@@ -75,15 +75,12 @@ class DetectSign(Node):
         # Initiate SIFT detector
         self.sift = cv2.SIFT_create()
 
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        dir_path = dir_path.replace(
-            'turtlebot3_autorace_detect/src', 'turtlebot3_autorace_detect/'
-        )
-        dir_path += 'image/'
+        dir_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+        dir_path = os.path.join(dir_path, "image")
 
-        self.img_intersection = cv2.imread(dir_path + 'intersection.png', 0)
-        self.img_left = cv2.imread(dir_path + 'left.png', 0)
-        self.img_right = cv2.imread(dir_path + 'right.png', 0)
+        self.img_intersection = cv2.imread(dir_path + '/intersection.png', 0)
+        self.img_left = cv2.imread(dir_path + '/left.png', 0)
+        self.img_right = cv2.imread(dir_path + '/right.png', 0)
 
         self.kp_intersection, self.des_intersection = self.sift.detectAndCompute(
             self.img_intersection, None

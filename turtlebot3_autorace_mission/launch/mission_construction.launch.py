@@ -33,14 +33,14 @@ def generate_launch_description():
 
     avoid_object_node = Node(
         package='turtlebot3_autorace_mission',
-        executable='avoid_construction.py',
+        executable='avoid_construction',
         name='avoid_construction',
         output='screen'
     )
 
     detect_lane_node = Node(
         package='turtlebot3_autorace_detect',
-        executable='detect_lane.py',
+        executable='detect_lane',
         name='detect_lane',
         output='screen',
         parameters=[
@@ -61,7 +61,7 @@ def generate_launch_description():
 
     control_node = Node(
             package='turtlebot3_autorace_mission',
-            executable='control_lane.py',
+            executable='control_lane',
             name='control_lane',
             output='screen',
             remappings=[

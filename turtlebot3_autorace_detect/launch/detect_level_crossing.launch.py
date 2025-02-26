@@ -39,7 +39,7 @@ def generate_launch_description():
 
     detect_level_crossing_node = Node(
         package='turtlebot3_autorace_detect',
-        executable='detect_level_crossing.py',
+        executable='detect_level_crossing',
         name='detect_level_crossing',
         output='screen',
         parameters=[

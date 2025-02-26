@@ -51,7 +51,7 @@ def generate_launch_description():
 
     mission_tunnel_node = Node(
         package='turtlebot3_autorace_mission',
-        executable='mission_tunnel.py',
+        executable='mission_tunnel',
         name='mission_tunnel',
         output='screen',
         parameters=[param_file]
