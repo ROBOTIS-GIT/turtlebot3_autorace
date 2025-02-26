@@ -56,7 +56,7 @@ jobs:
           target-ros2-distro: ${{ matrix.ros_distribution }}
           vcs-repo-file-url: ""
           package-name: |
-            turtlebot3_autorace_2020
+            turtlebot3_autorace
             turtlebot3_autorace_camera
             turtlebot3_autorace_detect
             turtlebot3_autorace_mission
