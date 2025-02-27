@@ -1,6 +1,6 @@
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Changelog for package turtlebot3_autorace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Changelog for package turtlebot3_autorace_mission
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 1.2.1 (2025-02-26)
 ------------------
@@ -26,7 +26,7 @@ Changelog for package turtlebot3_autorace
 1.0.0 (2018-03-20)
 ------------------
 * refactoring to release
-* updated control_parking.py
 * fixed the dependencies
+* updated control_parking.py
 * first upload of turtlebot3_autorace
 * Contributors: Leon Jung, Pyo

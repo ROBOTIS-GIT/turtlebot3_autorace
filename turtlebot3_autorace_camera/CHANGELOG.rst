@@ -2,6 +2,12 @@
 Changelog for package turtlebot3_autorace_camera
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.1 (2025-02-26)
+------------------
+* Support for ROS 2 Humble version
+* Renewal of package structure and functionality
+* Contributors: ChanHyeong Lee, Hyungyu Kim, Jun
+
 1.2.0 (2019-02-07)
 ------------------
 * modified for gazebo mode
@@ -13,7 +19,7 @@ Changelog for package turtlebot3_autorace_camera
 1.1.0 (2018-05-30)
 ------------------
 * modified system configuration related with the .py extensions & core launch launches
-* merged pull request `#4 <https://github.com/ROBOTIS-GIT/turtlebot3_autorace/issues/4>`_ `#3 <https://github.com/ROBOTIS-GIT/turtlebot3_autorace/issues/3>`_ `#2 <https://github.com/ROBOTIS-GIT/turtlebot3_autorace/issues/2>`_ 
+* merged pull request `#4 <https://github.com/ROBOTIS-GIT/turtlebot3_autorace/issues/4>`_ `#3 <https://github.com/ROBOTIS-GIT/turtlebot3_autorace/issues/3>`_ `#2 <https://github.com/ROBOTIS-GIT/turtlebot3_autorace/issues/2>`_
 * Contributors: Leon Jung, Pyo
 
 1.0.0 (2018-03-20)

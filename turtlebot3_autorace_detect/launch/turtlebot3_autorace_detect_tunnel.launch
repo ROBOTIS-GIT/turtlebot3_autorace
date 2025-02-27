@@ -1,6 +1,0 @@
-<launch>
-  <!-- tunnel detection -->
-  <node pkg="turtlebot3_autorace_detect" type="detect_tunnel" name="detect_tunnel" output="screen">
-    <remap from="/control/cmd_vel" to="/cmd_vel" />
-  </node>
-</launch>
