@@ -57,8 +57,8 @@ def generate_launch_description():
             {'is_extrinsic_camera_calibration_mode': calibration_mode}
         ],
         remappings=[
-            ('/camera/image_input', '/camera/image_rect_color'),
-            ('/camera/image_input/compressed', '/camera/image_rect_color/compressed'),
+            ('/camera/image_input', '/camera/image_raw'),
+            ('/camera/image_input/compressed', '/camera/image_raw/compressed'),
             ('/camera/image_output', '/camera/image_projected'),
             ('/camera/image_output/compressed', '/camera/image_projected/compressed'),
             ('/camera/image_calib', '/camera/image_extrinsic_calib'),
