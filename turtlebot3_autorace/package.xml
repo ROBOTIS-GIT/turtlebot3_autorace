@@ -16,7 +16,6 @@
   <author email="kimhg@robotis.com">Hyungyu Kim</author>
   <author email="dddoggi1207@gmail.com">ChanHyeong Lee</author>
   <author email="junyeong4321@gmail.com">Jun</author>
-  <buildtool_depend>ament_python</buildtool_depend>
   <exec_depend>turtlebot3_autorace_camera</exec_depend>
   <exec_depend>turtlebot3_autorace_detect</exec_depend>
   <exec_depend>turtlebot3_autorace_mission</exec_depend>
