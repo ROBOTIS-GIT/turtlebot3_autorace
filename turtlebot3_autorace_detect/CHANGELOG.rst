@@ -2,6 +2,11 @@
 Changelog for package turtlebot3_autorace_detect
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.2 (2025-04-24)
+------------------
+* Fixed incorrect entries in package.xml
+* Contributors: Hyungyu Kim
+
 1.2.1 (2025-02-26)
 ------------------
 * Support for ROS 2 Humble version
