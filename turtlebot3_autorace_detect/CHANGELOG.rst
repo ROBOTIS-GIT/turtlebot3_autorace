@@ -2,10 +2,6 @@
 Changelog for package turtlebot3_autorace_detect
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1.2.3 (2025-04-24)
-------------------
-* None
-
 1.2.2 (2025-04-24)
 ------------------
 * Fixed incorrect entries in package.xml

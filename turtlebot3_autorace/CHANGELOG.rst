@@ -2,11 +2,6 @@
 Changelog for package turtlebot3_autorace
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1.2.3 (2025-04-24)
-------------------
-* Fix metapackage
-* Contributors: Hyungyu Kim
-
 1.2.2 (2025-04-24)
 ------------------
 * Fixed incorrect entries in package.xml
