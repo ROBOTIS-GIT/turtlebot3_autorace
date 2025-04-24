@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>turtlebot3_autorace_mission</name>
-  <version>1.2.1</version>
+  <version>1.2.2</version>
   <description>
     ROS 2 packages for turtlebot3_autorace_mission
   </description>
@@ -16,11 +16,9 @@
   <author email="kimhg@robotis.com">Hyungyu Kim</author>
   <author email="dddoggi1207@gmail.com">ChanHyeong Lee</author>
   <author email="junyeong4321@gmail.com">Jun</author>
-  <buildtool_depend>ament_python</buildtool_depend>
   <depend>rclpy</depend>
   <depend>std_msgs</depend>
   <depend>sensor_msgs</depend>
-  <exec_depend>ament_python</exec_depend>
   <export>
     <build_type>ament_python</build_type>
   </export>
