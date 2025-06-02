@@ -24,6 +24,7 @@ AlleyMission::AlleyMission(const rclcpp::NodeOptions & options = rclcpp::NodeOpt
 CallbackReturn AlleyMission::on_configure(const rclcpp_lifecycle::State & state)
   {
     RCLCPP_INFO(this->get_logger(), "Configuring...");
+
     return CallbackReturn::SUCCESS;
   }
 
@@ -56,3 +57,8 @@ CallbackReturn AlleyMission::on_activate(const rclcpp_lifecycle::State & state)
     RCLCPP_WARN(this->get_logger(), "Error occurred.");
     return CallbackReturn::SUCCESS;
   }
+
+
+int main(int argc, char * argv[]){
+  return 0;
+}

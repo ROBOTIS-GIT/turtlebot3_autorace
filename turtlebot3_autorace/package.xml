@@ -18,7 +18,6 @@
   <author email="junyeong4321@gmail.com">Jun</author>
   <author email="kimhg@robotis.com">Hyungyu Kim</author>
   <buildtool_depend>ament_cmake</buildtool_depend>
-  <exec_depend>turtlebot3_autorace_camera</exec_depend>
   <exec_depend>turtlebot3_autorace_detect</exec_depend>
   <exec_depend>turtlebot3_autorace_mission</exec_depend>
   <export>
