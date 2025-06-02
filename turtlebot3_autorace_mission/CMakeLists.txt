@@ -13,6 +13,7 @@ endif()
 ################################################################################
 find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_lifecycle REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(std_msgs REQUIRED)
 
@@ -24,6 +25,7 @@ add_executable(alley_mission_node src/alley_mission.cpp)
 target_link_libraries(alley_mission_node
   ${std_msgs_TARGETS}
   rclcpp::rclcpp
+  rclcpp_lifecycle::rclcpp_lifecycle
 )
 
 ################################################################################
