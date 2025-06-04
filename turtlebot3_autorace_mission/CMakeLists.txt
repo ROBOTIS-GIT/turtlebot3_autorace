@@ -16,15 +16,28 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 
 include_directories(
   include
 )
-
+add_executable(task_manager_node src/task_manager.cpp)
+target_link_libraries(task_manager_node
+  ${std_msgs_TARGETS}
+  ${std_srvs_TARGETS}
+  ${geometry_msgs_TARGETS}
+  rclcpp::rclcpp
+  rclcpp_lifecycle::rclcpp_lifecycle
+  tf2::tf2
+  tf2_geometry_msgs::tf2_geometry_msgs
+)
 add_executable(undocking_node src/undocking.cpp)
 target_link_libraries(undocking_node
   ${std_msgs_TARGETS}
+  ${std_srvs_TARGETS}
   ${geometry_msgs_TARGETS}
   rclcpp::rclcpp
   rclcpp_lifecycle::rclcpp_lifecycle
@@ -40,6 +53,7 @@ target_link_libraries(alley_mission_node
 # Install
 ################################################################################
 install(TARGETS
+  task_manager_node
   alley_mission_node
   undocking_node
   DESTINATION lib/${PROJECT_NAME}

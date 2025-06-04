@@ -16,6 +16,7 @@
 
 #include "turtlebot3_autorace_mission/undocking.hpp"
 #include "geometry_msgs/msg/twist.hpp"
+#include "std_srvs/srv/trigger.hpp"
 
 Undocking::Undocking(const rclcpp::NodeOptions & options)
   : rclcpp_lifecycle::LifecycleNode("undocking_node", options),
@@ -48,7 +49,6 @@ CallbackReturn Undocking::on_activate(const rclcpp_lifecycle::State &)
 
   cmd_vel_pub_->on_activate();
   reached_target_ = false;
-
   return CallbackReturn::SUCCESS;
 }
 
@@ -112,6 +112,20 @@ msg.header.frame_id = "base_link";
 if (reached_target_) {
   msg.twist.linear.x = 0.0;
   msg.twist.angular.z = 0.0;
+  auto client = this->create_client<std_srvs::srv::Trigger>("state_change_trigger");
+  if (!client->wait_for_service(std::chrono::seconds(1))) {
+    RCLCPP_WARN(this->get_logger(), "state_change_client for service not available.");
+    return;
+  }
+  auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
+  auto future = client->async_send_request(request,
+    [this](rclcpp::Client<std_srvs::srv::Trigger>::SharedFuture result) {
+      if (result.get()->success) {
+        RCLCPP_INFO(this->get_logger(), "Undocking completion. Progress next step.");
+      } else {
+        RCLCPP_ERROR(this->get_logger(), "Undocking completion. But fail to progress next step.");
+      }
+    });
 } else {
   msg.twist.linear.x = -0.2;
   msg.twist.angular.z = 0.0;
