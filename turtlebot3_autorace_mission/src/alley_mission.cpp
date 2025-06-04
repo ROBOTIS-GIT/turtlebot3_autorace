@@ -21,38 +21,37 @@ AlleyMission::AlleyMission(const rclcpp::NodeOptions & options = rclcpp::NodeOpt
   : rclcpp_lifecycle::LifecycleNode("alley_mission_node", options)
   {}
 
-CallbackReturn AlleyMission::on_configure(const rclcpp_lifecycle::State & state)
+CallbackReturn AlleyMission::on_configure(const rclcpp_lifecycle::State & /**state**/)
   {
-    RCLCPP_INFO(this->get_logger(), "Configuring...");
-
+    RCLCPP_INFO(this->get_logger(), "Configuring ");
     return CallbackReturn::SUCCESS;
   }
 
-CallbackReturn AlleyMission::on_activate(const rclcpp_lifecycle::State & state)
+CallbackReturn AlleyMission::on_activate(const rclcpp_lifecycle::State & /**state**/)
   {
     RCLCPP_INFO(this->get_logger(), "Activating...");
     return CallbackReturn::SUCCESS;
   }
 
-  CallbackReturn AlleyMission::on_deactivate(const rclcpp_lifecycle::State & state)
+  CallbackReturn AlleyMission::on_deactivate(const rclcpp_lifecycle::State & /**state**/)
   {
     RCLCPP_INFO(this->get_logger(), "Deactivating...");
     return CallbackReturn::SUCCESS;
   }
 
-  CallbackReturn AlleyMission::on_cleanup(const rclcpp_lifecycle::State & state)
+  CallbackReturn AlleyMission::on_cleanup(const rclcpp_lifecycle::State & /**state**/)
   {
     RCLCPP_INFO(this->get_logger(), "Cleaning up...");
     return CallbackReturn::SUCCESS;
   }
 
-  CallbackReturn AlleyMission::on_shutdown(const rclcpp_lifecycle::State & state)
+  CallbackReturn AlleyMission::on_shutdown(const rclcpp_lifecycle::State & /**state**/)
   {
     RCLCPP_INFO(this->get_logger(), "Shutting down...");
     return CallbackReturn::SUCCESS;
   }
 
-  CallbackReturn AlleyMission::on_error(const rclcpp_lifecycle::State & state)
+  CallbackReturn AlleyMission::on_error(const rclcpp_lifecycle::State & /**state**/)
   {
     RCLCPP_WARN(this->get_logger(), "Error occurred.");
     return CallbackReturn::SUCCESS;

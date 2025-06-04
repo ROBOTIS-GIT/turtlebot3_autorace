@@ -119,7 +119,7 @@ def generate_launch_description():
     )
 
     localization_bringup = GroupAction([
-        PushROSNamespace(namespace),
+        PushRosNamespace(namespace),
         Node(
             condition=IfCondition(use_composition),
             name='nav2_container',
@@ -163,17 +163,17 @@ def generate_launch_description():
     ])
 
 
-    # rviz_config_dir = os.path.join(
-    #     get_package_share_directory('turtlebot3_navigation2'),
-    #     'rviz',
-    #     'tb3_navigation2.rviz')
-    # rviz =  Node(
-    #     package='rviz2',
-    #     executable='rviz2',
-    #     name='rviz2',
-    #     arguments=['-d', rviz_config_dir],
-    #     parameters=[{'use_sim_time': use_sim_time}],
-    #     output='screen')
+    rviz_config_dir = os.path.join(
+        get_package_share_directory('turtlebot3_navigation2'),
+        'rviz',
+        'tb3_navigation2.rviz')
+    rviz =  Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        arguments=['-d', rviz_config_dir],
+        parameters=[{'use_sim_time': use_sim_time}],
+        output='screen')
 
     ld = LaunchDescription()
     ld.add_action(stdout_linebuf_envvar)
