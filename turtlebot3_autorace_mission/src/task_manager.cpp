@@ -16,10 +16,10 @@
 
 #include "turtlebot3_autorace_mission/task_manager.hpp"
 #include "lifecycle_msgs/msg/transition.hpp"
-#include <geometry_msgs/msg/pose_stamped.hpp>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
+using NavigateToPose = nav2_msgs::action::NavigateToPose;
 TaskManager::TaskManager()
 : Node("task_manager"),
   step_(1)
@@ -32,11 +32,27 @@ TaskManager::TaskManager()
       std::placeholders::_2,
       std::placeholders::_3)
   );
+  nav_to_pose_client_ = rclcpp_action::create_client<NavigateToPose>(
+    this, "/navigate_to_pose");
   exec_step(step_);
 }
+
 void TaskManager::exec_step(int step){
   if(step == 1){
     configure_activate_node("undocking_node");
+    step_ = 2;
+  }
+  else if(step==2){
+    RCLCPP_INFO(this->get_logger(), "Publishing goal pose for next step.");
+    goal_pose_publish(-0.1,-0.7, 0.0);
+  }
+  else if(step==3){
+    RCLCPP_INFO(this->get_logger(), "Yolo Detection started.");
+    goal_pose_publish(-0.1,-0.7, -1.57);
+  }
+  else if(step==4){
+    RCLCPP_INFO(this->get_logger(), "Alley Mission Start.");
+    configure_activate_node("alley_mission_node");
   }
 }
 
@@ -48,7 +64,6 @@ void TaskManager::state_change_callback(const std::shared_ptr<rmw_request_id_t> 
   RCLCPP_INFO(this->get_logger(), "Received undocking done signal.");
   shutdown_node("undocking_node");
   res->success = true;
-  goal_pose_publish(-0.22,-0.5, 0.0);
 }
 
 void TaskManager::configure_activate_node(const std::string & node_name){
@@ -138,6 +153,7 @@ void TaskManager::shutdown_node(const std::string & node_name){
     [this, node_name](rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFuture result) {
       if (result.get()->success) {
         RCLCPP_INFO(this->get_logger(), "%s", ("Successfully shutdown" + node_name).c_str());
+        exec_step(step_);
       } else {
         RCLCPP_INFO(this->get_logger(), "%s", ("Failed to shutdown" + node_name).c_str());
       }
@@ -147,22 +163,52 @@ void TaskManager::shutdown_node(const std::string & node_name){
 void TaskManager::goal_pose_publish(double x, double y, double theta)
 {
   RCLCPP_INFO(this->get_logger(), "Publishing goal pose...");
-  auto goal_pub = this->create_publisher<geometry_msgs::msg::PoseStamped>("/goal_pose", 10);
-
+  if (!nav_to_pose_client_->wait_for_action_server(std::chrono::seconds(1))) {
+      RCLCPP_ERROR(this->get_logger(), "NavigateToPose action server not available.");
+      return;
+    }
   tf2::Quaternion q;
   q.setRPY(0, 0, theta);
-  geometry_msgs::msg::PoseStamped goal_msg;
-  goal_msg.header.frame_id = "map";
-  goal_msg.header.stamp = this->get_clock()->now();
-  goal_msg.pose.position.x = x;
-  goal_msg.pose.position.y = y;
-  goal_msg.pose.orientation = tf2::toMsg(q);
+  auto goal_msg = NavigateToPose::Goal();
+  goal_msg.pose.header.frame_id = "map";
+  goal_msg.pose.header.stamp = this->get_clock()->now();
+  goal_msg.pose.pose.position.x = x;
+  goal_msg.pose.pose.position.y = y;
+  goal_msg.pose.pose.orientation = tf2::toMsg(q);
 
-  goal_pub->publish(goal_msg);
+  auto send_goal_options = rclcpp_action::Client<NavigateToPose>::SendGoalOptions();
+  send_goal_options.feedback_callback =
+    [this](rclcpp_action::ClientGoalHandle<NavigateToPose>::SharedPtr,
+           const std::shared_ptr<const NavigateToPose::Feedback> feedback)
+    {
+      RCLCPP_INFO(this->get_logger(), "Distance remaining: %.2f",
+                  feedback->distance_remaining);
+    };
 
-    RCLCPP_INFO(this->get_logger(), "Publishing goal...");
-    goal_pub->publish(goal_msg);
+  send_goal_options.result_callback =
+    [this](const rclcpp_action::ClientGoalHandle<NavigateToPose>::WrappedResult & result)
+    {
+      switch (result.code) {
+        case rclcpp_action::ResultCode::SUCCEEDED:
+          RCLCPP_INFO(this->get_logger(), "Goal reached successfully!");
+          step_++;
+          exec_step(step_);
+          break;
+        case rclcpp_action::ResultCode::ABORTED:
+          RCLCPP_ERROR(this->get_logger(), "Goal was aborted.");
+          break;
+        case rclcpp_action::ResultCode::CANCELED:
+          RCLCPP_WARN(this->get_logger(), "Goal was canceled.");
+          break;
+        default:
+          RCLCPP_ERROR(this->get_logger(), "Unknown result code.");
+          break;
+      }
+    };
+  nav_to_pose_client_->async_send_goal(goal_msg, send_goal_options);
 }
+
+
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);

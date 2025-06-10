@@ -21,6 +21,9 @@
 #include "std_msgs/msg/bool.hpp"
 #include "std_srvs/srv/trigger.hpp"
 #include "lifecycle_msgs/srv/change_state.hpp"
+#include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
+#include "nav2_msgs/action/navigate_to_pose.hpp"
+#include "rclcpp_action/rclcpp_action.hpp"
 
 class TaskManager : public rclcpp::Node
 {
@@ -40,7 +43,7 @@ private:
   void shutdown_node(const std::string & node_name);
   void goal_pose_publish(double x, double y, double theta);
 
-
+  rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr nav_to_pose_client_;
 };
 
 
