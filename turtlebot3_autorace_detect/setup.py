@@ -38,6 +38,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'aruco_tracker = turtlebot3_autorace_detect.aruco_tracker:main',
         ],
     },
 )

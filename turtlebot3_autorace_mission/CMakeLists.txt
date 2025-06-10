@@ -24,6 +24,7 @@ find_package(tf2_geometry_msgs REQUIRED)
 include_directories(
   include
 )
+
 add_executable(task_manager_node src/task_manager.cpp)
 target_link_libraries(task_manager_node
   ${std_msgs_TARGETS}
@@ -34,6 +35,7 @@ target_link_libraries(task_manager_node
   tf2::tf2
   tf2_geometry_msgs::tf2_geometry_msgs
 )
+
 add_executable(undocking_node src/undocking.cpp)
 target_link_libraries(undocking_node
   ${std_msgs_TARGETS}
@@ -42,6 +44,7 @@ target_link_libraries(undocking_node
   rclcpp::rclcpp
   rclcpp_lifecycle::rclcpp_lifecycle
 )
+
 add_executable(alley_mission_node src/alley_mission.cpp)
 target_link_libraries(alley_mission_node
   ${std_msgs_TARGETS}
@@ -62,6 +65,14 @@ install(TARGETS
 install(
   DIRECTORY launch param map
   DESTINATION share/${PROJECT_NAME}
+)
+
+ament_python_install_package(${PROJECT_NAME})
+
+install(PROGRAMS
+  turtlebot3_autorace_mission/aruco_parking.py
+  turtlebot3_autorace_mission/lidar_docking.py
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 ################################################################################

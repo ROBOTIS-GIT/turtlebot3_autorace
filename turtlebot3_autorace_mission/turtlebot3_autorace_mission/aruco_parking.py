@@ -32,6 +32,7 @@ from rclpy.lifecycle import TransitionCallbackReturn
 from rclpy.qos import QoSProfile
 from scipy.spatial.transform import Rotation
 from std_msgs.msg import Int32
+from std_srvs.srv import Trigger
 import tf2_ros
 
 
@@ -80,6 +81,7 @@ class ArUcoParking(LifecycleNode):
         self.sub_odom_robot = None
         self.sub_marker_id = None
         self.pub_cmd_vel = None
+        self.state_change_client = None
 
     def on_configure(self, state: LifecycleState) -> TransitionCallbackReturn:
         try:
@@ -106,6 +108,11 @@ class ArUcoParking(LifecycleNode):
             self.tf_buffer = tf2_ros.Buffer()
             self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
             self.timer = self.create_timer(0.1, self.get_marker_odom)
+
+            self.state_change_client = self.create_client(
+                Trigger,
+                'state_change_trigger'
+            )
 
             self.get_logger().info('ArUco parking node configured successfully')
             return TransitionCallbackReturn.SUCCESS
@@ -167,6 +174,7 @@ class ArUcoParking(LifecycleNode):
             self.is_sequence_finished = False
             self.is_odom_received = False
             self.is_marker_pose_received = False
+            self.state_change_client = None
 
             self.get_logger().info('ArUco parking node cleaned up successfully')
             return TransitionCallbackReturn.SUCCESS
@@ -191,6 +199,7 @@ class ArUcoParking(LifecycleNode):
             self.get_logger().info('Start parking sequence')
             self.marker_frame = f'ar_marker_{self.target_marker_id}'
             self.current_parking_sequence = self.ParkingSequence.search_parking_lot.value
+            self.timer = self.create_timer(0.1, self._run)
 
     def get_robot_odom(self, robot_odom_msg):
         if not self.is_active:
@@ -364,11 +373,23 @@ class ArUcoParking(LifecycleNode):
     def seq_parking(self):
         desired_angle_turn = math.atan2(self.marker_2d_pose_y, self.marker_2d_pose_x)
         self.fn_track_marker(-desired_angle_turn)
-        self.get_logger().info(f'{self.marker_2d_pose_x}')
         if abs(self.marker_2d_pose_x) < self.parking_distance_to_marker:
             self.fn_stop()
+            request = Trigger.Request()
+            future = self.state_change_client.call_async(request)
+            future.add_done_callback(self.trigger_callback)
             return True
         return False
+
+    def trigger_callback(self, future):
+        try:
+            result = future.result()
+            if result.success:
+                self.get_logger().info('Successfully sent state change trigger')
+            else:
+                self.get_logger().error('Failed to send state change trigger')
+        except Exception as e:
+            self.get_logger().error(f'Service call failed: {str(e)}')
 
     def fn_stop(self):
         twist = TwistStamped()

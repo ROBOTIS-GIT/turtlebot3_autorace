@@ -32,6 +32,7 @@ from rclpy.lifecycle import TransitionCallbackReturn
 from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import CompressedImage
 from sensor_msgs.msg import LaserScan
+from std_srvs.srv import Trigger
 
 
 class LiDARDocking(LifecycleNode):
@@ -54,6 +55,7 @@ class LiDARDocking(LifecycleNode):
         self.sub_odom = None
         self.pub_lidar_img = None
         self.pub_cmd_vel = None
+        self.state_change_client = None
 
     def on_configure(self, state: LifecycleState) -> TransitionCallbackReturn:
         try:
@@ -81,6 +83,11 @@ class LiDARDocking(LifecycleNode):
                 TwistStamped,
                 '/cmd_vel',
                 10
+            )
+
+            self.state_change_client = self.create_client(
+                Trigger,
+                'state_change_trigger'
             )
 
             self.get_logger().info('LiDAR docking node configured successfully')
@@ -128,6 +135,7 @@ class LiDARDocking(LifecycleNode):
             self.parking_finished = False
             self.final_alignment_started = False
             self.cv_bridge = None
+            self.state_change_client = None
 
             self.get_logger().info('LiDAR docking node cleaned up successfully')
             return TransitionCallbackReturn.SUCCESS
@@ -272,8 +280,21 @@ class LiDARDocking(LifecycleNode):
                 cmd.twist.angular.z = 0.0
                 self.final_alignment_started = False
                 self.get_logger().info('Final heading alignment completed!')
+                request = Trigger.Request()
+                future = self.state_change_client.call_async(request)
+                future.add_done_callback(self.trigger_callback)
 
         self.pub_cmd_vel.publish(cmd)
+
+    def trigger_callback(self, future):
+        try:
+            result = future.result()
+            if result.success:
+                self.get_logger().info('Successfully sent state change trigger')
+            else:
+                self.get_logger().error('Failed to send state change trigger')
+        except Exception as e:
+            self.get_logger().error(f'Service call failed: {str(e)}')
 
 
 def main(args=None):

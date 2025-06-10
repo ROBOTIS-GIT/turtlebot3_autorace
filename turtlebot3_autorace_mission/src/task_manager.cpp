@@ -40,7 +40,8 @@ void TaskManager::exec_step(int step){
   }
 }
 
-void TaskManager::state_change_callback(const std::shared_ptr<rmw_request_id_t> request_header,
+void TaskManager::state_change_callback(
+  const std::shared_ptr<rmw_request_id_t> request_header,
   const std::shared_ptr<std_srvs::srv::Trigger::Request> req,
   const std::shared_ptr<std_srvs::srv::Trigger::Response> res){
   (void)request_header;
@@ -170,4 +171,3 @@ int main(int argc, char ** argv)
   rclcpp::shutdown();
   return 0;
 }
-
