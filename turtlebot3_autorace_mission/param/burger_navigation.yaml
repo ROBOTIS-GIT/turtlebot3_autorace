@@ -42,8 +42,8 @@ amcl:
     always_reset_initial_pose: false
     first_map_only: false
     initial_pose:
-      x: 0.1
-      y: 0.0
+      x: 0.0
+      y: -0.1
       z: 0.0
       yaw: 0.0
 
@@ -187,12 +187,14 @@ controller_server:
       transform_tolerance: 0.2
       short_circuit_trajectory_evaluation: true
       stateful: true
+      prune_distance: 0.5
+      forward_prune_distance: 0.5
       critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist","ObstacleFootprintCritic" ]
       xy_goal_tolerance: 0.05
       trans_stopped_velocity: 0.1
       RotateToGoal:
         scale: 0.5
-        slowing_factor: 3.0
+        slowing_factor: 1.0
         lookahead_time: -1.0
       Oscillation:
         scale: 1.0
@@ -203,7 +205,7 @@ controller_server:
         scale: 1.0
         sum_scores: false
       GoalAlign:
-        scale: 5.0 #
+        scale: 3.0 #
         forward_point_distance: 0.15
         aggregation_type: "last"
       PathAlign:
@@ -214,7 +216,7 @@ controller_server:
         scale: 5.0 #
         aggregation_type: "last"
       GoalDist:
-        scale: 3.0
+        scale: 2.0
         aggregation_type: "last"
       ObstacleFootprintCritic:
         scale: 1.0
