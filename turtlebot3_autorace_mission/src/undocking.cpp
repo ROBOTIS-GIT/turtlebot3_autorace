@@ -20,17 +20,14 @@
 Undocking::Undocking(const rclcpp::NodeOptions & options)
   : rclcpp_lifecycle::LifecycleNode("undocking_node", options),
   tf_buffer_(this->get_clock()),
-  tf_listener_(tf_buffer_),
-  target_x_(-0.5),
-  target_y_(0.0),
-  tolerance_(0.1),
-  reached_target_(false)
+  tf_listener_(tf_buffer_)
   {}
 
 CallbackReturn Undocking::on_configure(const rclcpp_lifecycle::State &)
 {
   RCLCPP_INFO(this->get_logger(), "##### Undocking Node CONFIGURED #####");
 
+  cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::TwistStamped>("cmd_vel", 10);
   timer_ = this->create_wall_timer(
     std::chrono::milliseconds(500),
     std::bind(&Undocking::publish_cmd_vel, this));
@@ -41,9 +38,14 @@ CallbackReturn Undocking::on_configure(const rclcpp_lifecycle::State &)
 CallbackReturn Undocking::on_activate(const rclcpp_lifecycle::State &)
 {
   RCLCPP_INFO(this->get_logger(), "##### Undocking Node ACTIVATED #####");
-
   cmd_vel_pub_->on_activate();
   reached_target_ = false;
+
+  target_x_ = -0.5;
+  target_y_ = 0.0;
+  tolerance_ = 0.1;
+  reached_target_ = false;
+
   return CallbackReturn::SUCCESS;
 }
 

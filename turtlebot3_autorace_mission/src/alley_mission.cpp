@@ -20,9 +20,19 @@
 AlleyMission::AlleyMission(const rclcpp::NodeOptions & options)
 : rclcpp_lifecycle::LifecycleNode("alley_mission_node", options),
   tf_buffer_(this->get_clock()),
-  tf_listener_(tf_buffer_),
-  current_waypoint_index_(0)
+  tf_listener_(tf_buffer_)
+  {}
+
+CallbackReturn AlleyMission::on_configure(const rclcpp_lifecycle::State &)
 {
+  RCLCPP_INFO(this->get_logger(), "##### Alley Mission INIT #####");
+
+  cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::TwistStamped>("/cmd_vel", 10);
+  timer_ = this->create_wall_timer(
+    std::chrono::milliseconds(500),
+    std::bind(&AlleyMission::publish_cmd_vel, this));
+
+  current_waypoint_index_ = 0;
   waypoints_ = {
     {-0.03, -0.7},
     {-0.03, -0.9},
@@ -36,16 +46,7 @@ AlleyMission::AlleyMission(const rclcpp::NodeOptions & options)
     {-0.59, -1.92},
     {-0.59, -2.12}
   };
-}
 
-CallbackReturn AlleyMission::on_configure(const rclcpp_lifecycle::State &)
-{
-  RCLCPP_INFO(this->get_logger(), "##### Alley Mission INIT #####");
-
-  cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::TwistStamped>("/cmd_vel", 10);
-  timer_ = this->create_wall_timer(
-    std::chrono::milliseconds(500),
-    std::bind(&AlleyMission::publish_cmd_vel, this));
   return CallbackReturn::SUCCESS;
 }
 
@@ -67,7 +68,7 @@ CallbackReturn AlleyMission::on_cleanup(const rclcpp_lifecycle::State &)
 {
   RCLCPP_INFO(this->get_logger(), "##### Alley Mission CLEANUP #####");
   cmd_vel_pub_.reset();
-  // amcl_sub_.reset();
+  timer_.reset();
   return CallbackReturn::SUCCESS;
 }
 

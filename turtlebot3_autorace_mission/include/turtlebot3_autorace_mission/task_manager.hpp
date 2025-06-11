@@ -23,6 +23,7 @@
 #include <lifecycle_msgs/srv/change_state.hpp>
 #include <nav2_msgs/action/navigate_to_pose.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
+#include "lifecycle_msgs/srv/change_state.hpp"
 
 class TaskManager : public rclcpp::Node
 {
@@ -30,10 +31,6 @@ public:
   TaskManager();
 
 private:
-  int step_;
-  rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr state_check_sub_;
-  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr state_change_trigger_;
-  rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedPtr undocking_client_;
   void exec_step(int step);
   void state_change_callback(const std::shared_ptr<rmw_request_id_t> request_header,
     const std::shared_ptr<std_srvs::srv::Trigger::Request> req,
@@ -43,6 +40,12 @@ private:
   void goal_pose_publish(double x, double y, double theta);
 
   rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr nav_to_pose_client_;
+  rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedPtr client_;
+  rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr state_check_sub_;
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr state_change_trigger_;
+
+  int step_;
+  std::vector<std::string> node_names_;
 };
 
 
