@@ -15,11 +15,12 @@
 // Author: Hyungyu Kim
 
 #include "turtlebot3_autorace_mission/undocking.hpp"
-#include "geometry_msgs/msg/twist.hpp"
 #include "std_srvs/srv/trigger.hpp"
 
 Undocking::Undocking(const rclcpp::NodeOptions & options)
   : rclcpp_lifecycle::LifecycleNode("undocking_node", options),
+  tf_buffer_(this->get_clock()),
+  tf_listener_(tf_buffer_),
   target_x_(-0.5),
   target_y_(0.0),
   tolerance_(0.1),
@@ -28,14 +29,8 @@ Undocking::Undocking(const rclcpp::NodeOptions & options)
 
 CallbackReturn Undocking::on_configure(const rclcpp_lifecycle::State &)
 {
-  RCLCPP_INFO(this->get_logger(), "Configuring Undocking Node");
+  RCLCPP_INFO(this->get_logger(), "##### Undocking Node CONFIGURED #####");
 
-  cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::TwistStamped>("cmd_vel", 10);
-  amcl_sub_ = this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(
-    "amcl_pose",
-    10,
-    std::bind(&Undocking::amcl_pose_callback, this, std::placeholders::_1));
-  // 타이머
   timer_ = this->create_wall_timer(
     std::chrono::milliseconds(500),
     std::bind(&Undocking::publish_cmd_vel, this));
@@ -45,7 +40,7 @@ CallbackReturn Undocking::on_configure(const rclcpp_lifecycle::State &)
 
 CallbackReturn Undocking::on_activate(const rclcpp_lifecycle::State &)
 {
-  RCLCPP_INFO(this->get_logger(), "Activating Undocking Node");
+  RCLCPP_INFO(this->get_logger(), "##### Undocking Node ACTIVATED #####");
 
   cmd_vel_pub_->on_activate();
   reached_target_ = false;
@@ -54,7 +49,7 @@ CallbackReturn Undocking::on_activate(const rclcpp_lifecycle::State &)
 
 CallbackReturn Undocking::on_deactivate(const rclcpp_lifecycle::State &)
 {
-  RCLCPP_INFO(this->get_logger(), "Deactivating Undocking Node");
+  RCLCPP_INFO(this->get_logger(), "##### Undocking Node DEACTIVATE #####");
 
   cmd_vel_pub_->on_deactivate();
 
@@ -63,18 +58,17 @@ CallbackReturn Undocking::on_deactivate(const rclcpp_lifecycle::State &)
 
 CallbackReturn Undocking::on_cleanup(const rclcpp_lifecycle::State &)
 {
-  RCLCPP_INFO(this->get_logger(), "Cleaning up Undocking Node");
+  RCLCPP_INFO(this->get_logger(), "##### Undocking Node CLEANUP #####");
 
   timer_.reset();
   cmd_vel_pub_.reset();
-  amcl_sub_.reset();
 
   return CallbackReturn::SUCCESS;
 }
 
 CallbackReturn Undocking::on_shutdown(const rclcpp_lifecycle::State &)
 {
-  RCLCPP_INFO(this->get_logger(), "Shutting down Undocking Node");
+  RCLCPP_INFO(this->get_logger(), "##### Undocking Node SHUTDOWN #####");
   return CallbackReturn::SUCCESS;
 }
 
@@ -84,54 +78,42 @@ CallbackReturn Undocking::on_error(const rclcpp_lifecycle::State &)
   return CallbackReturn::SUCCESS;
 }
 
-// amcl 콜백
-void Undocking::amcl_pose_callback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg)
-{
-  double dx = msg->pose.pose.position.x - target_x_;
-
-  if (dx < tolerance_) {
-    if (!reached_target_) {
-      RCLCPP_INFO(this->get_logger(), "Target reached!");
-    }
-    reached_target_ = true;
-  } else {
-    reached_target_ = false;
-  }
-}
-// cmd 퍼블리셔 함수
 void Undocking::publish_cmd_vel()
 {
   if (!cmd_vel_pub_ || !cmd_vel_pub_->is_activated()) {
     return;
   }
+  geometry_msgs::msg::TransformStamped transform =
+    tf_buffer_.lookupTransform("map", "base_link", tf2::TimePointZero);
+  double dx = transform.transform.translation.x - target_x_;
+  if (dx < tolerance_) {
+    if (!reached_target_) {
+      RCLCPP_INFO(this->get_logger(), "Undocking completed.");
+    }
+    reached_target_ = true;
+  } else {
+    reached_target_ = false;
+  }
 
   auto msg = geometry_msgs::msg::TwistStamped();
-msg.header.stamp = this->now();
-msg.header.frame_id = "base_link";
+  msg.header.stamp = this->now();
+  msg.header.frame_id = "base_link";
 
-if (reached_target_) {
-  msg.twist.linear.x = 0.0;
-  msg.twist.angular.z = 0.0;
-  auto client = this->create_client<std_srvs::srv::Trigger>("state_change_trigger");
-  if (!client->wait_for_service(std::chrono::seconds(1))) {
-    RCLCPP_WARN(this->get_logger(), "state_change_client for service not available.");
-    return;
+  if (reached_target_) {
+    msg.twist.linear.x = 0.0;
+    msg.twist.angular.z = 0.0;
+    auto client = this->create_client<std_srvs::srv::Trigger>("state_change_trigger");
+    if (!client->wait_for_service(std::chrono::seconds(1))) {
+      RCLCPP_WARN(this->get_logger(), "state_change_client for service not available.");
+      return;
+    }
+    auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
+    client->async_send_request(request);
+  } else {
+    msg.twist.linear.x = -0.2;
+    msg.twist.angular.z = 0.0;
   }
-  auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
-  auto future = client->async_send_request(request,
-    [this](rclcpp::Client<std_srvs::srv::Trigger>::SharedFuture result) {
-      if (result.get()->success) {
-        RCLCPP_INFO(this->get_logger(), "Undocking completion. Progress next step.");
-      } else {
-        RCLCPP_ERROR(this->get_logger(), "Undocking completion. But fail to progress next step.");
-      }
-    });
-} else {
-  msg.twist.linear.x = -0.2;
-  msg.twist.angular.z = 0.0;
-}
 
-cmd_vel_pub_->publish(msg);
   cmd_vel_pub_->publish(msg);
 }
 
@@ -140,6 +122,7 @@ int main(int argc, char * argv[])
   rclcpp::init(argc, argv);
   auto node = std::make_shared<Undocking>(rclcpp::NodeOptions{});
   rclcpp::executors::SingleThreadedExecutor exec;
+
   exec.add_node(node->get_node_base_interface());
   exec.spin();
   rclcpp::shutdown();

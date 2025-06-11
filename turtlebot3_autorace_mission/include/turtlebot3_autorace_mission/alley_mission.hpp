@@ -17,12 +17,13 @@
 #ifndef ALLEY_MISSION_HPP_
 #define ALLEY_MISSION_HPP_
 
-#include <memory>
-#include <chrono>
-#include <string>
+#include <vector>
 
 #include "rclcpp/rclcpp.hpp"
+#include "geometry_msgs/msg/twist_stamped.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
+#include "tf2_ros/buffer.h"
+#include "tf2_ros/transform_listener.h"
 
 
 using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
@@ -39,6 +40,17 @@ protected:
   CallbackReturn on_cleanup(const rclcpp_lifecycle::State & state) override;
   CallbackReturn on_shutdown(const rclcpp_lifecycle::State & state) override;
   CallbackReturn on_error(const rclcpp_lifecycle::State & state) override;
+
+  void publish_cmd_vel();
+
+  geometry_msgs::msg::TwistStamped cmd_vel_;
+  rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::TwistStamped>::SharedPtr cmd_vel_pub_;
+  rclcpp::TimerBase::SharedPtr timer_;
+  tf2_ros::Buffer tf_buffer_;
+  tf2_ros::TransformListener tf_listener_;
+
+  size_t current_waypoint_index_;
+  std::vector<std::pair<double, double>> waypoints_;
 };
 
 #endif  // ALLEY_MISSION_HPP_

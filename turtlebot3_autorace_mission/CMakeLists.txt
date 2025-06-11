@@ -20,6 +20,9 @@ find_package(std_srvs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
+find_package(nav2_msgs REQUIRED)
+find_package(tf2_ros)
+
 
 include_directories(
   include
@@ -29,10 +32,9 @@ add_executable(task_manager_node src/task_manager.cpp)
 target_link_libraries(task_manager_node
   ${std_msgs_TARGETS}
   ${std_srvs_TARGETS}
-  ${geometry_msgs_TARGETS}
+  ${nav2_msgs_TARGETS}
   rclcpp::rclcpp
   rclcpp_lifecycle::rclcpp_lifecycle
-  tf2::tf2
   tf2_geometry_msgs::tf2_geometry_msgs
 )
 
@@ -42,14 +44,19 @@ target_link_libraries(undocking_node
   ${std_srvs_TARGETS}
   ${geometry_msgs_TARGETS}
   rclcpp::rclcpp
+  tf2_ros::tf2_ros
   rclcpp_lifecycle::rclcpp_lifecycle
 )
 
 add_executable(alley_mission_node src/alley_mission.cpp)
 target_link_libraries(alley_mission_node
   ${std_msgs_TARGETS}
+  ${std_srvs_TARGETS}
+  ${geometry_msgs_TARGETS}
+  ${nav2_msgs_TARGETS}
   rclcpp::rclcpp
   rclcpp_lifecycle::rclcpp_lifecycle
+  tf2_ros::tf2_ros
 )
 
 ################################################################################
