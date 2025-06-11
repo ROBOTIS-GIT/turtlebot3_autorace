@@ -150,7 +150,7 @@ controller_server:
     progress_checker:
       plugin: "nav2_controller::SimpleProgressChecker"
       required_movement_radius: 0.1
-      movement_time_allowance: 10.0
+      movement_time_allowance: 5.0
     goal_checker_plugins: ["goal_checker"]
     goal_checker:
       stateful: true
@@ -190,10 +190,10 @@ controller_server:
       prune_distance: 0.5
       forward_prune_distance: 0.5
       critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist","ObstacleFootprintCritic" ]
-      xy_goal_tolerance: 0.05
-      trans_stopped_velocity: 0.1
+      xy_goal_tolerance: 0.1
+      trans_stopped_velocity: 0.02
       RotateToGoal:
-        scale: 0.5
+        scale: 0.6
         slowing_factor: 1.0
         lookahead_time: -1.0
       Oscillation:
@@ -202,10 +202,10 @@ controller_server:
         oscillation_reset_angle: 0.1
         x_only_threshold: 0.05
       BaseObstacle:
-        scale: 1.0
+        scale: 0.3
         sum_scores: false
       GoalAlign:
-        scale: 3.0 #
+        scale: 4.0 #
         forward_point_distance: 0.15
         aggregation_type: "last"
       PathAlign:
@@ -238,7 +238,7 @@ local_costmap:
       plugins: ["obstacle_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
-        inflation_radius: 0.1
+        inflation_radius: 0.08
         cost_scaling_factor: 1.0
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
@@ -286,7 +286,7 @@ global_costmap:
         transform_tolerance: 0.1
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
-        inflation_radius: 0.1
+        inflation_radius: 0.08
         cost_scaling_factor: 1.0
       always_send_full_costmap: true
 

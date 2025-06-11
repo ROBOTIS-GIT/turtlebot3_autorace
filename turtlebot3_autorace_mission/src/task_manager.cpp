@@ -44,7 +44,7 @@ void TaskManager::exec_step(int step){
   }
   else if(step==2){
     RCLCPP_INFO(this->get_logger(), "Publishing goal pose for next step.");
-    goal_pose_publish(-0.1,-0.7, 0.0);
+    goal_pose_publish(-0.1,-0.5, 0.0);
   }
   else if(step==3){
     RCLCPP_INFO(this->get_logger(), "Yolo Detection started.");

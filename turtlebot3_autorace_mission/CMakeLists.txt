@@ -21,6 +21,8 @@ find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
+find_package(tf2_ros)
+
 
 include_directories(
   include
@@ -49,8 +51,10 @@ target_link_libraries(alley_mission_node
   ${std_msgs_TARGETS}
   ${std_srvs_TARGETS}
   ${geometry_msgs_TARGETS}
+  ${nav2_msgs_TARGETS}
   rclcpp::rclcpp
   rclcpp_lifecycle::rclcpp_lifecycle
+  tf2_ros::tf2_ros
 )
 
 ################################################################################
