@@ -20,8 +20,9 @@
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "rclcpp_lifecycle/lifecycle_publisher.hpp"
 #include "geometry_msgs/msg/twist_stamped.hpp"
-#include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
 #include "rclcpp/rclcpp.hpp"
+#include "tf2_ros/buffer.h"
+#include "tf2_ros/transform_listener.h"
 
 
 using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
@@ -32,16 +33,6 @@ public:
   explicit Undocking(const rclcpp::NodeOptions & options);
 
 protected:
-
-  double target_x_;
-  double target_y_;
-  double tolerance_;
-  bool reached_target_;
-
-  rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::TwistStamped>::SharedPtr cmd_vel_pub_;
-  rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr amcl_sub_;
-  rclcpp::TimerBase::SharedPtr timer_;
-
   CallbackReturn on_configure(const rclcpp_lifecycle::State & state) override;
   CallbackReturn on_activate(const rclcpp_lifecycle::State & state) override;
   CallbackReturn on_deactivate(const rclcpp_lifecycle::State & state) override;
@@ -50,7 +41,16 @@ protected:
   CallbackReturn on_error(const rclcpp_lifecycle::State & state) override;
 
   void publish_cmd_vel();
-  void amcl_pose_callback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg);
+
+  rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::TwistStamped>::SharedPtr cmd_vel_pub_;
+  rclcpp::TimerBase::SharedPtr timer_;
+  tf2_ros::Buffer tf_buffer_;
+  tf2_ros::TransformListener tf_listener_;
+
+  double target_x_;
+  double target_y_;
+  double tolerance_;
+  bool reached_target_;
 };
 
 #endif  // UNDOCKING_HPP_

@@ -17,13 +17,12 @@
 #ifndef TASK_MANAGER_HPP_
 #define TASK_MANAGER_HPP_
 
-#include "rclcpp/rclcpp.hpp"
-#include "std_msgs/msg/bool.hpp"
-#include "std_srvs/srv/trigger.hpp"
-#include "lifecycle_msgs/srv/change_state.hpp"
-#include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
-#include "nav2_msgs/action/navigate_to_pose.hpp"
-#include "rclcpp_action/rclcpp_action.hpp"
+#include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/bool.hpp>
+#include <std_srvs/srv/trigger.hpp>
+#include <lifecycle_msgs/srv/change_state.hpp>
+#include <nav2_msgs/action/navigate_to_pose.hpp>
+#include <rclcpp_action/rclcpp_action.hpp>
 
 class TaskManager : public rclcpp::Node
 {

@@ -15,8 +15,7 @@
 // Author: Hyungyu Kim
 
 #include "turtlebot3_autorace_mission/task_manager.hpp"
-#include "lifecycle_msgs/msg/transition.hpp"
-#include <tf2/LinearMath/Quaternion.h>
+#include <lifecycle_msgs/msg/transition.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 using NavigateToPose = nav2_msgs::action::NavigateToPose;
@@ -43,7 +42,7 @@ void TaskManager::exec_step(int step){
     step_ = 2;
   }
   else if(step==2){
-    RCLCPP_INFO(this->get_logger(), "Publishing goal pose for next step.");
+    RCLCPP_INFO(this->get_logger(), "Move to Next step.");
     goal_pose_publish(-0.1,-0.5, 0.0);
   }
   else if(step==3){
@@ -74,7 +73,7 @@ void TaskManager::configure_activate_node(const std::string & node_name){
     RCLCPP_WARN(get_logger(), "%s", ("Waiting for /" + node_name + "/change_state service for configuring").c_str());
     retry_count++;
     if (retry_count > max_retries) {
-      RCLCPP_ERROR(get_logger(), "%s", (node_name + "ConfiguringService not available.").c_str());
+      RCLCPP_ERROR(get_logger(), "%s", (node_name + "Configuring Service not available.").c_str());
       return;
     }
   }
@@ -162,7 +161,7 @@ void TaskManager::shutdown_node(const std::string & node_name){
 
 void TaskManager::goal_pose_publish(double x, double y, double theta)
 {
-  RCLCPP_INFO(this->get_logger(), "Publishing goal pose...");
+  RCLCPP_INFO(this->get_logger(), "Publishing goal pose: (%.2f, %.2f, %.2f)", x, y, theta);
   if (!nav_to_pose_client_->wait_for_action_server(std::chrono::seconds(1))) {
       RCLCPP_ERROR(this->get_logger(), "NavigateToPose action server not available.");
       return;
@@ -177,13 +176,14 @@ void TaskManager::goal_pose_publish(double x, double y, double theta)
   goal_msg.pose.pose.orientation = tf2::toMsg(q);
 
   auto send_goal_options = rclcpp_action::Client<NavigateToPose>::SendGoalOptions();
-  send_goal_options.feedback_callback =
-    [this](rclcpp_action::ClientGoalHandle<NavigateToPose>::SharedPtr,
-           const std::shared_ptr<const NavigateToPose::Feedback> feedback)
-    {
-      RCLCPP_INFO(this->get_logger(), "Distance remaining: %.2f",
-                  feedback->distance_remaining);
-    };
+  // ## FOR DEBUG ##
+  // send_goal_options.feedback_callback =
+  //   [this](rclcpp_action::ClientGoalHandle<NavigateToPose>::SharedPtr,
+  //          const std::shared_ptr<const NavigateToPose::Feedback> feedback)
+  //   {
+  //     RCLCPP_INFO(this->get_logger(), "Distance remaining: %.2f",
+  //                 feedback->distance_remaining);
+  //   };
 
   send_goal_options.result_callback =
     [this](const rclcpp_action::ClientGoalHandle<NavigateToPose>::WrappedResult & result)

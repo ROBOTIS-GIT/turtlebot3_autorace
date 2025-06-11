@@ -19,9 +19,9 @@
 
 AlleyMission::AlleyMission(const rclcpp::NodeOptions & options)
 : rclcpp_lifecycle::LifecycleNode("alley_mission_node", options),
-current_waypoint_index_(0),
-tf_buffer_(this->get_clock()),
-tf_listener_(tf_buffer_)
+  tf_buffer_(this->get_clock()),
+  tf_listener_(tf_buffer_),
+  current_waypoint_index_(0)
 {
   waypoints_ = {
     {-0.03, -0.7},
