@@ -1,0 +1,6 @@
+# DetectionResult.srv
+
+string[] stores
+string[] rooms
+---
+bool success
