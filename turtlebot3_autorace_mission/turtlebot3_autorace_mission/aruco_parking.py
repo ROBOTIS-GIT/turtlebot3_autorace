@@ -51,8 +51,7 @@ class ArUcoParking(LifecycleNode):
             'initial_turn go_straight turn_right parking'
         )
 
-        self.target_marker_id = None
-        self.marker_frame = None
+        self.marker_frame = 'ar_marker_0'
         self.tf_buffer = None
         self.tf_listener = None
         self.timer = None
@@ -79,7 +78,6 @@ class ArUcoParking(LifecycleNode):
         self.is_marker_pose_received = False
 
         self.sub_odom_robot = None
-        self.sub_marker_id = None
         self.pub_cmd_vel = None
         self.state_change_client = None
 
@@ -90,13 +88,6 @@ class ArUcoParking(LifecycleNode):
                 '/odom',
                 self.get_robot_odom,
                 qos_profile=QoSProfile(depth=10)
-            )
-
-            self.sub_marker_id = self.create_subscription(
-                Int32,
-                '/target_marker_id',
-                self.marker_id_callback,
-                10
             )
 
             self.pub_cmd_vel = self.create_lifecycle_publisher(
@@ -127,6 +118,9 @@ class ArUcoParking(LifecycleNode):
                 return ret
 
             self.is_active = True
+            self.get_logger().info('Start parking sequence with marker 0')
+            self.current_parking_sequence = self.ParkingSequence.search_parking_lot.value
+            self.timer = self.create_timer(0.1, self._run)
             self.get_logger().info('ArUco parking node activated successfully')
             return TransitionCallbackReturn.SUCCESS
         except Exception as e:
@@ -149,14 +143,12 @@ class ArUcoParking(LifecycleNode):
     def on_cleanup(self, state: LifecycleState) -> TransitionCallbackReturn:
         try:
             self.sub_odom_robot = None
-            self.sub_marker_id = None
             self.pub_cmd_vel = None
             self.tf_buffer = None
             self.tf_listener = None
             self.timer = None
 
-            self.target_marker_id = None
-            self.marker_frame = None
+            self.marker_frame = 'ar_marker_0'
             self.current_nearby_sequence = self.NearbySequence.initial_turn.value
             self.current_parking_sequence = self.ParkingSequence.waiting.value
 
@@ -189,17 +181,6 @@ class ArUcoParking(LifecycleNode):
         except Exception as e:
             self.get_logger().error(f'Shutdown failed: {str(e)}')
             return TransitionCallbackReturn.FAILURE
-
-    def marker_id_callback(self, msg):
-        if not self.is_active:
-            return
-
-        if msg.data is not None and self.current_parking_sequence == self.ParkingSequence.waiting.value:
-            self.target_marker_id = msg.data
-            self.get_logger().info('Start parking sequence')
-            self.marker_frame = f'ar_marker_{self.target_marker_id}'
-            self.current_parking_sequence = self.ParkingSequence.search_parking_lot.value
-            self.timer = self.create_timer(0.1, self._run)
 
     def get_robot_odom(self, robot_odom_msg):
         if not self.is_active:
@@ -473,8 +454,7 @@ class ArUcoParking(LifecycleNode):
 
     def set_init(self):
         self.get_logger().info('Initialize sequences')
-        self.target_marker_id = None
-        self.marker_frame = None
+        self.marker_frame = 'ar_marker_0'
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
         self.timer = self.create_timer(0.1, self.get_marker_odom)
