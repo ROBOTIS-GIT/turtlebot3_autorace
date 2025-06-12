@@ -16,6 +16,7 @@
 
 #include "turtlebot3_autorace_mission/alley_mission.hpp"
 #include <cmath>
+#include "std_srvs/srv/trigger.hpp"
 
 AlleyMission::AlleyMission(const rclcpp::NodeOptions & options)
 : rclcpp_lifecycle::LifecycleNode("alley_mission_node", options),
@@ -125,6 +126,14 @@ void AlleyMission::publish_cmd_vel()
     RCLCPP_INFO(this->get_logger(), "Reached Destination.");
     cmd_vel_.twist.linear.x = 0;
     cmd_vel_.twist.angular.z = 0;
+    cmd_vel_pub_->publish(cmd_vel_);
+        auto client = this->create_client<std_srvs::srv::Trigger>("state_change_trigger");
+    if (!client->wait_for_service(std::chrono::seconds(1))) {
+      RCLCPP_WARN(this->get_logger(), "state_change_client for service not available.");
+      return;
+    }
+    auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
+    client->async_send_request(request);
   }
   cmd_vel_pub_->publish(cmd_vel_);
 }

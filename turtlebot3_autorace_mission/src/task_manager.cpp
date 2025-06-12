@@ -34,9 +34,13 @@ TaskManager::TaskManager()
   nav_to_pose_client_ = rclcpp_action::create_client<NavigateToPose>(
     this, "/navigate_to_pose");
   node_names_ = {
+    "error",
     "undocking_node",
+    "nav2_node",
     "yolo_detection_node",
-    "alley_mission_node"
+    "nav2_node",
+    "alley_mission_node",
+    "nav2_node"
   };
 
   exec_step(step_);
@@ -48,16 +52,25 @@ void TaskManager::exec_step(int step){
     configure_activate_node("undocking_node");
   }
   else if(step==2){
-    RCLCPP_INFO(this->get_logger(), "########## Move to Next step ##########");
+    RCLCPP_INFO(this->get_logger(), "########## Move to next step ##########");
     goal_pose_publish(-0.1,-0.5, 0.0);
   }
   else if(step==3){
     RCLCPP_INFO(this->get_logger(), "########## Yolo Detection Mission ##########");
-    goal_pose_publish(-0.1,-0.7, -1.57);
+    step_++;
+    exec_step(step_);
   }
   else if(step==4){
+    RCLCPP_INFO(this->get_logger(), "########## Move to next step ##########");
+    goal_pose_publish(-0.1,-0.7, -1.57);
+  }
+  else if(step==5){
     RCLCPP_INFO(this->get_logger(), "########## Alley Mission ##########");
     configure_activate_node("alley_mission_node");
+  }
+  else if(step==6) {
+    RCLCPP_INFO(this->get_logger(), "########## Move to next step ##########");
+    goal_pose_publish(-0.14,-2.49, -1.57);
   }
 }
 
@@ -67,8 +80,7 @@ void TaskManager::state_change_callback(const std::shared_ptr<rmw_request_id_t> 
   (void)request_header;
   (void)req;
   RCLCPP_INFO(this->get_logger(), "Mission");
-  shutdown_node(node_names_[step_]);
-  step_++;
+  shutdown_node(node_names_[step_++]);
   res->success = true;
 }
 
@@ -117,7 +129,6 @@ void TaskManager::configure_activate_node(const std::string & node_name){
 }
 
 void TaskManager::shutdown_node(const std::string & node_name){
-  client_ = this->create_client<lifecycle_msgs::srv::ChangeState>("/" + node_name + "/change_state");
   int retry_count = 0;
   int max_retries = 10;
   while (!client_->wait_for_service(std::chrono::seconds(1))) {
