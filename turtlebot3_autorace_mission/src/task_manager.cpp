@@ -33,25 +33,44 @@ TaskManager::TaskManager()
   );
   nav_to_pose_client_ = rclcpp_action::create_client<NavigateToPose>(
     this, "/navigate_to_pose");
+  node_names_ = {
+    "error",
+    "undocking_node",
+    "nav2_node",
+    "yolo_detection_node",
+    "nav2_node",
+    "alley_mission_node",
+    "nav2_node"
+  };
+
   exec_step(step_);
 }
 
 void TaskManager::exec_step(int step){
   if(step == 1){
+    RCLCPP_INFO(this->get_logger(), "########## Undocking Mission ##########");
     configure_activate_node("undocking_node");
-    step_ = 2;
   }
   else if(step==2){
-    RCLCPP_INFO(this->get_logger(), "Move to Next step.");
+    RCLCPP_INFO(this->get_logger(), "########## Move to next step ##########");
     goal_pose_publish(-0.1,-0.5, 0.0);
   }
   else if(step==3){
-    RCLCPP_INFO(this->get_logger(), "Yolo Detection started.");
-    goal_pose_publish(-0.1,-0.7, -1.57);
+    RCLCPP_INFO(this->get_logger(), "########## Yolo Detection Mission ##########");
+    step_++;
+    exec_step(step_);
   }
   else if(step==4){
-    RCLCPP_INFO(this->get_logger(), "Alley Mission Start.");
+    RCLCPP_INFO(this->get_logger(), "########## Move to next step ##########");
+    goal_pose_publish(-0.1,-0.7, -1.57);
+  }
+  else if(step==5){
+    RCLCPP_INFO(this->get_logger(), "########## Alley Mission ##########");
     configure_activate_node("alley_mission_node");
+  }
+  else if(step==6) {
+    RCLCPP_INFO(this->get_logger(), "########## Move to next step ##########");
+    goal_pose_publish(-0.14,-2.49, -1.57);
   }
 }
 
@@ -61,16 +80,16 @@ void TaskManager::state_change_callback(
   const std::shared_ptr<std_srvs::srv::Trigger::Response> res){
   (void)request_header;
   (void)req;
-  RCLCPP_INFO(this->get_logger(), "Received undocking done signal.");
-  shutdown_node("undocking_node");
+  RCLCPP_INFO(this->get_logger(), "Mission");
+  shutdown_node(node_names_[step_++]);
   res->success = true;
 }
 
 void TaskManager::configure_activate_node(const std::string & node_name){
-  undocking_client_ = this->create_client<lifecycle_msgs::srv::ChangeState>("/" + node_name + "/change_state");
+  client_ = this->create_client<lifecycle_msgs::srv::ChangeState>("/" + node_name + "/change_state");
   int retry_count = 0;
   int max_retries = 10;
-  while (!undocking_client_->wait_for_service(std::chrono::seconds(1))) {
+  while (!client_->wait_for_service(std::chrono::seconds(1))) {
     RCLCPP_WARN(get_logger(), "%s", ("Waiting for /" + node_name + "/change_state service for configuring").c_str());
     retry_count++;
     if (retry_count > max_retries) {
@@ -82,7 +101,7 @@ void TaskManager::configure_activate_node(const std::string & node_name){
   auto request_configure= std::make_shared<lifecycle_msgs::srv::ChangeState::Request>();
   request_configure->transition.id = lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE;
 
-  undocking_client_->async_send_request(request_configure,
+  client_->async_send_request(request_configure,
     [this, node_name](rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFuture result) {
       if (result.get()->success) {
         RCLCPP_INFO(this->get_logger(), "%s", ("Successfully configured " + node_name).c_str());
@@ -96,7 +115,7 @@ void TaskManager::configure_activate_node(const std::string & node_name){
   auto request_activate = std::make_shared<lifecycle_msgs::srv::ChangeState::Request>();
   request_activate->transition.id = lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE;
 
-  undocking_client_->async_send_request(request_activate,
+  client_->async_send_request(request_activate,
     [this, node_name](rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFuture result) {
       if (result.get()->success) {
         RCLCPP_INFO(this->get_logger(), "%s", ("Successfully activated " + node_name).c_str());
@@ -111,10 +130,9 @@ void TaskManager::configure_activate_node(const std::string & node_name){
 }
 
 void TaskManager::shutdown_node(const std::string & node_name){
-  undocking_client_ = this->create_client<lifecycle_msgs::srv::ChangeState>("/" + node_name + "/change_state");
   int retry_count = 0;
   int max_retries = 10;
-  while (!undocking_client_->wait_for_service(std::chrono::seconds(1))) {
+  while (!client_->wait_for_service(std::chrono::seconds(1))) {
     RCLCPP_WARN(get_logger(), "%s", ("Waiting for /" + node_name + "/change_state service for shutdown").c_str());
     retry_count++;
     if (retry_count > max_retries) {
@@ -125,7 +143,7 @@ void TaskManager::shutdown_node(const std::string & node_name){
 
   auto request_deactivate = std::make_shared<lifecycle_msgs::srv::ChangeState::Request>();
   request_deactivate->transition.id = lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE;
-  undocking_client_->async_send_request(request_deactivate,
+  client_->async_send_request(request_deactivate,
     [this, node_name](rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFuture result) {
       if (result.get()->success) {
         RCLCPP_INFO(this->get_logger(), "%s", ("Successfully deactivated" + node_name).c_str());
@@ -137,7 +155,7 @@ void TaskManager::shutdown_node(const std::string & node_name){
   auto request_cleanup = std::make_shared<lifecycle_msgs::srv::ChangeState::Request>();
   request_cleanup->transition.id = lifecycle_msgs::msg::Transition::TRANSITION_CLEANUP;
 
-  undocking_client_->async_send_request(request_cleanup,
+  client_->async_send_request(request_cleanup,
     [this, node_name](rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFuture result) {
       if (result.get()->success) {
         RCLCPP_INFO(this->get_logger(), "%s", ("Successfully cleaned up" + node_name).c_str());
@@ -149,7 +167,7 @@ void TaskManager::shutdown_node(const std::string & node_name){
   auto request_shutdown = std::make_shared<lifecycle_msgs::srv::ChangeState::Request>();
   request_shutdown->transition.id = lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN;
 
-  undocking_client_->async_send_request(request_shutdown,
+  client_->async_send_request(request_shutdown,
     [this, node_name](rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFuture result) {
       if (result.get()->success) {
         RCLCPP_INFO(this->get_logger(), "%s", ("Successfully shutdown" + node_name).c_str());
@@ -208,7 +226,6 @@ void TaskManager::goal_pose_publish(double x, double y, double theta)
     };
   nav_to_pose_client_->async_send_goal(goal_msg, send_goal_options);
 }
-
 
 int main(int argc, char ** argv)
 {

@@ -16,13 +16,24 @@
 
 #include "turtlebot3_autorace_mission/alley_mission.hpp"
 #include <cmath>
+#include "std_srvs/srv/trigger.hpp"
 
 AlleyMission::AlleyMission(const rclcpp::NodeOptions & options)
 : rclcpp_lifecycle::LifecycleNode("alley_mission_node", options),
   tf_buffer_(this->get_clock()),
-  tf_listener_(tf_buffer_),
-  current_waypoint_index_(0)
+  tf_listener_(tf_buffer_)
+  {}
+
+CallbackReturn AlleyMission::on_configure(const rclcpp_lifecycle::State &)
 {
+  RCLCPP_INFO(this->get_logger(), "##### Alley Mission INIT #####");
+
+  cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::TwistStamped>("/cmd_vel", 10);
+  timer_ = this->create_wall_timer(
+    std::chrono::milliseconds(500),
+    std::bind(&AlleyMission::publish_cmd_vel, this));
+
+  current_waypoint_index_ = 0;
   waypoints_ = {
     {-0.03, -0.7},
     {-0.03, -0.9},
@@ -36,16 +47,7 @@ AlleyMission::AlleyMission(const rclcpp::NodeOptions & options)
     {-0.59, -1.92},
     {-0.59, -2.12}
   };
-}
 
-CallbackReturn AlleyMission::on_configure(const rclcpp_lifecycle::State &)
-{
-  RCLCPP_INFO(this->get_logger(), "##### Alley Mission INIT #####");
-
-  cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::TwistStamped>("/cmd_vel", 10);
-  timer_ = this->create_wall_timer(
-    std::chrono::milliseconds(500),
-    std::bind(&AlleyMission::publish_cmd_vel, this));
   return CallbackReturn::SUCCESS;
 }
 
@@ -67,7 +69,7 @@ CallbackReturn AlleyMission::on_cleanup(const rclcpp_lifecycle::State &)
 {
   RCLCPP_INFO(this->get_logger(), "##### Alley Mission CLEANUP #####");
   cmd_vel_pub_.reset();
-  // amcl_sub_.reset();
+  timer_.reset();
   return CallbackReturn::SUCCESS;
 }
 
@@ -124,6 +126,14 @@ void AlleyMission::publish_cmd_vel()
     RCLCPP_INFO(this->get_logger(), "Reached Destination.");
     cmd_vel_.twist.linear.x = 0;
     cmd_vel_.twist.angular.z = 0;
+    cmd_vel_pub_->publish(cmd_vel_);
+        auto client = this->create_client<std_srvs::srv::Trigger>("state_change_trigger");
+    if (!client->wait_for_service(std::chrono::seconds(1))) {
+      RCLCPP_WARN(this->get_logger(), "state_change_client for service not available.");
+      return;
+    }
+    auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
+    client->async_send_request(request);
   }
   cmd_vel_pub_->publish(cmd_vel_);
 }
