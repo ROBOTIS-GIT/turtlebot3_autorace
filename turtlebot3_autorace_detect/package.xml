@@ -11,7 +11,6 @@
   <url type="website">http://turtlebot3.robotis.com</url>
   <url type="repository">https://github.com/ROBOTIS-GIT/turtlebot3_autorace</url>
   <url type="bugtracker">https://github.com/ROBOTIS-GIT/turtlebot3_autorace/issues</url>
-  <author email="kimhg@robotis.com">Hyungyu Kim</author>
   <author email="dddoggi1207@gmail.com">ChanHyeong Lee</author>
   <depend>rclpy</depend>
   <export>

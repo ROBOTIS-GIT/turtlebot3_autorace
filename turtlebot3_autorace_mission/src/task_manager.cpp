@@ -40,7 +40,8 @@ TaskManager::TaskManager()
     "yolo_detection_node",
     "nav2_node",
     "alley_mission_node",
-    "nav2_node"
+    "nav2_node",
+    "aruco_parking",
   };
 
   exec_step(step_);
@@ -70,7 +71,17 @@ void TaskManager::exec_step(int step){
   }
   else if(step==6) {
     RCLCPP_INFO(this->get_logger(), "########## Move to next step ##########");
-    goal_pose_publish(-0.14,-2.49, -1.57);
+    goal_pose_publish(-0.14,-2.39, -1.57);
+  }
+  else if(step==7) {
+    RCLCPP_INFO(this->get_logger(), "########## aruco docking ##########");
+    configure_activate_node("aruco_tracker");
+    configure_activate_node("aruco_parking");
+  }
+  else if (step==8) {
+    RCLCPP_INFO(this->get_logger(), "########## Mission Completed ##########");
+    shutdown_node("aruco_tracker");
+    rclcpp::shutdown();
   }
 }
 
