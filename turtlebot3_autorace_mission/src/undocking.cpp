@@ -85,8 +85,15 @@ void Undocking::publish_cmd_vel()
   if (!cmd_vel_pub_ || !cmd_vel_pub_->is_activated()) {
     return;
   }
-  geometry_msgs::msg::TransformStamped transform =
-    tf_buffer_.lookupTransform("map", "base_link", tf2::TimePointZero);
+
+  geometry_msgs::msg::TransformStamped transform;
+  if (tf_buffer_.canTransform("map", "base_link", rclcpp::Time(0), rclcpp::Duration::from_seconds(1.0))) {
+    transform = tf_buffer_.lookupTransform("map", "base_link", tf2::TimePointZero);
+  } else {
+    RCLCPP_WARN(this->get_logger(), "Transform not available yet");
+    return;
+  }
+
   double dx = transform.transform.translation.x - target_x_;
   if (dx < tolerance_) {
     if (!reached_target_) {

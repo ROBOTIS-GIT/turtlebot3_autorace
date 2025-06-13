@@ -71,7 +71,7 @@ void TaskManager::exec_step(int step){
   }
   else if(step==6) {
     RCLCPP_INFO(this->get_logger(), "########## Move to next step ##########");
-    goal_pose_publish(-0.14,-2.39, -1.57);
+    goal_pose_publish(-0.14,-2.49, -1.57);
   }
   else if(step==7) {
     RCLCPP_INFO(this->get_logger(), "########## aruco docking ##########");

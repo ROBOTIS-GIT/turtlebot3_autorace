@@ -193,7 +193,7 @@ controller_server:
       xy_goal_tolerance: 0.1
       trans_stopped_velocity: 0.02
       RotateToGoal:
-        scale: 0.6
+        scale: 1.0
         slowing_factor: 1.0
         lookahead_time: -1.0
       Oscillation:
@@ -202,7 +202,7 @@ controller_server:
         oscillation_reset_angle: 0.1
         x_only_threshold: 0.05
       BaseObstacle:
-        scale: 0.3
+        scale: 1.0
         sum_scores: false
       GoalAlign:
         scale: 4.0 #
@@ -213,10 +213,10 @@ controller_server:
         aggregation_type: "last"
         forward_point_distance: 0.15
       PathDist:
-        scale: 5.0 #
+        scale: 3.0 #
         aggregation_type: "last"
       GoalDist:
-        scale: 2.0
+        scale: 1.0
         aggregation_type: "last"
       ObstacleFootprintCritic:
         scale: 1.0
