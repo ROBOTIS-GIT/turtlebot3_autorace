@@ -41,7 +41,7 @@ CallbackReturn Undocking::on_activate(const rclcpp_lifecycle::State &)
   cmd_vel_pub_->on_activate();
   reached_target_ = false;
 
-  target_x_ = -0.5;
+  target_x_ = -0.7;
   target_y_ = 0.0;
   tolerance_ = 0.1;
   reached_target_ = false;
