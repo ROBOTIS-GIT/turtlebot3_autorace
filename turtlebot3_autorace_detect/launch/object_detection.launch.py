@@ -25,15 +25,15 @@ from launch_ros.actions import Node
 def generate_launch_description():
     model_path_arg = DeclareLaunchArgument(
         'model_path',
-        default_value='~/Downloads/best.pt',
+        default_value='/home/ubuntu/best.pt',
         description='Path to the YOLO model file'
     )
     model_path = LaunchConfiguration('model_path')
 
     object_detection_node = Node(
-        package='turtlebot3_yolo_object_detection',
-        executable='turtlebot3_yolo_object_detection',
-        name='turtlebot3_object_detection_node',
+        package='turtlebot3_autorace_detect',
+        executable='object_detection',
+        name='object_detection_node',
         output='screen',
         parameters=[{'model_path': model_path}]
     )
