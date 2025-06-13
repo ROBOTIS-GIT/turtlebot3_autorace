@@ -26,6 +26,7 @@ import rclpy
 from rclpy.lifecycle import LifecycleNode
 from rclpy.lifecycle import State
 from rclpy.lifecycle import TransitionCallbackReturn
+from rclpy.parameter import Parameter
 from sensor_msgs.msg import Image
 from std_srvs.srv import Trigger
 from turtlebot3_autorace_msgs.srv import DetectionResult
@@ -38,7 +39,7 @@ class ObjectDetectionNode(LifecycleNode):
         super().__init__('object_detection_node')
 
         self.declare_parameter('use_sim_time', False)
-        self.use_sim_time = self.get_parameter('use_sim_time').get_parameter_value().bool_value
+        self.use_sim_time = self.get_parameter_or('use_sim_time', Parameter('use_sim_time', Parameter.Type.BOOL, False)).value
 
         self.declare_parameter('model_path', '/home/ubuntu/best.pt')
         model_path = os.path.expanduser(
