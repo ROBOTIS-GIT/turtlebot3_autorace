@@ -38,7 +38,6 @@ class ObjectDetectionNode(LifecycleNode):
     def __init__(self):
         super().__init__('object_detection_node')
 
-        self.declare_parameter('use_sim_time', False)
         self.use_sim_time = self.get_parameter_or('use_sim_time', Parameter('use_sim_time', Parameter.Type.BOOL, False)).value
 
         self.declare_parameter('model_path', '/home/ubuntu/best.pt')
