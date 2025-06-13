@@ -26,6 +26,7 @@ import rclpy
 from rclpy.lifecycle import LifecycleNode
 from rclpy.lifecycle import State
 from rclpy.lifecycle import TransitionCallbackReturn
+from rclpy.parameter import Parameter
 from sensor_msgs.msg import Image
 from std_srvs.srv import Trigger
 from turtlebot3_autorace_msgs.srv import DetectionResult
@@ -37,22 +38,16 @@ class ObjectDetectionNode(LifecycleNode):
     def __init__(self):
         super().__init__('object_detection_node')
 
-        self.declare_parameter('use_sim_time', False)
-        self.use_sim_time = self.get_parameter('use_sim_time').get_parameter_value().bool_value
-
-        self.declare_parameter('model_path', '~/Downloads/best.pt')
+    def on_configure(self, state: State) -> TransitionCallbackReturn:
+        self.get_logger().info("Configuring object detection...")
+        self.use_sim_time = self.get_parameter_or('use_sim_time', Parameter('use_sim_time', Parameter.Type.BOOL, False)).value
+        self.declare_parameter('model_path', '/home/ubuntu/best.pt')
         model_path = os.path.expanduser(
             self.get_parameter('model_path').get_parameter_value().string_value)
         self.model = YOLO(model_path)
         self.bridge = CvBridge()
         self.trigger_called = False
 
-    def on_configure(self, state: State) -> TransitionCallbackReturn:
-        self.get_logger().info("Configuring object detection...")
-        return TransitionCallbackReturn.SUCCESS
-    
-    def on_activate(self, state: State) -> TransitionCallbackReturn:
-        self.get_logger().info("Activating object detection...")
         if self.use_sim_time:
             self.get_logger().info('Using simulated time: subscribing to image topic')
             self.image_sub = self.create_subscription(
@@ -68,6 +63,11 @@ class ObjectDetectionNode(LifecycleNode):
         self.trigger_cli = self.create_client(Trigger, 'state_change_trigger')
         while not self.trigger_cli.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('Waiting for state_change_trigger service...')
+
+        return TransitionCallbackReturn.SUCCESS
+    
+    def on_activate(self, state: State) -> TransitionCallbackReturn:
+        self.get_logger().info("Activating object detection...")
         return TransitionCallbackReturn.SUCCESS
     
     def on_deactivate(self, state: State) -> TransitionCallbackReturn:
