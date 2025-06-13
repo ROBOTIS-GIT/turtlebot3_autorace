@@ -33,6 +33,7 @@ target_link_libraries(task_manager_node
   ${std_msgs_TARGETS}
   ${std_srvs_TARGETS}
   ${nav2_msgs_TARGETS}
+  ${turtlebot3_autorace_msgs_TARGETS}
   rclcpp::rclcpp
   rclcpp_lifecycle::rclcpp_lifecycle
   tf2_geometry_msgs::tf2_geometry_msgs

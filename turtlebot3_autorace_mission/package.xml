@@ -17,6 +17,7 @@
   <depend>rclpy</depend>
   <depend>std_msgs</depend>
   <depend>nav2</depend>
+  <depend>turtlebot3_autorace_msgs</depend>
   <export>
     <build_type>ament_cmake</build_type>
   </export>
