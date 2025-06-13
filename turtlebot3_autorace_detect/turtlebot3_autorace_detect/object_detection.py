@@ -40,7 +40,7 @@ class ObjectDetectionNode(LifecycleNode):
         self.declare_parameter('use_sim_time', False)
         self.use_sim_time = self.get_parameter('use_sim_time').get_parameter_value().bool_value
 
-        self.declare_parameter('model_path', '~/Downloads/best.pt')
+        self.declare_parameter('model_path', '/home/ubuntu/best.pt')
         model_path = os.path.expanduser(
             self.get_parameter('model_path').get_parameter_value().string_value)
         self.model = YOLO(model_path)
