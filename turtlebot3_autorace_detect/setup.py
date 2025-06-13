@@ -32,7 +32,7 @@ setup(
     entry_points={
         'console_scripts': [
             'aruco_tracker = turtlebot3_autorace_detect.aruco_tracker:main',
-            'object_detection_node = turtlebot3_autorace_detect.object_detection_node:main',
+            'object_detection_node = turtlebot3_autorace_detect.object_detection:main',
         ],
     },
 )
