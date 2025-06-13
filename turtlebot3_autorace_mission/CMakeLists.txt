@@ -22,7 +22,7 @@ find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
 find_package(tf2_ros)
-
+find_package(turtlebot3_autorace_msgs REQUIRED)
 
 include_directories(
   include

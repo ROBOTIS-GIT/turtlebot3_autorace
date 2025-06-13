@@ -49,37 +49,39 @@ TaskManager::TaskManager()
 
 void TaskManager::exec_step(int step){
   if(step == 1){
-    RCLCPP_INFO(this->get_logger(), "########## Undocking Mission ##########");
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Undocking Starts #####\033[0m");
     configure_activate_node("undocking_node");
   }
   else if(step==2){
-    RCLCPP_INFO(this->get_logger(), "########## Move to next step ##########");
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Move forward to the ordering panel #####\033[0m");
     goal_pose_publish(-0.1,-0.5, 0.0);
   }
   else if(step==3){
-    RCLCPP_INFO(this->get_logger(), "########## Yolo Detection Mission ##########");
-    step_++;
-    exec_step(step_);
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Order Details Perception #####\033[0m");
+    configure_activate_node("object_detection_node");
   }
   else if(step==4){
-    RCLCPP_INFO(this->get_logger(), "########## Move to next step ##########");
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Move forward to the alley #####\033[0m");
     goal_pose_publish(-0.1,-0.7, -1.57);
   }
   else if(step==5){
-    RCLCPP_INFO(this->get_logger(), "########## Alley Mission ##########");
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Alley Driving #####\033[0m");
     configure_activate_node("alley_mission_node");
   }
   else if(step==6) {
-    RCLCPP_INFO(this->get_logger(), "########## Move to next step ##########");
-    goal_pose_publish(-0.14,-2.49, -1.57);
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Move forward to first shop #####\033[0m");
+    goal_pose_publish(-0.14,-2.19, -1.57);
   }
   else if(step==7) {
-    RCLCPP_INFO(this->get_logger(), "########## aruco docking ##########");
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Identify the type of store #####\033[0m");
+  }
+  else if(step==8) {
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### aruco docking #####\033[0m");
     configure_activate_node("aruco_tracker");
     configure_activate_node("aruco_parking");
   }
-  else if (step==8) {
-    RCLCPP_INFO(this->get_logger(), "########## Mission Completed ##########");
+  else if (step==9) {
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Mission Completed #####\033[0m");
     shutdown_node("aruco_tracker");
     rclcpp::shutdown();
   }
