@@ -23,6 +23,7 @@ from cv_bridge import CvBridge
 from cv_bridge import CvBridgeError
 import numpy as np
 import rclpy
+from collections import deque
 from rclpy.lifecycle import LifecycleNode
 from rclpy.lifecycle import State
 from rclpy.lifecycle import TransitionCallbackReturn
@@ -47,6 +48,15 @@ class ObjectDetectionNode(LifecycleNode):
         self.model = YOLO(model_path)
         self.bridge = CvBridge()
         self.trigger_called = False
+        self.detection_in_progress = False
+        self.class_history = {
+            'pizza': deque(maxlen=5),
+            'burger': deque(maxlen=5),
+            'chicken': deque(maxlen=5),
+            '101': deque(maxlen=5),
+            '102': deque(maxlen=5),
+            '103': deque(maxlen=5)
+        }
 
         if self.use_sim_time:
             self.get_logger().info('Using simulated time: subscribing to image topic')
@@ -72,7 +82,7 @@ class ObjectDetectionNode(LifecycleNode):
     
     def on_deactivate(self, state: State) -> TransitionCallbackReturn:
         self.get_logger().info("Deactivating object detection...")
-        if self.image_sub is not None:
+        if hasattr(self, 'image_sub') and self.image_sub is not None:
             self.image_sub.destroy()
             self.image_sub = None
         if hasattr(self, 'cap') and self.cap.isOpened():
@@ -109,12 +119,38 @@ class ObjectDetectionNode(LifecycleNode):
         self.image_callback(msg)
 
     def image_callback(self, msg):
+        if self.detection_in_progress:
+            return
+
         try:
             frame = self.bridge.imgmsg_to_cv2(msg, 'rgb8')
             results = self.model(frame)
-            self.process_detection_results(results)
+            detected_labels = set()
+            for i, cls_id in enumerate(results[0].boxes.cls.cpu().numpy()):
+                label = results[0].names[int(cls_id)]
+                detected_labels.add(label)
+
+            for label in self.class_history.keys():
+                self.class_history[label].append(label in detected_labels)
+
+            confirmed_stores = []
+            confirmed_rooms = []
+
+            for label, history in self.class_history.items():
+                if len(history) == 5 and all(history):
+                    if label in ['pizza', 'burger', 'chicken']:
+                        confirmed_stores.append(label)
+                    elif label in ['101', '102', '103']:
+                        confirmed_rooms.append(int(label))
+
+            if confirmed_stores and confirmed_rooms:
+                self.process_detection_results(results)
+            else:
+                self.get_logger().info("Waiting for stable detection.")
+
             annotated_frame = np.array(results[0].plot())
             annotated_frame = cv2.cvtColor(annotated_frame, cv2.COLOR_RGB2BGR)
+
         except CvBridgeError as e:
             self.get_logger().error(f'CV Bridge error: {e}')
         except Exception as e:
@@ -152,10 +188,11 @@ class ObjectDetectionNode(LifecycleNode):
         req = DetectionResult.Request()
         req.stores = stores
         req.rooms = rooms
+
+        self.detection_in_progress = True
         future = self.result_cli.call_async(req)
-        future.add_done_callback(self.detection_result_callback)
-    
-    def detection_result_callback(self, future):
+        rclpy.spin_until_future_complete(self, future)
+
         try:
             result = future.result()
             if result.success:
@@ -163,10 +200,13 @@ class ObjectDetectionNode(LifecycleNode):
                 if not self.trigger_called:
                     self.call_state_change_trigger()
                     self.trigger_called = True
+                rclpy.shutdown()
             else:
                 self.get_logger().warn('Detection result was rejected by TaskManager.')
         except Exception as e:
             self.get_logger().error(f'Service call failed: {str(e)}')
+
+        self.detection_in_progress = False
 
     def call_state_change_trigger(self):
         req = Trigger.Request()
