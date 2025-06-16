@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="turtlebot3_arm">
+    <xacro:arg name="tf_prefix" default="" />
+    <!-- Import control_xacro -->
+    <xacro:include filename="turtlebot3_arm.ros2_control.xacro" />
+
+    <xacro:turtlebot3_arm_ros2_control name="turtlebot3_arm"/>
+
+    <link name="$(arg tf_prefix)base_link"/>
+    <link name="$(arg tf_prefix)turtlebot3_arm"/>
+
+    <joint name="$(arg tf_prefix)joint1" type="revolute">
+        <parent link="$(arg tf_prefix)base_link"/>
+        <child link="$(arg tf_prefix)turtlebot3_arm"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <axis xyz="1 0 0" />
+        <limit velocity="4.8" effort="1" lower="${-pi*100.0}" upper="${pi*100.0}" />
+    </joint>
+
+</robot>

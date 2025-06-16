@@ -31,7 +31,6 @@ from rclpy.lifecycle import LifecycleState
 from rclpy.lifecycle import TransitionCallbackReturn
 from rclpy.qos import QoSProfile
 from scipy.spatial.transform import Rotation
-from std_msgs.msg import Int32
 from std_srvs.srv import Trigger
 import tf2_ros
 
