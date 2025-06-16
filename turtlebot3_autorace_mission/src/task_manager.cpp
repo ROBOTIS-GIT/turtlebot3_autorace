@@ -23,7 +23,6 @@ TaskManager::TaskManager()
 : Node("task_manager"),
   step_(1)
 {
-  RCLCPP_INFO(get_logger(), "TaskManaging Start");
   state_change_trigger_=this->create_service<std_srvs::srv::Trigger>(
     "state_change_trigger",
     std::bind(&TaskManager::state_change_callback,
@@ -44,7 +43,7 @@ TaskManager::TaskManager()
     "error",
     "undocking_node",
     "nav2_node",
-    "yolo_detection_node",
+    "object_detection_node",
     "nav2_node",
     "alley_mission_node",
     "nav2_node",
@@ -117,7 +116,6 @@ void TaskManager::state_change_callback(
   const std::shared_ptr<std_srvs::srv::Trigger::Response> res){
   (void)request_header;
   (void)req;
-  RCLCPP_INFO(this->get_logger(), "Mission");
   shutdown_node(node_names_[step_++]);
   res->success = true;
 }
@@ -153,7 +151,7 @@ void TaskManager::configure_activate_node(const std::string & node_name){
   client_->async_send_request(request_configure,
     [this, node_name](rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFuture result) {
       if (result.get()->success) {
-        RCLCPP_INFO(this->get_logger(), "%s", ("Successfully configured " + node_name).c_str());
+        RCLCPP_INFO(this->get_logger(), "%s", ("\033[1;34mSuccessfully configured" + node_name +"\033[0m").c_str());
       } else {
         RCLCPP_ERROR(this->get_logger(), "%s", ("Failed to configure" + node_name).c_str());
         RCLCPP_ERROR(this->get_logger(), "Task Node will shut down");
@@ -167,7 +165,7 @@ void TaskManager::configure_activate_node(const std::string & node_name){
   client_->async_send_request(request_activate,
     [this, node_name](rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFuture result) {
       if (result.get()->success) {
-        RCLCPP_INFO(this->get_logger(), "%s", ("Successfully activated " + node_name).c_str());
+        RCLCPP_INFO(this->get_logger(), "%s", ("\033[1;34mSuccessfully activated " + node_name + "\033[0m").c_str());
       } else {
         RCLCPP_ERROR(this->get_logger(), "%s", ("Failed to activate" + node_name).c_str());
         RCLCPP_ERROR(this->get_logger(), "Task Node will shut down");
@@ -195,7 +193,7 @@ void TaskManager::shutdown_node(const std::string & node_name){
   client_->async_send_request(request_deactivate,
     [this, node_name](rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFuture result) {
       if (result.get()->success) {
-        RCLCPP_INFO(this->get_logger(), "%s", ("Successfully deactivated" + node_name).c_str());
+        RCLCPP_INFO(this->get_logger(), "%s", ("\033[1;34mSuccessfully deactivated" + node_name + "\033[0m").c_str());
       } else {
         RCLCPP_ERROR(this->get_logger(), "%s", ("Failed to deactivate" + node_name).c_str());
       }
@@ -207,24 +205,25 @@ void TaskManager::shutdown_node(const std::string & node_name){
   client_->async_send_request(request_cleanup,
     [this, node_name](rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFuture result) {
       if (result.get()->success) {
-        RCLCPP_INFO(this->get_logger(), "%s", ("Successfully cleaned up" + node_name).c_str());
-      } else {
-        RCLCPP_INFO(this->get_logger(), "%s", ("Failed to clean up" + node_name).c_str());
-      }
-    });
-
-  auto request_shutdown = std::make_shared<lifecycle_msgs::srv::ChangeState::Request>();
-  request_shutdown->transition.id = lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN;
-
-  client_->async_send_request(request_shutdown,
-    [this, node_name](rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFuture result) {
-      if (result.get()->success) {
-        RCLCPP_INFO(this->get_logger(), "%s", ("Successfully shutdown" + node_name).c_str());
+        RCLCPP_INFO(this->get_logger(), "%s", ("\033[1;34mSuccessfully cleaned up " + node_name + "\033[0m").c_str());
         exec_step(step_);
       } else {
-        RCLCPP_INFO(this->get_logger(), "%s", ("Failed to shutdown" + node_name).c_str());
+        RCLCPP_INFO(this->get_logger(), "%s", ("Failed to clean up " + node_name).c_str());
       }
     });
+
+  // auto request_shutdown = std::make_shared<lifecycle_msgs::srv::ChangeState::Request>();
+  // request_shutdown->transition.id = lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN;
+
+  // client_->async_send_request(request_shutdown,
+  //   [this, node_name](rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFuture result) {
+  //     if (result.get()->success) {
+  //       RCLCPP_INFO(this->get_logger(), "%s", ("Successfully shutdown" + node_name).c_str());
+  //       exec_step(step_);
+  //     } else {
+  //       RCLCPP_INFO(this->get_logger(), "%s", ("Failed to shutdown" + node_name).c_str());
+  //     }
+  //   });
 }
 
 void TaskManager::goal_pose_publish(double x, double y, double theta)
@@ -277,14 +276,14 @@ void TaskManager::goal_pose_publish(double x, double y, double theta)
 }
 
 void TaskManager::detection_callback_order_details(const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Request> req,
-  const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Response> res){
-  if (req->stores.size() == 3 && req->rooms.size() == 3) {
+    const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Response> res){
+  if (req->stores.size() >= 2 && req->rooms.size() >= 2) {
     for (size_t i = 0; i < req->stores.size(); ++i) {
       order_details_.push_back({req->stores[i], req->rooms[i]});
     }
-    RCLCPP_INFO(this->get_logger(), "First order: %s, ->, %s", req->stores[0].c_str(), req->rooms[0].c_str());
-    RCLCPP_INFO(this->get_logger(), "Second order: %s, ->, %s", req->stores[1].c_str(), req->rooms[1].c_str());
-    RCLCPP_INFO(this->get_logger(), "Third order: %s, ->, %s", req->stores[2].c_str(), req->rooms[2].c_str());
+    RCLCPP_INFO(this->get_logger(), "First order: %s -> %s", req->stores[0].c_str(), req->rooms[0].c_str());
+    RCLCPP_INFO(this->get_logger(), "Second order: %s -> %s", req->stores[1].c_str(), req->rooms[1].c_str());
+    //RCLCPP_INFO(this->get_logger(), "Third order: %s, ->, %s", req->stores[2].c_str(), req->rooms[2].c_str());
     res->success = true;
     shutdown_node(node_names_[step_++]);
   } else {
@@ -301,7 +300,8 @@ void TaskManager::detection_callback_store_sign(const std::shared_ptr<turtlebot3
       shutdown_node("object_detection_node");
       step_ = 12;
     } else {
-      shutdown_node(node_names_[step_++]);
+      shutdown_node("object_detection_node");
+      step++;
     }
   } else {
     RCLCPP_ERROR(this->get_logger(), "It is not unique detection result. Detection again.");

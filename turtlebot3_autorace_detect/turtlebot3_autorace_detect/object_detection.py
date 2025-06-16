@@ -23,6 +23,7 @@ from cv_bridge import CvBridge
 from cv_bridge import CvBridgeError
 import numpy as np
 import rclpy
+from collections import deque
 from rclpy.lifecycle import LifecycleNode
 from rclpy.lifecycle import State
 from rclpy.lifecycle import TransitionCallbackReturn
@@ -31,98 +32,102 @@ from sensor_msgs.msg import Image
 from std_srvs.srv import Trigger
 from turtlebot3_autorace_msgs.srv import DetectionResult
 from ultralytics import YOLO
+from ament_index_python.packages import get_package_share_directory
 
 
 class ObjectDetectionNode(LifecycleNode):
 
     def __init__(self):
         super().__init__('object_detection_node')
-
-    def on_configure(self, state: State) -> TransitionCallbackReturn:
-        self.get_logger().info("Configuring object detection...")
+        package_name = 'turtlebot3_autorace_detect'
+        package_share_dir = get_package_share_directory(package_name)
+        self.model_path = os.path.join(package_share_dir, 'model', 'best.pt')
         self.use_sim_time = self.get_parameter_or('use_sim_time', Parameter('use_sim_time', Parameter.Type.BOOL, False)).value
         self.declare_parameter('model_path', '/home/ubuntu/best.pt')
-        model_path = os.path.expanduser(
-            self.get_parameter('model_path').get_parameter_value().string_value)
-        self.model = YOLO(model_path)
+
+    def on_configure(self, state: State) -> TransitionCallbackReturn:
+        self.get_logger().info("\033[1;34mObject Dectection Node INIT\033[0m")
+        self.model = YOLO(self.model_path)
         self.bridge = CvBridge()
-        self.trigger_called = False
-
-        if self.use_sim_time:
-            self.get_logger().info('Using simulated time: subscribing to image topic')
-            self.image_sub = self.create_subscription(
-                Image, '/camera/image_raw', self.image_callback, 10)
-        else:
-            self.get_logger().info('Using real time: opening camera device')
-            self.cap = cv2.VideoCapture(0)
-            self.timer = self.create_timer(0.033, self.camera_timer_callback)
-
         self.result_cli = self.create_client(DetectionResult, 'detection_result')
         while not self.result_cli.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info('Waiting for detection_result service from TaskManager...')
-        self.trigger_cli = self.create_client(Trigger, 'state_change_trigger')
-        while not self.trigger_cli.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info('Waiting for state_change_trigger service...')
+          self.get_logger().warn('Service not available, waiting...')
+        self.detection_in_progress = False
 
+        self.class_history = {
+            'pizza': deque(maxlen=5),
+            'burger': deque(maxlen=5),
+            'chicken': deque(maxlen=5),
+            '101': deque(maxlen=5),
+            '102': deque(maxlen=5),
+            '103': deque(maxlen=5)
+        }
         return TransitionCallbackReturn.SUCCESS
 
     def on_activate(self, state: State) -> TransitionCallbackReturn:
-        self.get_logger().info("Activating object detection...")
+        self.get_logger().info("\033[1;34mObject Detection Node ACTIVATE\033[0m")
+        self.image_sub = self.create_subscription(
+            Image, '/camera/image_raw', self.image_callback, 10)
         return TransitionCallbackReturn.SUCCESS
 
     def on_deactivate(self, state: State) -> TransitionCallbackReturn:
-        self.get_logger().info("Deactivating object detection...")
-        if self.image_sub is not None:
-            self.image_sub.destroy()
+        self.get_logger().info("\033[1;34mObject Detection Node DEACTIVATE\033[0m")
+        if self.image_sub:
+            self.destroy_subscription(self.image_sub)
             self.image_sub = None
-        if hasattr(self, 'cap') and self.cap.isOpened():
-            self.cap.release()
-        if hasattr(self, 'timer') and self.timer:
-            self.timer.cancel()
         return TransitionCallbackReturn.SUCCESS
 
     def on_cleanup(self, state: State) -> TransitionCallbackReturn:
-        self.get_logger().info("Cleaning up object detection...")
+        self.get_logger().info("\033[1;34mObject Detection Node CLEANUP\033[0m")
+        self.model = None
+        self.bridge = None
+        self.result_cli = None
+        self.class_history = None
+        self.process_detection_results = None
+        self.future = None
         return TransitionCallbackReturn.SUCCESS
 
     def on_shutdown(self, state: State) -> TransitionCallbackReturn:
-        self.get_logger().info("Shutting down object detection...")
+        self.get_logger().info("\033[1;34mObject Detection Node SHUTDOWN\033[0m")
         return TransitionCallbackReturn.SUCCESS
 
-    def camera_timer_callback(self):
-        if not self.cap.isOpened():
-            self.get_logger().error('Camera device not opened')
-            return
-        ret, frame = self.cap.read()
-        if not ret:
-            self.get_logger().warn('Failed to capture image from camera')
-            return
-
-        msg = Image()
-        msg.header.stamp = self.get_clock().now().to_msg()
-        msg.header.frame_id = 'camera'
-        msg.height, msg.width = frame.shape[:2]
-        msg.encoding = 'bgr8'
-        msg.step = msg.width * 3
-        msg.data = frame.tobytes()
-
-        self.image_callback(msg)
-
     def image_callback(self, msg):
+        if self.detection_in_progress:
+            return
+
         try:
             frame = self.bridge.imgmsg_to_cv2(msg, 'rgb8')
             results = self.model(frame)
-            self.process_detection_results(results)
+            detected_labels = set()
+            for i, cls_id in enumerate(results[0].boxes.cls.cpu().numpy()):
+                label = results[0].names[int(cls_id)]
+                detected_labels.add(label)
+
+            for label in self.class_history.keys():
+                self.class_history[label].append(label in detected_labels)
+
+            confirmed_stores = []
+            confirmed_rooms = []
+
+            for label, history in self.class_history.items():
+                if len(history) == 5 and all(history):
+                    if label in ['pizza', 'burger', 'chicken']:
+                        confirmed_stores.append(label)
+                    elif label in ['101', '102', '103']:
+                        confirmed_rooms.append(int(label))
+
+            if confirmed_stores or confirmed_rooms:
+                self.process_detection_results(results)
+            else:
+                self.get_logger().info("Waiting for stable detection.")
+
             annotated_frame = np.array(results[0].plot())
             annotated_frame = cv2.cvtColor(annotated_frame, cv2.COLOR_RGB2BGR)
+
         except CvBridgeError as e:
             self.get_logger().error(f'CV Bridge error: {e}')
         except Exception as e:
             self.get_logger().error(f'Error processing image: {e}')
-
-        if not self.use_sim_time:
-            cv2.imshow('YOLO Detection', annotated_frame)
-            cv2.waitKey(1)
 
     def process_detection_results(self, results):
         labels = results[0].names
@@ -145,33 +150,17 @@ class ObjectDetectionNode(LifecycleNode):
             if det['label'] in ['pizza', 'chicken', 'burger']:
                 stores.append(det['label'])
             elif det['label'] in ['101', '102', '103']:
-                rooms.append(int(det['label']))
+                rooms.append(det['label'])
 
         self.get_logger().info(f'Detected stores: {stores}, Detected rooms: {rooms}')
 
         req = DetectionResult.Request()
         req.stores = stores
         req.rooms = rooms
-        future = self.result_cli.call_async(req)
-        future.add_done_callback(self.detection_result_callback)
 
-    def detection_result_callback(self, future):
-        try:
-            result = future.result()
-            if result.success:
-                self.get_logger().info('Detection result successfully sent.')
-                if not self.trigger_called:
-                    self.call_state_change_trigger()
-                    self.trigger_called = True
-            else:
-                self.get_logger().warn('Detection result was rejected by TaskManager.')
-        except Exception as e:
-            self.get_logger().error(f'Service call failed: {str(e)}')
-
-    def call_state_change_trigger(self):
-        req = Trigger.Request()
-        future = self.trigger_cli.call_async(req)
-        future.add_done_callback(self.trigger_callback)
+        self.future = self.result_cli.call_async(req)
+        self.detection_in_progress = True
+        self.future.add_done_callback(self.future_callback)
 
     def trigger_callback(self, future):
         try:
@@ -180,6 +169,17 @@ class ObjectDetectionNode(LifecycleNode):
                 self.get_logger().info('State change trigger successfully sent.')
             else:
                 self.get_logger().warn('State change trigger rejected by TaskManager.')
+        except Exception as e:
+            self.get_logger().error(f'Service call failed: {str(e)}')
+
+    def future_callback(self, future):
+        try:
+            result = future.result()
+            if result.success:
+                self.get_logger().info('Detection result successfully sent.')
+            else:
+                self.detection_in_progress = False
+                self.get_logger().warn('Detection result was rejected by TaskManager.')
         except Exception as e:
             self.get_logger().error(f'Service call failed: {str(e)}')
 

@@ -39,6 +39,13 @@ def generate_launch_description():
             output='screen'),
 
         Node(
+            package='turtlebot3_autorace_detect',
+            executable='object_detection',
+            parameters=[
+                {'use_sim_time': use_sim_time}],
+            output='screen'),
+
+        Node(
             package='turtlebot3_autorace_mission',
             executable='alley_mission_node',
             parameters=[

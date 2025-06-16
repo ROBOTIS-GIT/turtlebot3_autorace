@@ -26,7 +26,7 @@ AlleyMission::AlleyMission(const rclcpp::NodeOptions & options)
 
 CallbackReturn AlleyMission::on_configure(const rclcpp_lifecycle::State &)
 {
-  RCLCPP_INFO(this->get_logger(), "##### Alley Mission INIT #####");
+  RCLCPP_INFO(this->get_logger(), "\033[1;34mAlley Mission INIT\033[0m");
 
   cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::TwistStamped>("/cmd_vel", 10);
   timer_ = this->create_wall_timer(
@@ -53,21 +53,21 @@ CallbackReturn AlleyMission::on_configure(const rclcpp_lifecycle::State &)
 
 CallbackReturn AlleyMission::on_activate(const rclcpp_lifecycle::State &)
 {
-  RCLCPP_INFO(this->get_logger(), "##### Alley Mission ACTIVATE #####");
+  RCLCPP_INFO(this->get_logger(), "\033[1;34mAlley Mission ACTIVATE\033[0m");
   cmd_vel_pub_->on_activate();
   return CallbackReturn::SUCCESS;
 }
 
 CallbackReturn AlleyMission::on_deactivate(const rclcpp_lifecycle::State &)
 {
-  RCLCPP_INFO(this->get_logger(), "##### Alley Mission DEACTIVATE #####");
+  RCLCPP_INFO(this->get_logger(), "\033[1;34mAlley Mission DEACTIVATE\033[0m");
   cmd_vel_pub_->on_deactivate();
   return CallbackReturn::SUCCESS;
 }
 
 CallbackReturn AlleyMission::on_cleanup(const rclcpp_lifecycle::State &)
 {
-  RCLCPP_INFO(this->get_logger(), "##### Alley Mission CLEANUP #####");
+  RCLCPP_INFO(this->get_logger(), "\033[1;34mAlley Mission CLEANUP\033[0m");
   cmd_vel_pub_.reset();
   timer_.reset();
   return CallbackReturn::SUCCESS;
@@ -75,7 +75,7 @@ CallbackReturn AlleyMission::on_cleanup(const rclcpp_lifecycle::State &)
 
 CallbackReturn AlleyMission::on_shutdown(const rclcpp_lifecycle::State &)
 {
-  RCLCPP_INFO(this->get_logger(), "##### Alley Mission SHUTDOWN #####");
+  RCLCPP_INFO(this->get_logger(), "\033[1;34mAlley Mission SHUTDOWN\033[0m");
   return CallbackReturn::SUCCESS;
 }
 
