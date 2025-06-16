@@ -27,7 +27,7 @@ from collections import deque
 from rclpy.lifecycle import LifecycleNode
 from rclpy.lifecycle import State
 from rclpy.lifecycle import TransitionCallbackReturn
-from rclpy.parameter import Parameter
+from sensor_msgs.msg import CompressedImage
 from sensor_msgs.msg import Image
 from std_srvs.srv import Trigger
 from turtlebot3_autorace_msgs.srv import DetectionResult
@@ -41,7 +41,6 @@ class ObjectDetectionNode(LifecycleNode):
 
     def on_configure(self, state: State) -> TransitionCallbackReturn:
         self.get_logger().info("Configuring object detection...")
-        self.use_sim_time = self.get_parameter_or('use_sim_time', Parameter('use_sim_time', Parameter.Type.BOOL, False)).value
         self.declare_parameter('model_path', '/home/ubuntu/best.pt')
         model_path = os.path.expanduser(
             self.get_parameter('model_path').get_parameter_value().string_value)
@@ -58,14 +57,10 @@ class ObjectDetectionNode(LifecycleNode):
             '103': deque(maxlen=5)
         }
 
-        if self.use_sim_time:
-            self.get_logger().info('Using simulated time: subscribing to image topic')
-            self.image_sub = self.create_subscription(
-                Image, '/camera/image_raw', self.image_callback, 10)
-        else:
-            self.get_logger().info('Using real time: opening camera device')
-            self.cap = cv2.VideoCapture(0)
-            self.timer = self.create_timer(0.033, self.camera_timer_callback)
+        self.image_sub = self.create_subscription(
+            Image, '/camera/image_raw', self.image_callback, 10)
+        self.image_pub = self.create_publisher(
+            CompressedImage, '/camera/detections/compressed', 10)
 
         self.result_cli = self.create_client(DetectionResult, 'detection_result')
         while not self.result_cli.wait_for_service(timeout_sec=1.0):
@@ -85,10 +80,9 @@ class ObjectDetectionNode(LifecycleNode):
         if hasattr(self, 'image_sub') and self.image_sub is not None:
             self.image_sub.destroy()
             self.image_sub = None
-        if hasattr(self, 'cap') and self.cap.isOpened():
-            self.cap.release()
-        if hasattr(self, 'timer') and self.timer:
-            self.timer.cancel()
+        if hasattr(self, 'image_pub') and self.image_pub is not None:
+            self.image_pub.destroy()
+            self.image_pub = None
         return TransitionCallbackReturn.SUCCESS
     
     def on_cleanup(self, state: State) -> TransitionCallbackReturn:
@@ -98,25 +92,6 @@ class ObjectDetectionNode(LifecycleNode):
     def on_shutdown(self, state: State) -> TransitionCallbackReturn:
         self.get_logger().info("Shutting down object detection...")
         return TransitionCallbackReturn.SUCCESS
-    
-    def camera_timer_callback(self):
-        if not self.cap.isOpened():
-            self.get_logger().error('Camera device not opened')
-            return
-        ret, frame = self.cap.read()
-        if not ret:
-            self.get_logger().warn('Failed to capture image from camera')
-            return
-        
-        msg = Image()
-        msg.header.stamp = self.get_clock().now().to_msg()
-        msg.header.frame_id = 'camera'
-        msg.height, msg.width = frame.shape[:2]
-        msg.encoding = 'bgr8'
-        msg.step = msg.width * 3
-        msg.data = frame.tobytes()
-
-        self.image_callback(msg)
 
     def image_callback(self, msg):
         if self.detection_in_progress:
@@ -150,15 +125,18 @@ class ObjectDetectionNode(LifecycleNode):
 
             annotated_frame = np.array(results[0].plot())
             annotated_frame = cv2.cvtColor(annotated_frame, cv2.COLOR_RGB2BGR)
+            success, encoded_image = cv2.imencode('.jpg', annotated_frame)
+            if success:
+                compressed_image = CompressedImage()
+                compressed_image.header = msg.header
+                compressed_image.format = 'jpeg'
+                compressed_image.data = encoded_image.tobytes()
+                self.image_pub.publish(compressed_image)
 
         except CvBridgeError as e:
             self.get_logger().error(f'CV Bridge error: {e}')
         except Exception as e:
             self.get_logger().error(f'Error processing image: {e}')
-
-        if not self.use_sim_time:
-            cv2.imshow('YOLO Detection', annotated_frame)
-            cv2.waitKey(1)
 
     def process_detection_results(self, results):
         labels = results[0].names
