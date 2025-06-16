@@ -65,11 +65,11 @@ class ObjectDetectionNode(LifecycleNode):
             self.get_logger().info('Waiting for state_change_trigger service...')
 
         return TransitionCallbackReturn.SUCCESS
-    
+
     def on_activate(self, state: State) -> TransitionCallbackReturn:
         self.get_logger().info("Activating object detection...")
         return TransitionCallbackReturn.SUCCESS
-    
+
     def on_deactivate(self, state: State) -> TransitionCallbackReturn:
         self.get_logger().info("Deactivating object detection...")
         if self.image_sub is not None:
@@ -80,7 +80,7 @@ class ObjectDetectionNode(LifecycleNode):
         if hasattr(self, 'timer') and self.timer:
             self.timer.cancel()
         return TransitionCallbackReturn.SUCCESS
-    
+
     def on_cleanup(self, state: State) -> TransitionCallbackReturn:
         self.get_logger().info("Cleaning up object detection...")
         return TransitionCallbackReturn.SUCCESS
@@ -88,7 +88,7 @@ class ObjectDetectionNode(LifecycleNode):
     def on_shutdown(self, state: State) -> TransitionCallbackReturn:
         self.get_logger().info("Shutting down object detection...")
         return TransitionCallbackReturn.SUCCESS
-    
+
     def camera_timer_callback(self):
         if not self.cap.isOpened():
             self.get_logger().error('Camera device not opened')
@@ -97,7 +97,7 @@ class ObjectDetectionNode(LifecycleNode):
         if not ret:
             self.get_logger().warn('Failed to capture image from camera')
             return
-        
+
         msg = Image()
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.header.frame_id = 'camera'
@@ -154,7 +154,7 @@ class ObjectDetectionNode(LifecycleNode):
         req.rooms = rooms
         future = self.result_cli.call_async(req)
         future.add_done_callback(self.detection_result_callback)
-    
+
     def detection_result_callback(self, future):
         try:
             result = future.result()
@@ -172,7 +172,7 @@ class ObjectDetectionNode(LifecycleNode):
         req = Trigger.Request()
         future = self.trigger_cli.call_async(req)
         future.add_done_callback(self.trigger_callback)
-    
+
     def trigger_callback(self, future):
         try:
             result = future.result()
