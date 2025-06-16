@@ -16,6 +16,8 @@
 #
 # Author: Hyungyu Kim
 
+import os
+
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
@@ -25,6 +27,9 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
+    detect_package_dir = get_package_share_directory('turtlebot3_autorace_detect')
+    model_path = os.path.join(detect_package_dir, 'model', 'best.pt')
+
     return LaunchDescription([
         DeclareLaunchArgument(
             'use_sim_time',
@@ -42,7 +47,8 @@ def generate_launch_description():
             package='turtlebot3_autorace_detect',
             executable='object_detection',
             parameters=[
-                {'use_sim_time': use_sim_time}],
+                {'use_sim_time': use_sim_time},
+                {'model_path': model_path}],
             output='screen'),
 
         Node(

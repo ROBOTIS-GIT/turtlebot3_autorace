@@ -32,28 +32,24 @@ from sensor_msgs.msg import Image
 from std_srvs.srv import Trigger
 from turtlebot3_autorace_msgs.srv import DetectionResult
 from ultralytics import YOLO
-from ament_index_python.packages import get_package_share_directory
 
 
 class ObjectDetectionNode(LifecycleNode):
 
     def __init__(self):
         super().__init__('object_detection_node')
-        package_name = 'turtlebot3_autorace_detect'
-        package_share_dir = get_package_share_directory(package_name)
-        self.model_path = os.path.join(package_share_dir, 'model', 'best.pt')
-        self.use_sim_time = self.get_parameter_or('use_sim_time', Parameter('use_sim_time', Parameter.Type.BOOL, False)).value
-        self.declare_parameter('model_path', '/home/ubuntu/best.pt')
+        self.declare_parameter('model_path', '')
+        self.model_path = self.get_parameter('model_path').value
 
     def on_configure(self, state: State) -> TransitionCallbackReturn:
         self.get_logger().info("\033[1;34mObject Dectection Node INIT\033[0m")
+
         self.model = YOLO(self.model_path)
         self.bridge = CvBridge()
         self.result_cli = self.create_client(DetectionResult, 'detection_result')
         while not self.result_cli.wait_for_service(timeout_sec=1.0):
           self.get_logger().warn('Service not available, waiting...')
         self.detection_in_progress = False
-
         self.class_history = {
             'pizza': deque(maxlen=5),
             'burger': deque(maxlen=5),
@@ -97,7 +93,7 @@ class ObjectDetectionNode(LifecycleNode):
 
         try:
             frame = self.bridge.imgmsg_to_cv2(msg, 'rgb8')
-            results = self.model(frame)
+            results = self.model(frame, verbose=False, conf=0.7, iou=0.1)
             detected_labels = set()
             for i, cls_id in enumerate(results[0].boxes.cls.cpu().numpy()):
                 label = results[0].names[int(cls_id)]

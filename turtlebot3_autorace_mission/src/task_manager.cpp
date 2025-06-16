@@ -41,13 +41,18 @@ TaskManager::TaskManager()
     this, "/navigate_to_pose");
   node_names_ = {
     "error",
-    "undocking_node",
-    "nav2_node",
-    "object_detection_node",
-    "nav2_node",
-    "alley_mission_node",
-    "nav2_node",
-    "aruco_parking",
+    "undocking_node", // 1
+    "nav2_node", // 2
+    "object_detection_node", // 3
+    "nav2_node", // 4
+    "alley_mission_node", // 5
+    "nav2_node", // 6
+    "object_detection_node", // 7
+    "nav2_node", // 8
+    "object_detection_node", // 9
+    "nav2_node", // 10
+    "object_detection_node", // 11
+    "aruco_parking", // 12
   };
 
   exec_step(step_);
@@ -301,7 +306,7 @@ void TaskManager::detection_callback_store_sign(const std::shared_ptr<turtlebot3
       step_ = 12;
     } else {
       shutdown_node("object_detection_node");
-      step++;
+      step_++;
     }
   } else {
     RCLCPP_ERROR(this->get_logger(), "It is not unique detection result. Detection again.");
