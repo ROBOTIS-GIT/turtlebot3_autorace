@@ -23,6 +23,7 @@ find_package(tf2_geometry_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
 find_package(tf2_ros)
 find_package(turtlebot3_autorace_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 include_directories(
   include
@@ -44,6 +45,7 @@ target_link_libraries(undocking_node
   ${std_msgs_TARGETS}
   ${std_srvs_TARGETS}
   ${geometry_msgs_TARGETS}
+  ${turtlebot3_autorace_msgs_TARGETS}
   rclcpp::rclcpp
   tf2_ros::tf2_ros
   rclcpp_lifecycle::rclcpp_lifecycle
@@ -60,6 +62,16 @@ target_link_libraries(alley_mission_node
   tf2_ros::tf2_ros
 )
 
+add_executable(door_docking_node src/door_docking.cpp)
+target_link_libraries(door_docking_node
+  ${std_msgs_TARGETS}
+  ${std_srvs_TARGETS}
+  ${geometry_msgs_TARGETS}
+  ${sensor_msgs_TARGETS}
+  rclcpp::rclcpp
+  rclcpp_lifecycle::rclcpp_lifecycle
+)
+
 ################################################################################
 # Install
 ################################################################################
@@ -67,6 +79,7 @@ install(TARGETS
   task_manager_node
   alley_mission_node
   undocking_node
+  door_docking_node
   DESTINATION lib/${PROJECT_NAME}
 )
 

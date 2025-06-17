@@ -14,24 +14,22 @@
 //
 // Author: Hyungyu Kim
 
-#ifndef UNDOCKING_HPP_
-#define UNDOCKING_HPP_
+#ifndef DOOR_DOCKING_HPP_
+#define DOOR_DOCKING_HPP_
 
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "rclcpp_lifecycle/lifecycle_publisher.hpp"
 #include "geometry_msgs/msg/twist_stamped.hpp"
+#include "sensor_msgs/msg/laser_scan.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "tf2_ros/buffer.h"
-#include "tf2_ros/transform_listener.h"
-#include "turtlebot3_autorace_msgs/srv/undocking_target.hpp"
-
+#include <cmath>
 
 using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
 
-class Undocking : public rclcpp_lifecycle::LifecycleNode
+class DoorDocking : public rclcpp_lifecycle::LifecycleNode
 {
 public:
-  explicit Undocking(const rclcpp::NodeOptions & options);
+  explicit DoorDocking(const rclcpp::NodeOptions & options);
 
 protected:
   CallbackReturn on_configure(const rclcpp_lifecycle::State & state) override;
@@ -41,19 +39,11 @@ protected:
   CallbackReturn on_shutdown(const rclcpp_lifecycle::State & state) override;
   CallbackReturn on_error(const rclcpp_lifecycle::State & state) override;
 
-  void publish_cmd_vel();
+  void scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg);
 
-  rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::TwistStamped>::SharedPtr cmd_vel_pub_;
-  rclcpp::Service<turtlebot3_autorace_msgs::srv::UndockingTarget>::SharedPtr undocking_target_;
-  rclcpp::TimerBase::SharedPtr timer_;
-  tf2_ros::Buffer tf_buffer_;
-  tf2_ros::TransformListener tf_listener_;
-
-  double target_x_;
-  double target_y_;
-  double tolerance_;
   bool reached_target_;
-  bool target_received_;
+  rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::TwistStamped>::SharedPtr cmd_vel_pub_;
+  rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_sub_;
 };
 
-#endif  // UNDOCKING_HPP_
+#endif  // DOOR_DOCKING_HPP_

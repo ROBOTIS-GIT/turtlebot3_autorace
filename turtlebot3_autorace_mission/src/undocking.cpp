@@ -26,51 +26,55 @@ Undocking::Undocking(const rclcpp::NodeOptions & options)
 CallbackReturn Undocking::on_configure(const rclcpp_lifecycle::State &)
 {
   RCLCPP_INFO(this->get_logger(), "\033[1;34mUndocking Node INIT\033[0m");
-
-
   cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::TwistStamped>("cmd_vel", 10);
+  target_received_ = false;
+  return CallbackReturn::SUCCESS;
+}
+
+CallbackReturn Undocking::on_activate(const rclcpp_lifecycle::State &){
+  RCLCPP_INFO(this->get_logger(), "\033[1;34mUndocking Node ACTIVATE\033[0m");
+  cmd_vel_pub_->on_activate();
   timer_ = this->create_wall_timer(
     std::chrono::milliseconds(500),
     std::bind(&Undocking::publish_cmd_vel, this));
-
-  return CallbackReturn::SUCCESS;
-}
-
-CallbackReturn Undocking::on_activate(const rclcpp_lifecycle::State &)
-{
-  RCLCPP_INFO(this->get_logger(), "\033[1;34mUndocking Node ACTIVATE\033[0m");
-  cmd_vel_pub_->on_activate();
+  undocking_target_ = this->create_service<turtlebot3_autorace_msgs::srv::UndockingTarget>(
+    "undocking_target",
+    [this](const std::shared_ptr<rmw_request_id_t> request_header,
+           const std::shared_ptr<turtlebot3_autorace_msgs::srv::UndockingTarget::Request> request,
+           const std::shared_ptr<turtlebot3_autorace_msgs::srv::UndockingTarget::Response> response) {
+      RCLCPP_INFO(this->get_logger(), "Received undocking target request");
+      (void)request_header;
+      target_x_ = request->target_x;
+      target_y_ = request->target_y;
+      target_received_ = true;
+      response->success = true;
+    });
   reached_target_ = false;
-
-  target_x_ = -0.7;
-  target_y_ = 0.0;
   tolerance_ = 0.1;
-  reached_target_ = false;
 
   return CallbackReturn::SUCCESS;
 }
 
-CallbackReturn Undocking::on_deactivate(const rclcpp_lifecycle::State &)
-{
+CallbackReturn Undocking::on_deactivate(const rclcpp_lifecycle::State &){
   RCLCPP_INFO(this->get_logger(), "\033[1;34mUndocking Node DEACTIVATE\033[0m");
-
   cmd_vel_pub_->on_deactivate();
 
   return CallbackReturn::SUCCESS;
 }
 
-CallbackReturn Undocking::on_cleanup(const rclcpp_lifecycle::State &)
-{
+CallbackReturn Undocking::on_cleanup(const rclcpp_lifecycle::State &){
   RCLCPP_INFO(this->get_logger(), "\033[1;34mUndocking Node CLEANUP\033[0m");
-
   timer_.reset();
   cmd_vel_pub_.reset();
-
+  undocking_target_.reset();
+  target_x_ = 0.0;
+  target_y_ = 0.0;
+  target_received_ = false;
+  reached_target_ = false;
   return CallbackReturn::SUCCESS;
 }
 
-CallbackReturn Undocking::on_shutdown(const rclcpp_lifecycle::State &)
-{
+CallbackReturn Undocking::on_shutdown(const rclcpp_lifecycle::State &){
   RCLCPP_INFO(this->get_logger(), "\033[1;34mUndocking Node SHUTDOWN\033[0m");
   return CallbackReturn::SUCCESS;
 }
@@ -83,7 +87,7 @@ CallbackReturn Undocking::on_error(const rclcpp_lifecycle::State &)
 
 void Undocking::publish_cmd_vel()
 {
-  if (!cmd_vel_pub_ || !cmd_vel_pub_->is_activated()) {
+  if (!cmd_vel_pub_ || !cmd_vel_pub_->is_activated() || !target_received_) {
     return;
   }
 
@@ -95,8 +99,14 @@ void Undocking::publish_cmd_vel()
     return;
   }
 
-  double dx = transform.transform.translation.x - target_x_;
-  if (dx < tolerance_) {
+  double criterion;
+  if (target_x_ == 0.0) {
+    criterion = transform.transform.translation.y - target_y_;
+  } else if (target_y_ == 0.0) {
+    criterion = transform.transform.translation.x - target_x_;
+  }
+
+  if (criterion < tolerance_) {
     if (!reached_target_) {
       RCLCPP_INFO(this->get_logger(), "Undocking completed.");
     }

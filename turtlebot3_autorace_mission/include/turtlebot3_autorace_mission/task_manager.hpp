@@ -25,6 +25,7 @@
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <lifecycle_msgs/srv/change_state.hpp>
 #include "turtlebot3_autorace_msgs/srv/detection_result.hpp"
+#include "turtlebot3_autorace_msgs/srv/undocking_target.hpp"
 
 class TaskManager : public rclcpp::Node
 {
@@ -46,9 +47,11 @@ private:
     const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Response> res);
   void detection_callback_store_sign(const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Request> req,
     const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Response> res);
+  void undocking_target_send(float x, float y);
 
   rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr nav_to_pose_client_;
   rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedPtr client_;
+  rclcpp::Client<turtlebot3_autorace_msgs::srv::UndockingTarget>::SharedPtr undocking_target_client_;
   rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr state_check_sub_;
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr state_change_trigger_;
   rclcpp::Service<turtlebot3_autorace_msgs::srv::DetectionResult>::SharedPtr detection_;

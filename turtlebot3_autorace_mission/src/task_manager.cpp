@@ -30,6 +30,10 @@ TaskManager::TaskManager()
       std::placeholders::_2,
       std::placeholders::_3)
   );
+
+  undocking_target_client_ = this->create_client<turtlebot3_autorace_msgs::srv::UndockingTarget>(
+    "undocking_target"
+  );
   detection_ = this->create_service<turtlebot3_autorace_msgs::srv::DetectionResult>(
     "detection_result",
     std::bind(&TaskManager::detection_callback,
@@ -62,56 +66,54 @@ void TaskManager::exec_step(int step){
   if(step == 1){
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Undocking Starts #####\033[0m");
     configure_activate_node("undocking_node");
-  }
-  else if(step==2){
+    undocking_target_send(-0.7, 0.0);
+  } else if(step==2){
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Move forward to the ordering panel #####\033[0m");
     goal_pose_publish(-0.1,-0.5, 0.0);
-  }
-  else if(step==3){
+  } else if(step==3){
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Order Details Perception #####\033[0m");
     configure_activate_node("object_detection_node");
-  }
-  else if(step==4){
+  } else if(step==4){
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Move forward to the alley #####\033[0m");
     goal_pose_publish(-0.1,-0.7, -1.57);
-  }
-  else if(step==5){
+  } else if(step==5){
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Alley Driving #####\033[0m");
     configure_activate_node("alley_mission_node");
-  }
-  else if(step==6) {
+  } else if(step==6) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Move forward to first shop #####\033[0m");
     goal_pose_publish(-0.14,-2.19, -1.57);
-  }
-  else if(step==7) {
+  } else if(step==7) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Identify the type of store #####\033[0m");
     configure_activate_node("object_detection_node");
-  }
-  else if(step==8) {
+  } else if(step==8) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Move forward to second shop #####\033[0m");
     goal_pose_publish(-1.18,-2.19, -1.57);
-  }
-  else if(step==9) {
+  } else if(step==9) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Identify the type of store #####\033[0m");
     configure_activate_node("object_detection_node");
-  }
-  else if(step==10) {
+  } else if(step==10) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Move forward to third shop #####\033[0m");
     goal_pose_publish(-2.26,-2.19, -1.57);
-  }
-  else if(step==11) {
+  } else if(step==11) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Identify the type of store #####\033[0m");
     configure_activate_node("object_detection_node");
-  }
-  else if(step==12) {
+  } else if(step==12) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### aruco docking #####\033[0m");
     configure_activate_node("aruco_tracker");
     configure_activate_node("aruco_parking");
-  }
-  else if (step==13) {
-    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Mission Completed #####\033[0m");
-    shutdown_node("aruco_tracker");
-    rclcpp::shutdown();
+  } else if (step==13) {
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### PICKUP #####\033[0m");
+    shutdown_node("aruco_tracker"); // shutdown하면 exec step이 되므로 이후 픽업 노드를 추가할 때 고려하기
+  } else if (step==14) {
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Undocking #####\033[0m");
+    configure_activate_node("undocking_node");
+    undocking_target_send(0.0, -2.2);
+  } else if (step==15) {
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Move forward to bollard #####\033[0m");
+    goal_pose_publish(-2.26,-2.19, -1.57);
+  } else if (step==16) {
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Bollard Mission by Nav2 #####\033[0m");
+    goal_pose_publish(-2.26,-2.19, -1.57);
   }
 }
 
@@ -278,6 +280,26 @@ void TaskManager::goal_pose_publish(double x, double y, double theta)
       }
     };
   nav_to_pose_client_->async_send_goal(goal_msg, send_goal_options);
+}
+
+void TaskManager::undocking_target_send(float x, float y)
+{
+  RCLCPP_INFO(this->get_logger(), "Sending undocking target: (%.2f, %.2f)", x, y);
+  if (!undocking_target_client_->wait_for_service(std::chrono::seconds(1))) {
+    RCLCPP_ERROR(this->get_logger(), "UndockingTarget service not available.");
+    return;
+  }
+  auto request = std::make_shared<turtlebot3_autorace_msgs::srv::UndockingTarget::Request>();
+  request->target_x = x;
+  request->target_y = y;
+
+  auto future = undocking_target_client_->async_send_request(request);
+  if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), future) ==
+      rclcpp::FutureReturnCode::SUCCESS) {
+    RCLCPP_INFO(this->get_logger(), "Undocking target sent successfully.");
+  } else {
+    RCLCPP_ERROR(this->get_logger(), "Failed to send undocking target.");
+  }
 }
 
 void TaskManager::detection_callback_order_details(const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Request> req,

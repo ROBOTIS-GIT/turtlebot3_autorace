@@ -17,6 +17,7 @@ find_package(std_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/DetectionResult.srv"
+  "srv/UndockingTarget.srv"
   DEPENDENCIES std_msgs
 )
 
