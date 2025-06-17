@@ -13,10 +13,15 @@
   <url type="bugtracker">https://github.com/ROBOTIS-GIT/turtlebot3_autorace/issues</url>
   <author email="kimhg@robotis.com">Hyungyu Kim</author>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
+  <depend>controller_manager</depend>
+  <depend>dynamixel_hardware_interface</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav2</depend>
   <depend>rclcpp</depend>
   <depend>rclpy</depend>
   <depend>std_msgs</depend>
-  <depend>nav2</depend>
+  <depend>tf2_ros</depend>
+  <depend>trajectory_msgs</depend>
   <depend>turtlebot3_autorace_msgs</depend>
   <export>
     <build_type>ament_cmake</build_type>
