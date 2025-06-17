@@ -36,17 +36,26 @@ private:
   void state_change_callback(const std::shared_ptr<rmw_request_id_t> request_header,
     const std::shared_ptr<std_srvs::srv::Trigger::Request> req,
     const std::shared_ptr<std_srvs::srv::Trigger::Response> res);
+  void detection_callback(const std::shared_ptr<rmw_request_id_t> request_header,
+    const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Request> req,
+    const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Response> res);
   void configure_activate_node(const std::string & node_name);
   void shutdown_node(const std::string & node_name);
   void goal_pose_publish(double x, double y, double theta);
+  void detection_callback_order_details(const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Request> req,
+    const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Response> res);
+  void detection_callback_store_sign(const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Request> req,
+    const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Response> res);
 
   rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr nav_to_pose_client_;
   rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedPtr client_;
   rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr state_check_sub_;
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr state_change_trigger_;
+  rclcpp::Service<turtlebot3_autorace_msgs::srv::DetectionResult>::SharedPtr detection_;
 
   int step_;
   std::vector<std::string> node_names_;
+  std::vector<std::vector<std::string>> order_details_;
 };
 
 

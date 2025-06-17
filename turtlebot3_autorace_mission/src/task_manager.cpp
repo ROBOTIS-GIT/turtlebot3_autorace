@@ -23,10 +23,16 @@ TaskManager::TaskManager()
 : Node("task_manager"),
   step_(1)
 {
-  RCLCPP_INFO(get_logger(), "TaskManaging Start");
   state_change_trigger_=this->create_service<std_srvs::srv::Trigger>(
     "state_change_trigger",
     std::bind(&TaskManager::state_change_callback,
+      this, std::placeholders::_1,
+      std::placeholders::_2,
+      std::placeholders::_3)
+  );
+  detection_ = this->create_service<turtlebot3_autorace_msgs::srv::DetectionResult>(
+    "detection_result",
+    std::bind(&TaskManager::detection_callback,
       this, std::placeholders::_1,
       std::placeholders::_2,
       std::placeholders::_3)
@@ -37,7 +43,7 @@ TaskManager::TaskManager()
     "error",
     "undocking_node",
     "nav2_node",
-    "yolo_detection_node",
+    "object_detection_node",
     "nav2_node",
     "alley_mission_node",
     "nav2_node",
@@ -74,13 +80,30 @@ void TaskManager::exec_step(int step){
   }
   else if(step==7) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Identify the type of store #####\033[0m");
+    configure_activate_node("object_detection_node");
   }
   else if(step==8) {
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Move forward to second shop #####\033[0m");
+    goal_pose_publish(-1.18,-2.19, -1.57);
+  }
+  else if(step==9) {
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Identify the type of store #####\033[0m");
+    configure_activate_node("object_detection_node");
+  }
+  else if(step==10) {
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Move forward to third shop #####\033[0m");
+    goal_pose_publish(-2.26,-2.19, -1.57);
+  }
+  else if(step==11) {
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Identify the type of store #####\033[0m");
+    configure_activate_node("object_detection_node");
+  }
+  else if(step==12) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### aruco docking #####\033[0m");
     configure_activate_node("aruco_tracker");
     configure_activate_node("aruco_parking");
   }
-  else if (step==9) {
+  else if (step==13) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Mission Completed #####\033[0m");
     shutdown_node("aruco_tracker");
     rclcpp::shutdown();
@@ -93,9 +116,20 @@ void TaskManager::state_change_callback(
   const std::shared_ptr<std_srvs::srv::Trigger::Response> res){
   (void)request_header;
   (void)req;
-  RCLCPP_INFO(this->get_logger(), "Mission");
   shutdown_node(node_names_[step_++]);
   res->success = true;
+}
+
+void TaskManager::detection_callback(
+  const std::shared_ptr<rmw_request_id_t> request_header,
+  const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Request> req,
+  const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Response> res){
+  (void)request_header;
+  if (step_==3) {
+    detection_callback_order_details(req, res);
+  } else {
+    detection_callback_store_sign(req, res);
+  }
 }
 
 void TaskManager::configure_activate_node(const std::string & node_name){
@@ -117,7 +151,7 @@ void TaskManager::configure_activate_node(const std::string & node_name){
   client_->async_send_request(request_configure,
     [this, node_name](rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFuture result) {
       if (result.get()->success) {
-        RCLCPP_INFO(this->get_logger(), "%s", ("Successfully configured " + node_name).c_str());
+        RCLCPP_INFO(this->get_logger(), "%s", ("\033[1;34mSuccessfully configured" + node_name +"\033[0m").c_str());
       } else {
         RCLCPP_ERROR(this->get_logger(), "%s", ("Failed to configure" + node_name).c_str());
         RCLCPP_ERROR(this->get_logger(), "Task Node will shut down");
@@ -131,7 +165,7 @@ void TaskManager::configure_activate_node(const std::string & node_name){
   client_->async_send_request(request_activate,
     [this, node_name](rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFuture result) {
       if (result.get()->success) {
-        RCLCPP_INFO(this->get_logger(), "%s", ("Successfully activated " + node_name).c_str());
+        RCLCPP_INFO(this->get_logger(), "%s", ("\033[1;34mSuccessfully activated " + node_name + "\033[0m").c_str());
       } else {
         RCLCPP_ERROR(this->get_logger(), "%s", ("Failed to activate" + node_name).c_str());
         RCLCPP_ERROR(this->get_logger(), "Task Node will shut down");
@@ -159,7 +193,7 @@ void TaskManager::shutdown_node(const std::string & node_name){
   client_->async_send_request(request_deactivate,
     [this, node_name](rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFuture result) {
       if (result.get()->success) {
-        RCLCPP_INFO(this->get_logger(), "%s", ("Successfully deactivated" + node_name).c_str());
+        RCLCPP_INFO(this->get_logger(), "%s", ("\033[1;34mSuccessfully deactivated" + node_name + "\033[0m").c_str());
       } else {
         RCLCPP_ERROR(this->get_logger(), "%s", ("Failed to deactivate" + node_name).c_str());
       }
@@ -171,24 +205,25 @@ void TaskManager::shutdown_node(const std::string & node_name){
   client_->async_send_request(request_cleanup,
     [this, node_name](rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFuture result) {
       if (result.get()->success) {
-        RCLCPP_INFO(this->get_logger(), "%s", ("Successfully cleaned up" + node_name).c_str());
-      } else {
-        RCLCPP_INFO(this->get_logger(), "%s", ("Failed to clean up" + node_name).c_str());
-      }
-    });
-
-  auto request_shutdown = std::make_shared<lifecycle_msgs::srv::ChangeState::Request>();
-  request_shutdown->transition.id = lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN;
-
-  client_->async_send_request(request_shutdown,
-    [this, node_name](rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFuture result) {
-      if (result.get()->success) {
-        RCLCPP_INFO(this->get_logger(), "%s", ("Successfully shutdown" + node_name).c_str());
+        RCLCPP_INFO(this->get_logger(), "%s", ("\033[1;34mSuccessfully cleaned up " + node_name + "\033[0m").c_str());
         exec_step(step_);
       } else {
-        RCLCPP_INFO(this->get_logger(), "%s", ("Failed to shutdown" + node_name).c_str());
+        RCLCPP_INFO(this->get_logger(), "%s", ("Failed to clean up " + node_name).c_str());
       }
     });
+
+  // auto request_shutdown = std::make_shared<lifecycle_msgs::srv::ChangeState::Request>();
+  // request_shutdown->transition.id = lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN;
+
+  // client_->async_send_request(request_shutdown,
+  //   [this, node_name](rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFuture result) {
+  //     if (result.get()->success) {
+  //       RCLCPP_INFO(this->get_logger(), "%s", ("Successfully shutdown" + node_name).c_str());
+  //       exec_step(step_);
+  //     } else {
+  //       RCLCPP_INFO(this->get_logger(), "%s", ("Failed to shutdown" + node_name).c_str());
+  //     }
+  //   });
 }
 
 void TaskManager::goal_pose_publish(double x, double y, double theta)
@@ -238,6 +273,40 @@ void TaskManager::goal_pose_publish(double x, double y, double theta)
       }
     };
   nav_to_pose_client_->async_send_goal(goal_msg, send_goal_options);
+}
+
+void TaskManager::detection_callback_order_details(const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Request> req,
+    const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Response> res){
+  if (req->stores.size() >= 2 && req->rooms.size() >= 2) {
+    for (size_t i = 0; i < req->stores.size(); ++i) {
+      order_details_.push_back({req->stores[i], req->rooms[i]});
+    }
+    RCLCPP_INFO(this->get_logger(), "First order: %s -> %s", req->stores[0].c_str(), req->rooms[0].c_str());
+    RCLCPP_INFO(this->get_logger(), "Second order: %s -> %s", req->stores[1].c_str(), req->rooms[1].c_str());
+    //RCLCPP_INFO(this->get_logger(), "Third order: %s, ->, %s", req->stores[2].c_str(), req->rooms[2].c_str());
+    res->success = true;
+    shutdown_node(node_names_[step_++]);
+  } else {
+    RCLCPP_ERROR(this->get_logger(), "Detection failed. Detection again.");
+    res->success = false;
+  }
+}
+
+void TaskManager::detection_callback_store_sign(const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Request> req,
+  const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Response> res){
+  if (req->stores.size() == 1){
+    res->success = true;
+    if (req->stores[0] == order_details_[0][0]){
+      shutdown_node("object_detection_node");
+      step_ = 12;
+    } else {
+      shutdown_node("object_detection_node");
+      step++;
+    }
+  } else {
+    RCLCPP_ERROR(this->get_logger(), "It is not unique detection result. Detection again.");
+    res->success = false;
+  }
 }
 
 int main(int argc, char ** argv)

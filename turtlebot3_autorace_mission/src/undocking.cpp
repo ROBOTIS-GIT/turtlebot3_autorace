@@ -25,7 +25,8 @@ Undocking::Undocking(const rclcpp::NodeOptions & options)
 
 CallbackReturn Undocking::on_configure(const rclcpp_lifecycle::State &)
 {
-  RCLCPP_INFO(this->get_logger(), "##### Undocking Node CONFIGURED #####");
+  RCLCPP_INFO(this->get_logger(), "\033[1;34mUndocking Node INIT\033[0m");
+
 
   cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::TwistStamped>("cmd_vel", 10);
   timer_ = this->create_wall_timer(
@@ -37,7 +38,7 @@ CallbackReturn Undocking::on_configure(const rclcpp_lifecycle::State &)
 
 CallbackReturn Undocking::on_activate(const rclcpp_lifecycle::State &)
 {
-  RCLCPP_INFO(this->get_logger(), "##### Undocking Node ACTIVATED #####");
+  RCLCPP_INFO(this->get_logger(), "\033[1;34mUndocking Node ACTIVATE\033[0m");
   cmd_vel_pub_->on_activate();
   reached_target_ = false;
 
@@ -51,7 +52,7 @@ CallbackReturn Undocking::on_activate(const rclcpp_lifecycle::State &)
 
 CallbackReturn Undocking::on_deactivate(const rclcpp_lifecycle::State &)
 {
-  RCLCPP_INFO(this->get_logger(), "##### Undocking Node DEACTIVATE #####");
+  RCLCPP_INFO(this->get_logger(), "\033[1;34mUndocking Node DEACTIVATE\033[0m");
 
   cmd_vel_pub_->on_deactivate();
 
@@ -60,7 +61,7 @@ CallbackReturn Undocking::on_deactivate(const rclcpp_lifecycle::State &)
 
 CallbackReturn Undocking::on_cleanup(const rclcpp_lifecycle::State &)
 {
-  RCLCPP_INFO(this->get_logger(), "##### Undocking Node CLEANUP #####");
+  RCLCPP_INFO(this->get_logger(), "\033[1;34mUndocking Node CLEANUP\033[0m");
 
   timer_.reset();
   cmd_vel_pub_.reset();
@@ -70,7 +71,7 @@ CallbackReturn Undocking::on_cleanup(const rclcpp_lifecycle::State &)
 
 CallbackReturn Undocking::on_shutdown(const rclcpp_lifecycle::State &)
 {
-  RCLCPP_INFO(this->get_logger(), "##### Undocking Node SHUTDOWN #####");
+  RCLCPP_INFO(this->get_logger(), "\033[1;34mUndocking Node SHUTDOWN\033[0m");
   return CallbackReturn::SUCCESS;
 }
 
