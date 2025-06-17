@@ -66,7 +66,7 @@ class ArUcoParking(LifecycleNode):
         self.marker_2d_pose_y = .0
         self.marker_2d_theta = .0
 
-        self.parking_distance_to_marker = 0.30
+        self.parking_distance_to_marker = 0.1
 
         self.previous_robot_2d_theta = .0
         self.total_robot_2d_theta = .0
@@ -119,6 +119,9 @@ class ArUcoParking(LifecycleNode):
             self.is_active = True
             self.get_logger().info('Start parking sequence with marker 0')
             self.current_parking_sequence = self.ParkingSequence.search_parking_lot.value
+            self.current_nearby_sequence = self.NearbySequence.initial_turn.value
+            self.is_sequence_finished = False
+            self.is_triggered = False
             self.timer = self.create_timer(0.1, self._run)
             self.get_logger().info('ArUco parking node activated successfully')
             return TransitionCallbackReturn.SUCCESS

@@ -36,7 +36,7 @@ class ArUcoTracker(LifecycleNode):
     def __init__(self):
         super().__init__('aruco_tracker')
 
-        self.declare_parameter('marker_size', 0.116)
+        self.declare_parameter('marker_size', 0.0625)
         self.marker_size = self.get_parameter('marker_size').get_parameter_value().double_value
 
         self.camera_info_msg = None
@@ -113,7 +113,6 @@ class ArUcoTracker(LifecycleNode):
             self.camera_info_msg = None
             self.intrinsic_mat = None
             self.distortion = None
-            self.bridge = None
 
             self.get_logger().info('ArUco tracker node cleaned up successfully')
             return TransitionCallbackReturn.SUCCESS
