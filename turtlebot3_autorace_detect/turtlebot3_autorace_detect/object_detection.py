@@ -93,7 +93,7 @@ class ObjectDetectionNode(LifecycleNode):
 
         try:
             frame = self.bridge.imgmsg_to_cv2(msg, 'rgb8')
-            results = self.model(frame, verbose=False, conf=0.7, iou=0.1)
+            results = self.model(frame, verbose=False, conf=0.3, iou=0.1)
             detected_labels = set()
             for i, cls_id in enumerate(results[0].boxes.cls.cpu().numpy()):
                 label = results[0].names[int(cls_id)]
