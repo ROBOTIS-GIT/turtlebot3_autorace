@@ -110,10 +110,26 @@ void TaskManager::exec_step(int step){
     undocking_target_send(0.0, -2.2);
   } else if (step==15) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Move forward to bollard #####\033[0m");
-    goal_pose_publish(-2.26,-2.19, -1.57);
+    goal_pose_publish(-2.1,-2.12, 1.57);
   } else if (step==16) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Bollard Mission by Nav2 #####\033[0m");
-    goal_pose_publish(-2.26,-2.19, -1.57);
+    goal_pose_publish(-2.1,-0.5, 1.57);
+  } else if (step==17) {
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Move forward to first door #####\033[0m");
+    goal_pose_publish(-2.4,-0.36, 1.57);
+  } else if (step==18) {
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Move forward to second door #####\033[0m");
+    goal_pose_publish(-1.9,-0.36, 1.57);
+  } else if (step==19) {
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Move forward to third door #####\033[0m");
+    goal_pose_publish(-1.4,-0.36, 1.57);
+  } else if (step==20) {
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Docking at door #####\033[0m");
+    configure_activate_node("door_docking_node");
+  }  else if (step==21) {
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Undocking #####\033[0m");
+    configure_activate_node("undocking_node");
+    undocking_target_send(0.0, -0.36);
   }
 }
 

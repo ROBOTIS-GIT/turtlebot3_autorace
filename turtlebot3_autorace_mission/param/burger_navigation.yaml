@@ -202,21 +202,21 @@ controller_server:
         oscillation_reset_angle: 0.1
         x_only_threshold: 0.05
       BaseObstacle:
-        scale: 1.0
+        scale: 2.0
         sum_scores: false
       GoalAlign:
-        scale: 4.0 #
+        scale: 4.0
         forward_point_distance: 0.15
         aggregation_type: "last"
       PathAlign:
-        scale: 5.0 #
+        scale: 5.0
         aggregation_type: "last"
         forward_point_distance: 0.15
       PathDist:
-        scale: 3.0 #
+        scale: 5.0
         aggregation_type: "last"
       GoalDist:
-        scale: 1.0
+        scale: 0.8
         aggregation_type: "last"
       ObstacleFootprintCritic:
         scale: 1.0
@@ -231,10 +231,10 @@ local_costmap:
       global_frame: odom
       robot_base_frame: base_link
       rolling_window: true
-      width: 3
-      height: 3
+      width: 2
+      height: 2
       resolution: 0.05
-      robot_radius: 0.1
+      robot_radius: 0.075
       plugins: ["obstacle_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
@@ -262,7 +262,7 @@ global_costmap:
       global_frame: map
       robot_base_frame: base_link
       transform_tolerance: 0.5
-      robot_radius: 0.1
+      robot_radius: 0.075
       resolution: 0.05
       track_unknown_space: true
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
@@ -277,7 +277,6 @@ global_costmap:
           marking: true
           data_type: "LaserScan"
           raytrace_max_range: 3.0
-          raytrace_min_range: 0.0
           obstacle_max_range: 2.5
           obstacle_min_range: 0.0
       static_layer:
