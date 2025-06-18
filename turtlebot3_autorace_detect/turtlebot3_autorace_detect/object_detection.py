@@ -40,6 +40,7 @@ class ObjectDetectionNode(LifecycleNode):
         super().__init__('object_detection_node')
         self.declare_parameter('model_path', '')
         self.model_path = self.get_parameter('model_path').value
+        self.count = 0 ## For test
 
     def on_configure(self, state: State) -> TransitionCallbackReturn:
         self.get_logger().info("\033[1;34mObject Dectection Node INIT\033[0m")
@@ -79,7 +80,6 @@ class ObjectDetectionNode(LifecycleNode):
         self.bridge = None
         self.result_cli = None
         self.class_history = None
-        self.process_detection_results = None
         self.future = None
         return TransitionCallbackReturn.SUCCESS
 
@@ -112,13 +112,17 @@ class ObjectDetectionNode(LifecycleNode):
                     elif label in ['101', '102', '103']:
                         confirmed_rooms.append(int(label))
 
-            if confirmed_stores or confirmed_rooms:
-                self.process_detection_results(results)
-            else:
-                self.get_logger().info("Waiting for stable detection.")
+            ## for test
+            self.process_detection_results(results)
+            ##
+            # if confirmed_stores or confirmed_rooms:
+            #     self.process_detection_results(results)
+            #     self.get_logger().info(f'cf_st:{confirmed_stores}, cf_rm:{confirmed_rooms}')
+            # else:
+            #     self.get_logger().info("Waiting for stable detection.")
 
-            annotated_frame = np.array(results[0].plot())
-            annotated_frame = cv2.cvtColor(annotated_frame, cv2.COLOR_RGB2BGR)
+            # annotated_frame = np.array(results[0].plot())
+            # annotated_frame = cv2.cvtColor(annotated_frame, cv2.COLOR_RGB2BGR)
 
         except CvBridgeError as e:
             self.get_logger().error(f'CV Bridge error: {e}')
@@ -126,27 +130,48 @@ class ObjectDetectionNode(LifecycleNode):
             self.get_logger().error(f'Error processing image: {e}')
 
     def process_detection_results(self, results):
-        labels = results[0].names
-        boxes = results[0].boxes
-        classes = boxes.cls.cpu().numpy()
-        xyxy = boxes.xyxy.cpu().numpy()
+        # labels = results[0].names
+        # boxes = results[0].boxes
+        # classes = boxes.cls.cpu().numpy()
+        # xyxy = boxes.xyxy.cpu().numpy()
 
-        detections = []
-        for i, cls_id in enumerate(classes):
-            label = labels[int(cls_id)]
-            x1, y1, x2, y2 = xyxy[i]
-            center_y = (y1 + y2) / 2
-            detections.append({'label': label, 'center_y': center_y})
+        # detections = []
+        # for i, cls_id in enumerate(classes):
+        #     label = labels[int(cls_id)]
+        #     x1, y1, x2, y2 = xyxy[i]
+        #     center_y = (y1 + y2) / 2
+        #     detections.append({'label': label, 'center_y': center_y})
 
-        detections.sort(key=lambda d: d['center_y'])
+        # detections.sort(key=lambda d: d['center_y'])
 
-        stores = []
-        rooms = []
-        for det in detections:
-            if det['label'] in ['pizza', 'chicken', 'burger']:
-                stores.append(det['label'])
-            elif det['label'] in ['101', '102', '103']:
-                rooms.append(det['label'])
+        # stores = []
+        # rooms = []
+        # for det in detections:
+        #     if det['label'] in ['pizza', 'chicken', 'burger']:
+        #         stores.append(det['label'])
+        #     elif det['label'] in ['101', '102', '103']:
+        #         rooms.append(det['label'])
+
+        #### For test ####
+        if self.count == 0:
+            stores = ['chicken','pizza' ,'burger']
+            rooms = ['102', '101', '103']
+        elif self.count == 1:
+            stores = ['burger']
+            rooms = []
+        elif self.count == 2:
+            stores = ['pizza']
+            rooms = []
+        elif self.count == 3:
+            stores = ['chicken']
+            rooms = []
+        elif self.count == 4:
+            stores = []
+            rooms = ['101']
+        elif self.count == 5:
+            stores = []
+            rooms = ['102']
+        ##################
 
         self.get_logger().info(f'Detected stores: {stores}, Detected rooms: {rooms}')
 
@@ -158,21 +183,12 @@ class ObjectDetectionNode(LifecycleNode):
         self.detection_in_progress = True
         self.future.add_done_callback(self.future_callback)
 
-    def trigger_callback(self, future):
-        try:
-            result = future.result()
-            if result.success:
-                self.get_logger().info('State change trigger successfully sent.')
-            else:
-                self.get_logger().warn('State change trigger rejected by TaskManager.')
-        except Exception as e:
-            self.get_logger().error(f'Service call failed: {str(e)}')
-
     def future_callback(self, future):
         try:
             result = future.result()
             if result.success:
                 self.get_logger().info('Detection result successfully sent.')
+                self.count += 1 # For test
             else:
                 self.detection_in_progress = False
                 self.get_logger().warn('Detection result was rejected by TaskManager.')

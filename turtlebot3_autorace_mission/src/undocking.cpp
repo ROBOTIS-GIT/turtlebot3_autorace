@@ -106,7 +106,7 @@ void Undocking::publish_cmd_vel()
     criterion = transform.transform.translation.x - target_x_;
   }
 
-  if (criterion < tolerance_) {
+  if (abs(criterion) < tolerance_) {
     if (!reached_target_) {
       RCLCPP_INFO(this->get_logger(), "Undocking completed.");
     }
@@ -142,7 +142,6 @@ int main(int argc, char * argv[])
   rclcpp::init(argc, argv);
   auto node = std::make_shared<Undocking>(rclcpp::NodeOptions{});
   rclcpp::executors::SingleThreadedExecutor exec;
-
   exec.add_node(node->get_node_base_interface());
   exec.spin();
   rclcpp::shutdown();
