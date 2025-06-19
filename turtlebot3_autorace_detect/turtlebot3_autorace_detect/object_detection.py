@@ -57,22 +57,17 @@ class ObjectDetectionNode(LifecycleNode):
             '103': deque(maxlen=5)
         }
 
-        self.image_sub = self.create_subscription(
-            Image, '/camera/image_raw', self.image_callback, 10)
-        self.image_pub = self.create_publisher(
-            CompressedImage, '/camera/detections/compressed', 10)
-
         self.result_cli = self.create_client(DetectionResult, 'detection_result')
-        while not self.result_cli.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info('Waiting for detection_result service from TaskManager...')
         self.trigger_cli = self.create_client(Trigger, 'state_change_trigger')
-        while not self.trigger_cli.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info('Waiting for state_change_trigger service...')
-
         return TransitionCallbackReturn.SUCCESS
     
     def on_activate(self, state: State) -> TransitionCallbackReturn:
         self.get_logger().info("Activating object detection...")
+
+        self.image_sub = self.create_subscription(
+            Image, '/camera/image_raw', self.image_callback, 10)
+        self.image_pub = self.create_publisher(
+            CompressedImage, '/camera/detections/compressed', 10)
         return TransitionCallbackReturn.SUCCESS
     
     def on_deactivate(self, state: State) -> TransitionCallbackReturn:
