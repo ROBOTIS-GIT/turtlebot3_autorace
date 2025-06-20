@@ -19,8 +19,6 @@
 import os
 
 import cv2
-from cv_bridge import CvBridge
-from cv_bridge import CvBridgeError
 import numpy as np
 import rclpy
 from collections import deque
@@ -45,7 +43,6 @@ class ObjectDetectionNode(LifecycleNode):
         model_path = os.path.expanduser(
             self.get_parameter('model_path').get_parameter_value().string_value)
         self.model = YOLO(model_path)
-        self.bridge = CvBridge()
         self.trigger_called = False
         self.detection_in_progress = False
         self.class_history = {
@@ -65,7 +62,7 @@ class ObjectDetectionNode(LifecycleNode):
         self.get_logger().info("Activating object detection...")
 
         self.image_sub = self.create_subscription(
-            Image, '/camera/image_raw', self.image_callback, 10)
+            CompressedImage, '/camera/image_raw/compressed', self.image_callback, 10)
         self.image_pub = self.create_publisher(
             CompressedImage, '/camera/detections/compressed', 10)
         return TransitionCallbackReturn.SUCCESS
@@ -93,10 +90,12 @@ class ObjectDetectionNode(LifecycleNode):
             return
 
         try:
-            frame = self.bridge.imgmsg_to_cv2(msg, 'rgb8')
+            np_arr = np.frombuffer(msg.data, np.uint8)
+            frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+
             results = self.model(frame)
             detected_labels = set()
-            for i, cls_id in enumerate(results[0].boxes.cls.cpu().numpy()):
+            for cls_id in results[0].boxes.cls.cpu().numpy():
                 label = results[0].names[int(cls_id)]
                 detected_labels.add(label)
 
@@ -119,7 +118,6 @@ class ObjectDetectionNode(LifecycleNode):
                 self.get_logger().info("Waiting for stable detection.")
 
             annotated_frame = np.array(results[0].plot())
-            annotated_frame = cv2.cvtColor(annotated_frame, cv2.COLOR_RGB2BGR)
             success, encoded_image = cv2.imencode('.jpg', annotated_frame)
             if success:
                 compressed_image = CompressedImage()
@@ -128,10 +126,8 @@ class ObjectDetectionNode(LifecycleNode):
                 compressed_image.data = encoded_image.tobytes()
                 self.image_pub.publish(compressed_image)
 
-        except CvBridgeError as e:
-            self.get_logger().error(f'CV Bridge error: {e}')
         except Exception as e:
-            self.get_logger().error(f'Error processing image: {e}')
+            self.get_logger().error(f'Error in image_callback: {e}')
 
     def process_detection_results(self, results):
         labels = results[0].names
@@ -154,7 +150,7 @@ class ObjectDetectionNode(LifecycleNode):
             if det['label'] in ['pizza', 'chicken', 'burger']:
                 stores.append(det['label'])
             elif det['label'] in ['101', '102', '103']:
-                rooms.append(int(det['label']))
+                rooms.append(det['label'])
 
         self.get_logger().info(f'Detected stores: {stores}, Detected rooms: {rooms}')
 
