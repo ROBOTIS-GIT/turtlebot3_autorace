@@ -78,7 +78,6 @@ void TaskManager::exec_step(int step){
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Undocking Starts #####\033[0m");
     configure_activate_node("undocking_node", client_);
     undocking_target_send(-0.7, 0.0);
-    return;
   } else if(step==2){
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Move forward to the ordering panel #####\033[0m");
     goal_pose_publish(-0.1,-0.6, 0.0);
@@ -158,13 +157,10 @@ void TaskManager::exec_step(int step){
   } else if (step==26) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Charging Station Docking #####\033[0m");
     configure_activate_node("lidar_docking", client_);
-  } else if (step==27) {
-    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Mission Completed #####\033[0m");
-    rclcpp::shutdown();
   } else {
-    RCLCPP_ERROR(this->get_logger(), "Invalid step: %d", step);
-    rclcpp::shutdown();
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Mission Completed #####\033[0m");
   }
+  return;
 }
 
 void TaskManager::state_change_callback(
@@ -270,19 +266,6 @@ void TaskManager::shutdown_node(const std::string & node_name,
         RCLCPP_INFO(this->get_logger(), "%s", ("Failed to clean up " + node_name).c_str());
       }
     });
-
-  // auto request_shutdown = std::make_shared<lifecycle_msgs::srv::ChangeState::Request>();
-  // request_shutdown->transition.id = lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN;
-
-  // client_->async_send_request(request_shutdown,
-  //   [this, node_name](rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFuture result) {
-  //     if (result.get()->success) {
-  //       RCLCPP_INFO(this->get_logger(), "%s", ("Successfully shutdown" + node_name).c_str());
-  //       exec_step(step_);
-  //     } else {
-  //       RCLCPP_INFO(this->get_logger(), "%s", ("Failed to shutdown" + node_name).c_str());
-  //     }
-  //   });
 }
 
 void TaskManager::goal_pose_publish(double x, double y, double theta)
@@ -384,7 +367,6 @@ void TaskManager::detection_callback_store_sign(const std::shared_ptr<turtlebot3
 
 void TaskManager::detection_callback_door_sign(const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Request> req,
   const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Response> res){
-    order_details_.push_back({"chicken","102"});
   if (req->rooms.size() == 1){
     res->success = true;
     if (req->rooms[0] == order_details_[0][1]){
