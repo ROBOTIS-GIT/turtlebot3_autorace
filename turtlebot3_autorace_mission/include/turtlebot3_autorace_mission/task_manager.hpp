@@ -47,6 +47,8 @@ private:
     const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Response> res);
   void detection_callback_store_sign(const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Request> req,
     const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Response> res);
+  void detection_callback_door_sign(const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Request> req,
+    const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Response> res);
   void undocking_target_send(float x, float y);
 
   rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr nav_to_pose_client_;

@@ -68,7 +68,7 @@ CallbackReturn DoorDocking::on_error(const rclcpp_lifecycle::State &)
 }
 
 void DoorDocking::scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg){
-  if (!cmd_vel_pub_ || !cmd_vel_pub_->is_activated()) {
+  if (!cmd_vel_pub_ || !cmd_vel_pub_->is_activated() || reached_target_) {
     return;
   }
 
