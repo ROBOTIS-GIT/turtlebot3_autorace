@@ -40,6 +40,8 @@ class ObjectDetectionNode(LifecycleNode):
     def on_configure(self, state: State) -> TransitionCallbackReturn:
         self.get_logger().info("Configuring object detection...")
         self.declare_parameter('model_path', '/home/ubuntu/best.pt')
+        self.declare_parameter('test_mode', True)
+        self.test_mode = self.get_parameter('test_mode').get_parameter_value().bool_value
         model_path = os.path.expanduser(
             self.get_parameter('model_path').get_parameter_value().string_value)
         self.model = YOLO(model_path)
@@ -112,7 +114,7 @@ class ObjectDetectionNode(LifecycleNode):
                     elif label in ['101', '102', '103']:
                         confirmed_rooms.append(int(label))
 
-            if confirmed_stores and confirmed_rooms:
+            if confirmed_stores or confirmed_rooms:
                 self.process_detection_results(results)
             else:
                 self.get_logger().info("Waiting for stable detection.")
@@ -153,6 +155,10 @@ class ObjectDetectionNode(LifecycleNode):
                 rooms.append(det['label'])
 
         self.get_logger().info(f'Detected stores: {stores}, Detected rooms: {rooms}')
+
+        if self.test_mode:
+            self.trigger_called = True
+            return
 
         req = DetectionResult.Request()
         req.stores = stores
