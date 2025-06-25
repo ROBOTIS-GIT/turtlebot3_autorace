@@ -173,7 +173,7 @@ controller_server:
       max_vel_theta: 1.0
       min_speed_xy: 0.0
       max_speed_xy: 0.3
-      min_speed_theta: 0.0
+      min_speed_theta: 0.1
       acc_lim_x: 3.0
       acc_lim_y: 0.0
       acc_lim_theta: 3.2
@@ -194,7 +194,7 @@ controller_server:
       trans_stopped_velocity: 0.02
       RotateToGoal:
         scale: 1.0
-        slowing_factor: 1.0
+        slowing_factor: -1.0
         lookahead_time: -1.0
       Oscillation:
         scale: 1.0
@@ -219,7 +219,7 @@ controller_server:
         scale: 0.8
         aggregation_type: "last"
       ObstacleFootprintCritic:
-        scale: 1.0
+        scale: 0.0
         sum_scores: false
     enable_stamped_cmd_vel: true
 

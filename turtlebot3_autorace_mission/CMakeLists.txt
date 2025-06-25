@@ -56,10 +56,9 @@ target_link_libraries(alley_mission_node
   ${std_msgs_TARGETS}
   ${std_srvs_TARGETS}
   ${geometry_msgs_TARGETS}
-  ${nav2_msgs_TARGETS}
+  ${sensor_msgs_TARGETS}
   rclcpp::rclcpp
   rclcpp_lifecycle::rclcpp_lifecycle
-  tf2_ros::tf2_ros
 )
 
 add_executable(door_docking_node src/door_docking.cpp)

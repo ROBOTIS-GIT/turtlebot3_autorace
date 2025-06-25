@@ -169,6 +169,7 @@ void TaskManager::state_change_callback(
   const std::shared_ptr<std_srvs::srv::Trigger::Response> res){
   (void)request_header;
   (void)req;
+  RCLCPP_INFO(this->get_logger(), "Quit Service called");
   shutdown_node(node_names_[step_++],client_);
   res->success = true;
 }

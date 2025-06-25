@@ -16,60 +16,41 @@
 
 #include "turtlebot3_autorace_mission/alley_mission.hpp"
 #include <cmath>
+#include <algorithm>
 #include "std_srvs/srv/trigger.hpp"
 
 AlleyMission::AlleyMission(const rclcpp::NodeOptions & options)
-: rclcpp_lifecycle::LifecycleNode("alley_mission_node", options),
-  tf_buffer_(this->get_clock()),
-  tf_listener_(tf_buffer_)
+: rclcpp_lifecycle::LifecycleNode("alley_mission_node", options)
   {}
 
 CallbackReturn AlleyMission::on_configure(const rclcpp_lifecycle::State &)
 {
   RCLCPP_INFO(this->get_logger(), "\033[1;34mAlley Mission INIT\033[0m");
-
   cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::TwistStamped>("/cmd_vel", 10);
-  timer_ = this->create_wall_timer(
-    std::chrono::milliseconds(500),
-    std::bind(&AlleyMission::publish_cmd_vel, this));
-
-  current_waypoint_index_ = 0;
-  waypoints_ = {
-    {-0.03, -0.7},
-    {-0.03, -0.9},
-    {-0.03, -1.1},
-    {-0.03, -1.32},
-    {-0.23, -1.32},
-    {-0.43, -1.32},
-    {-0.59, -1.32},
-    {-0.59, -1.52},
-    {-0.59, -1.72},
-    {-0.59, -1.92},
-    {-0.59, -2.12}
-  };
-
+  reached_target_ = false;
+  status_ = 0;
   return CallbackReturn::SUCCESS;
 }
 
-CallbackReturn AlleyMission::on_activate(const rclcpp_lifecycle::State &)
-{
+CallbackReturn AlleyMission::on_activate(const rclcpp_lifecycle::State &) {
   RCLCPP_INFO(this->get_logger(), "\033[1;34mAlley Mission ACTIVATE\033[0m");
   cmd_vel_pub_->on_activate();
+  scan_sub_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
+    "/scan", 10,
+    std::bind(&AlleyMission::scan_callback, this, std::placeholders::_1));
   return CallbackReturn::SUCCESS;
 }
 
-CallbackReturn AlleyMission::on_deactivate(const rclcpp_lifecycle::State &)
-{
+CallbackReturn AlleyMission::on_deactivate(const rclcpp_lifecycle::State &) {
   RCLCPP_INFO(this->get_logger(), "\033[1;34mAlley Mission DEACTIVATE\033[0m");
   cmd_vel_pub_->on_deactivate();
   return CallbackReturn::SUCCESS;
 }
 
-CallbackReturn AlleyMission::on_cleanup(const rclcpp_lifecycle::State &)
-{
+CallbackReturn AlleyMission::on_cleanup(const rclcpp_lifecycle::State &) {
   RCLCPP_INFO(this->get_logger(), "\033[1;34mAlley Mission CLEANUP\033[0m");
   cmd_vel_pub_.reset();
-  timer_.reset();
+  scan_sub_.reset();
   return CallbackReturn::SUCCESS;
 }
 
@@ -85,49 +66,51 @@ CallbackReturn AlleyMission::on_error(const rclcpp_lifecycle::State &)
   return CallbackReturn::SUCCESS;
 }
 
-
-void AlleyMission::publish_cmd_vel()
-{
-  if (!cmd_vel_pub_ || !cmd_vel_pub_->is_activated()) {
+void AlleyMission::scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg){
+  if (!cmd_vel_pub_ || !cmd_vel_pub_->is_activated() || reached_target_) {
     return;
   }
-  geometry_msgs::msg::TransformStamped transform =
-    tf_buffer_.lookupTransform("map", "base_link", tf2::TimePointZero);
 
-  double roll, pitch, yaw;
-  tf2::Quaternion q(
-      transform.transform.rotation.x,
-      transform.transform.rotation.y,
-      transform.transform.rotation.z,
-      transform.transform.rotation.w);
-  tf2::Matrix3x3(q).getRPY(roll, pitch, yaw);
+  if (status_ == 0) {
+    align_to_wall(msg);
+  } else if (status_ == 1) {
+    wall_following(msg);
+  }
+}
 
-  double dx = waypoints_[current_waypoint_index_].first - transform.transform.translation.x;
-  double dy = waypoints_[current_waypoint_index_].second - transform.transform.translation.y;
-  double look_ahead_distance = std::hypot(dx, dy);
-  double target_yaw = std::atan2(dy, dx) - yaw;
-  target_yaw = std::atan2(std::sin(target_yaw), std::cos(target_yaw));
+void AlleyMission::wall_following(const sensor_msgs::msg::LaserScan::SharedPtr msg) {
+  const float angle_min = msg->angle_min;
+  const float angle_max = msg->angle_max;
+  const float angle_increment = msg->angle_increment;
+  float front_distance = msg->ranges[0];
+  float left_distance = msg->ranges[std::round((90.0 * M_PI / 180.0 - angle_min)/ angle_increment)];
+  float back_distance = msg->ranges[std::round((M_PI - angle_min)/ angle_increment)];
 
-  cmd_vel_.header.stamp = this->get_clock()->now();
-  cmd_vel_.header.frame_id = "map";
-  if (current_waypoint_index_ < waypoints_.size()) {
-    if (look_ahead_distance > 0.1) {
-      if(target_yaw <M_PI/6 && target_yaw > -M_PI/6) {
-        cmd_vel_.twist.linear.x = 0.08;
-        cmd_vel_.twist.angular.z = target_yaw;
-      } else if (target_yaw > M_PI/6 || target_yaw < -M_PI/6) {
-        cmd_vel_.twist.linear.x = 0.03;
-        cmd_vel_.twist.angular.z = target_yaw;
-      }
-    } else {
-      current_waypoint_index_++;
-    }
-  } else {
-    RCLCPP_INFO(this->get_logger(), "Reached Destination.");
-    cmd_vel_.twist.linear.x = 0;
-    cmd_vel_.twist.angular.z = 0;
-    cmd_vel_pub_->publish(cmd_vel_);
-        auto client = this->create_client<std_srvs::srv::Trigger>("state_change_trigger");
+  const std::vector<float> target_deg = {90.0 * M_PI / 180.0,
+    75.0 * M_PI / 180.0,
+    60.0 * M_PI / 180.0,
+    45.0 * M_PI / 180.0,
+    30.0 * M_PI / 180.0
+  };
+  float min  = 0.3;
+  for (const auto & deg : target_deg) {
+    int idx = std::round((angle_max - deg)/ angle_increment);
+    float target_distance = msg->ranges[idx] * std::sin(deg);
+    min = std::min(min, target_distance);
+  }
+  auto cmd = geometry_msgs::msg::TwistStamped();
+  cmd.header.stamp = this->now();
+  cmd.header.frame_id = "base_link";
+  float criterion = (0.15 - min);
+  RCLCPP_INFO(this->get_logger(), "criterion:%f", criterion);
+  cmd.twist.angular.z = std::clamp(20 * criterion, -1.0f, 1.0f);
+  cmd.twist.linear.x = cmd.twist.angular.z > 0.2 ? 0.0 : 0.05;
+  if (front_distance > 0.9 && left_distance > 0.8 && back_distance > 0.5) {
+    RCLCPP_INFO(this->get_logger(), "front: %f, left: %f", front_distance, left_distance);
+    reached_target_ = true;
+    cmd.twist.linear.x = 0.0;
+    cmd.twist.angular.z = 0.0;
+    auto client = this->create_client<std_srvs::srv::Trigger>("state_change_trigger");
     if (!client->wait_for_service(std::chrono::seconds(1))) {
       RCLCPP_WARN(this->get_logger(), "state_change_client for service not available.");
       return;
@@ -135,7 +118,40 @@ void AlleyMission::publish_cmd_vel()
     auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
     client->async_send_request(request);
   }
-  cmd_vel_pub_->publish(cmd_vel_);
+  cmd_vel_pub_->publish(cmd);
+}
+
+void AlleyMission::align_to_wall(const sensor_msgs::msg::LaserScan::SharedPtr msg){
+  const float angle_min = msg->angle_min;
+  const float angle_max = msg->angle_max;
+  const float angle_increment = msg->angle_increment;
+
+  const float target_deg = 5.0 * M_PI / 180.0;
+
+  int start_idx = std::round((target_deg - angle_min) / angle_increment);
+  int end_idx   = std::round((angle_max - target_deg) / angle_increment);
+  float left_dist = msg->ranges[start_idx];
+  float right_dist = msg->ranges[end_idx];
+  float forward_distance = msg->ranges[0];
+
+  auto cmd = geometry_msgs::msg::TwistStamped();
+  cmd.header.stamp = this->now();
+  cmd.header.frame_id = "base_link";
+  if (std::isfinite(left_dist) && std::isfinite(right_dist))
+  {
+    RCLCPP_INFO(this->get_logger(), "forward: %f", forward_distance);
+    double diff = left_dist - right_dist;
+    if (std::fabs(diff) > 0.03) {
+      cmd.twist.angular.z = -0.8 * diff;
+      RCLCPP_INFO(this->get_logger(), "DIFF: %f", diff);
+    } else if (forward_distance > 0.7) {
+      cmd.twist.linear.x = 0.08;
+    } else {
+      status_ = 1;
+      RCLCPP_INFO(this->get_logger(), "Align done");
+    }
+  }
+  cmd_vel_pub_->publish(cmd);
 }
 
 int main(int argc, char * argv[])
