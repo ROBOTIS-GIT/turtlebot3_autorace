@@ -19,10 +19,10 @@
 
 #include <vector>
 
-#include "rclcpp/rclcpp.hpp"
-#include "geometry_msgs/msg/twist_stamped.hpp"
-#include "rclcpp_lifecycle/lifecycle_node.hpp"
-#include "sensor_msgs/msg/laser_scan.hpp"
+#include <geometry_msgs/msg/twist_stamped.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp_lifecycle/lifecycle_node.hpp>
+#include <sensor_msgs/msg/laser_scan.hpp>
 
 
 using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
@@ -43,7 +43,6 @@ protected:
   void scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg);
   void align_to_wall(const sensor_msgs::msg::LaserScan::SharedPtr msg);
   void wall_following(const sensor_msgs::msg::LaserScan::SharedPtr msg);
-  geometry_msgs::msg::TwistStamped cmd_vel_;
   rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::TwistStamped>::SharedPtr cmd_vel_pub_;
   rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_sub_;
 
