@@ -14,12 +14,13 @@
 //
 // Author: Hyungyu Kim
 
-#include "turtlebot3_autorace_mission/door_docking.hpp"
 #include "std_srvs/srv/trigger.hpp"
+#include "turtlebot3_autorace_mission/door_docking.hpp"
+
 
 DoorDocking::DoorDocking(const rclcpp::NodeOptions & options)
-  : rclcpp_lifecycle::LifecycleNode("door_docking_node", options)
-  {}
+: rclcpp_lifecycle::LifecycleNode("door_docking_node", options)
+{}
 
 CallbackReturn DoorDocking::on_configure(const rclcpp_lifecycle::State &)
 {
@@ -41,23 +42,22 @@ CallbackReturn DoorDocking::on_activate(const rclcpp_lifecycle::State &)
 
 CallbackReturn DoorDocking::on_deactivate(const rclcpp_lifecycle::State &)
 {
-  RCLCPP_INFO(this->get_logger(), "\033[1;34mDoorDocking Node DEACTIVATE\033[0m");
-
+  RCLCPP_INFO(this->get_logger(), "\033[1;31mDoorDocking Node DEACTIVATE\033[0m");
   cmd_vel_pub_->on_deactivate();
-
   return CallbackReturn::SUCCESS;
 }
 
 CallbackReturn DoorDocking::on_cleanup(const rclcpp_lifecycle::State &)
 {
-  RCLCPP_INFO(this->get_logger(), "\033[1;34mDoorDocking Node CLEANUP\033[0m");
+  RCLCPP_INFO(this->get_logger(), "\033[1;31mDoorDocking Node CLEANUP\033[0m");
   cmd_vel_pub_.reset();
+  scan_sub_.reset();
   return CallbackReturn::SUCCESS;
 }
 
 CallbackReturn DoorDocking::on_shutdown(const rclcpp_lifecycle::State &)
 {
-  RCLCPP_INFO(this->get_logger(), "\033[1;34mDoorDocking Node SHUTDOWN\033[0m");
+  RCLCPP_INFO(this->get_logger(), "\033[1;31mDoorDocking Node SHUTDOWN\033[0m");
   return CallbackReturn::SUCCESS;
 }
 
@@ -67,25 +67,22 @@ CallbackReturn DoorDocking::on_error(const rclcpp_lifecycle::State &)
   return CallbackReturn::SUCCESS;
 }
 
-void DoorDocking::scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg){
-  if (!cmd_vel_pub_ || !cmd_vel_pub_->is_activated() || reached_target_) {
+void DoorDocking::scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg)
+{
+  if (reached_target_) {
     return;
   }
 
   const double angle_min = msg->angle_min;
   const double angle_max = msg->angle_max;
   const double angle_increment = msg->angle_increment;
-  const int total_points = msg->ranges.size();
 
   const double target_deg = 10.0 * M_PI / 180.0;
-  int start_idx = std::round((target_deg - angle_min) / angle_increment);
-  int end_idx   = std::round((angle_max - target_deg) / angle_increment);
-  if (start_idx < 0 || end_idx >= total_points) {
-    RCLCPP_WARN(this->get_logger(), "INDEX ERROR start: %d, end: %d", start_idx, end_idx);
-    return;
-  }
-  float left_dist = msg->ranges[start_idx];
-  float right_dist = msg->ranges[end_idx];
+  int left_idx = std::round((target_deg - angle_min) / angle_increment);
+  int right_idx   = std::round((angle_max - target_deg) / angle_increment);
+
+  float left_dist = msg->ranges[left_idx];
+  float right_dist = msg->ranges[right_idx];
   float forward_dist = msg->ranges[0];
 
   auto cmd = geometry_msgs::msg::TwistStamped();
@@ -97,23 +94,20 @@ void DoorDocking::scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg
     if (std::fabs(diff) > 0.02) {
       cmd.twist.angular.z = -0.8 * diff;
       RCLCPP_INFO(this->get_logger(), "DIFF: %f", diff);
-    } else if (forward_dist > 0.3)
-    {
+    } else if (forward_dist > 0.3) {
       cmd.twist.linear.x = 0.8;
     } else {
+      cmd.twist.linear.x = 0.0;
+      cmd.twist.angular.z = 0.0;
+      auto client = this->create_client<std_srvs::srv::Trigger>("state_change_trigger");
+      if (!client->wait_for_service(std::chrono::seconds(1))) {
+        RCLCPP_WARN(this->get_logger(), "state_change_client for service not available.");
+        return;
+      }
       reached_target_ = true;
+      auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
+      client->async_send_request(request);
     }
-  }
-  if (reached_target_) {
-    cmd.twist.linear.x = 0.0;
-    cmd.twist.angular.z = 0.0;
-    auto client = this->create_client<std_srvs::srv::Trigger>("state_change_trigger");
-    if (!client->wait_for_service(std::chrono::seconds(1))) {
-      RCLCPP_WARN(this->get_logger(), "state_change_client for service not available.");
-      return;
-    }
-    auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
-    client->async_send_request(request);
   }
   cmd_vel_pub_->publish(cmd);
 }
