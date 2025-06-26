@@ -14,8 +14,8 @@
 //
 // Author: Hyungyu Kim
 
-#ifndef ALLEY_MISSION_HPP_
-#define ALLEY_MISSION_HPP_
+#ifndef TURTLEBOT3_AUTORACE_MISSION__ALLEY_MISSION_HPP_
+#define TURTLEBOT3_AUTORACE_MISSION__ALLEY_MISSION_HPP_
 
 #include <vector>
 
@@ -50,4 +50,4 @@ protected:
   int status_;
 };
 
-#endif  // ALLEY_MISSION_HPP_
+#endif  // TURTLEBOT3_AUTORACE_MISSION__ALLEY_MISSION_HPP_
