@@ -98,7 +98,8 @@ void Undocking::publish_cmd_vel()
   }
 
   geometry_msgs::msg::TransformStamped transform;
-  bool can_transform = tf_buffer_.canTransform("map",
+  bool can_transform = tf_buffer_.canTransform(
+    "map",
     "base_link",
     rclcpp::Time(0),
     rclcpp::Duration::from_seconds(1.0));
@@ -109,11 +110,14 @@ void Undocking::publish_cmd_vel()
     return;
   }
 
-  double criterion;
+  double criterion = 0.0;
   if (target_x_ == 0.0) {
     criterion = transform.transform.translation.y - target_y_;
   } else if (target_y_ == 0.0) {
     criterion = transform.transform.translation.x - target_x_;
+  } else {
+    RCLCPP_WARN(this->get_logger(), "Invalid undocking target");
+    return;
   }
 
   auto msg = geometry_msgs::msg::TwistStamped();

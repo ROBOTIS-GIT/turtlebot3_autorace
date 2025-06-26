@@ -79,7 +79,7 @@ void DoorDocking::scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg
 
   const double target_deg = 10.0 * M_PI / 180.0;
   int left_idx = std::round((target_deg - angle_min) / angle_increment);
-  int right_idx   = std::round((angle_max - target_deg) / angle_increment);
+  int right_idx = std::round((angle_max - target_deg) / angle_increment);
 
   float left_dist = msg->ranges[left_idx];
   float right_dist = msg->ranges[right_idx];
@@ -88,8 +88,7 @@ void DoorDocking::scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg
   auto cmd = geometry_msgs::msg::TwistStamped();
   cmd.header.stamp = this->now();
   cmd.header.frame_id = "base_link";
-  if (std::isfinite(left_dist) && std::isfinite(right_dist))
-  {
+  if (std::isfinite(left_dist) && std::isfinite(right_dist)) {
     double diff = left_dist - right_dist;
     if (std::fabs(diff) > 0.02) {
       cmd.twist.angular.z = -0.8 * diff;
