@@ -38,15 +38,20 @@ class ObjectDetectionNode(LifecycleNode):
     def __init__(self):
         super().__init__('object_detection_node')
         self.declare_parameter('model_path', '')
-        self.model_path = self.get_parameter('model_path').value
+        self.declare_parameter('test_mode', False)
 
     def on_configure(self, state: State) -> TransitionCallbackReturn:
         self.get_logger().info('\033[1;34mObject Dectection Node INIT\033[0m')
 
+        self.model_path = self.get_parameter('model_path').value
+        self.test_mode = self.get_parameter('test_mode').value
         self.model = YOLO(self.model_path)
         self.bridge = CvBridge()
         self.result_cli = self.create_client(DetectionResult, 'detection_result')
         while not self.result_cli.wait_for_service(timeout_sec=1.0):
+            if self.test_mode:
+                self.get_logger().warn('Service not available, continuing in test mode.')
+                break
             self.get_logger().warn('Service not available, waiting...')
         self.detection_in_progress = False
         self.class_history = {
@@ -73,7 +78,7 @@ class ObjectDetectionNode(LifecycleNode):
             self.destroy_subscription(self.image_sub)
             self.image_sub = None
         if hasattr(self, 'image_pub') and self.image_pub is not None:
-            self.destroy_publisher(self.image_sub)
+            self.destroy_publisher(self.image_pub)
             self.image_pub = None
         return TransitionCallbackReturn.SUCCESS
 
@@ -118,7 +123,6 @@ class ObjectDetectionNode(LifecycleNode):
 
             if confirmed_stores or confirmed_rooms:
                 self.process_detection_results(results)
-                self.get_logger().info(f'cf_st:{confirmed_stores}, cf_rm:{confirmed_rooms}')
             else:
                 self.get_logger().info('Waiting for stable detection.')
 
@@ -160,6 +164,11 @@ class ObjectDetectionNode(LifecycleNode):
                 rooms.append(det['label'])
 
         self.get_logger().info(f'Detected stores: {stores}, Detected rooms: {rooms}')
+
+        if self.test_mode:
+            self.get_logger().info('Test mode: Skipping service call.')
+            self.detection_in_progress = False
+            return
 
         req = DetectionResult.Request()
         req.stores = stores
