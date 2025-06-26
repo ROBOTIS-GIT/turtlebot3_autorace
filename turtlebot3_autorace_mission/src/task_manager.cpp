@@ -47,15 +47,15 @@ TaskManager::TaskManager()
     this, "/navigate_to_pose");
   node_names_ = {
     "error",
-    "undocking_node"
-    "nav2_node"
-    "object_detection_node"
-    "nav2_node"
-    "alley_mission_node"
-    "nav2_node"
-    "object_detection_node"
-    "nav2_node"
-    "object_detection_node"
+    "undocking_node",
+    "nav2_node",
+    "object_detection_node",
+    "nav2_node",
+    "alley_mission_node",
+    "nav2_node",
+    "object_detection_node",
+    "nav2_node",
+    "object_detection_node",
     "nav2_node",
     "object_detection_node",
     "aruco_parking",
