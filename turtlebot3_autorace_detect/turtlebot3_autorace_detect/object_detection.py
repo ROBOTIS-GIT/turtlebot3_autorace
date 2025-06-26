@@ -16,18 +16,17 @@
 #
 # Author: YeonSoo Noh, Hyungyu Kim
 
-import os
+from collections import deque
 
 import cv2
 from cv_bridge import CvBridge
 from cv_bridge import CvBridgeError
+
 import numpy as np
 import rclpy
-from collections import deque
 from rclpy.lifecycle import LifecycleNode
 from rclpy.lifecycle import State
 from rclpy.lifecycle import TransitionCallbackReturn
-from rclpy.parameter import Parameter
 from sensor_msgs.msg import Image
 from turtlebot3_autorace_msgs.srv import DetectionResult
 from ultralytics import YOLO
@@ -41,13 +40,13 @@ class ObjectDetectionNode(LifecycleNode):
         self.model_path = self.get_parameter('model_path').value
 
     def on_configure(self, state: State) -> TransitionCallbackReturn:
-        self.get_logger().info("\033[1;34mObject Dectection Node INIT\033[0m")
+        self.get_logger().info('\033[1;34mObject Dectection Node INIT\033[0m')
 
         self.model = YOLO(self.model_path)
         self.bridge = CvBridge()
         self.result_cli = self.create_client(DetectionResult, 'detection_result')
         while not self.result_cli.wait_for_service(timeout_sec=1.0):
-          self.get_logger().warn('Service not available, waiting...')
+            self.get_logger().warn('Service not available, waiting...')
         self.detection_in_progress = False
         self.class_history = {
             'pizza': deque(maxlen=5),
@@ -60,20 +59,20 @@ class ObjectDetectionNode(LifecycleNode):
         return TransitionCallbackReturn.SUCCESS
 
     def on_activate(self, state: State) -> TransitionCallbackReturn:
-        self.get_logger().info("\033[1;34mObject Detection Node ACTIVATE\033[0m")
+        self.get_logger().info('\033[1;34mObject Detection Node ACTIVATE\033[0m')
         self.image_sub = self.create_subscription(
             Image, '/camera/image_raw', self.image_callback, 10)
         return TransitionCallbackReturn.SUCCESS
 
     def on_deactivate(self, state: State) -> TransitionCallbackReturn:
-        self.get_logger().info("\033[1;34mObject Detection Node DEACTIVATE\033[0m")
+        self.get_logger().info('\033[1;34mObject Detection Node DEACTIVATE\033[0m')
         if self.image_sub:
             self.destroy_subscription(self.image_sub)
             self.image_sub = None
         return TransitionCallbackReturn.SUCCESS
 
     def on_cleanup(self, state: State) -> TransitionCallbackReturn:
-        self.get_logger().info("\033[1;34mObject Detection Node CLEANUP\033[0m")
+        self.get_logger().info('\033[1;34mObject Detection Node CLEANUP\033[0m')
         self.model = None
         self.bridge = None
         self.result_cli = None
@@ -82,7 +81,7 @@ class ObjectDetectionNode(LifecycleNode):
         return TransitionCallbackReturn.SUCCESS
 
     def on_shutdown(self, state: State) -> TransitionCallbackReturn:
-        self.get_logger().info("\033[1;34mObject Detection Node SHUTDOWN\033[0m")
+        self.get_logger().info('\033[1;34mObject Detection Node SHUTDOWN\033[0m')
         return TransitionCallbackReturn.SUCCESS
 
     def image_callback(self, msg):
@@ -115,7 +114,7 @@ class ObjectDetectionNode(LifecycleNode):
                 self.process_detection_results(results)
                 self.get_logger().info(f'cf_st:{confirmed_stores}, cf_rm:{confirmed_rooms}')
             else:
-                self.get_logger().info("Waiting for stable detection.")
+                self.get_logger().info('Waiting for stable detection.')
 
             annotated_frame = np.array(results[0].plot())
             annotated_frame = cv2.cvtColor(annotated_frame, cv2.COLOR_RGB2BGR)
@@ -168,6 +167,7 @@ class ObjectDetectionNode(LifecycleNode):
                 self.get_logger().warn('Detection result was rejected by TaskManager.')
         except Exception as e:
             self.get_logger().error(f'Service call failed: {str(e)}')
+
 
 def main(args=None):
     rclpy.init(args=args)

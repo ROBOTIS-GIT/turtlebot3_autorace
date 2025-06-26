@@ -19,24 +19,23 @@
 import os
 
 from ament_index_python.packages import get_package_share_directory
+
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
+from launch.actions import GroupAction
 from launch.actions import IncludeLaunchDescription
 from launch.actions import SetEnvironmentVariable
-from launch.actions import GroupAction
-from launch.substitutions import LaunchConfiguration
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch_ros.actions import Node
 from launch.conditions import IfCondition
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node
 from launch_ros.actions import PushRosNamespace
 from launch_ros.descriptions import ParameterFile
 from nav2_common.launch import RewrittenYaml
 
 
 def generate_launch_description():
-    nav2_launch_dir = os.path.join(get_package_share_directory('turtlebot3_autorace_mission'), 'launch')
     pkg_dir = get_package_share_directory('turtlebot3_autorace_mission')
-
     namespace = LaunchConfiguration('namespace')
     map_yaml_file = LaunchConfiguration('map')
     graph_filepath = LaunchConfiguration('graph')
@@ -47,7 +46,6 @@ def generate_launch_description():
     use_respawn = LaunchConfiguration('use_respawn')
     log_level = LaunchConfiguration('log_level')
 
-################################################################
     stdout_linebuf_envvar = SetEnvironmentVariable(
         'RCUTILS_LOGGING_BUFFERED_STREAM', '1'
     )
@@ -63,7 +61,6 @@ def generate_launch_description():
         ),
         allow_substs=True,
     )
-###############################################################
     declare_namespace_cmd = DeclareLaunchArgument(
         'namespace',
         default_value='',
@@ -72,7 +69,7 @@ def generate_launch_description():
 
     declare_map_yaml_cmd = DeclareLaunchArgument(
         'map',
-        default_value=os.path.join(pkg_dir,'map','map.yaml'),
+        default_value=os.path.join(pkg_dir, 'map', 'map.yaml'),
         description='Full path to map yaml file to load'
     )
 
@@ -162,12 +159,11 @@ def generate_launch_description():
         )
     ])
 
-
     rviz_config_dir = os.path.join(
         get_package_share_directory('turtlebot3_navigation2'),
         'rviz',
         'tb3_navigation2.rviz')
-    rviz =  Node(
+    rviz = Node(
         package='rviz2',
         executable='rviz2',
         name='rviz2',

@@ -42,12 +42,21 @@ class ArUcoParking(LifecycleNode):
 
         self.ParkingSequence = Enum(
             'ParkingSequence',
-            'waiting search_parking_lot align_direction move_nearby_parking_lot parking stop initialization'
+            ['waiting',
+             'search_parking_lot',
+             'align_direction',
+             'move_nearby_parking_lot',
+             'parking',
+             'stop',
+             'initialization']
         )
 
         self.NearbySequence = Enum(
             'NearbySequence',
-            'initial_turn go_straight turn_right parking'
+            ['initial_turn',
+             'go_straight',
+             'turn_right',
+             'parking']
         )
 
         self.marker_frame = 'ar_marker_0'

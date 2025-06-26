@@ -145,6 +145,7 @@ class LiDARDocking(LifecycleNode):
     def on_shutdown(self, state: LifecycleState) -> TransitionCallbackReturn:
         try:
             self.get_logger().info('LiDAR docking node shutting down...')
+
             def shutdown_node():
                 time.sleep(0.1)
                 rclpy.shutdown()
@@ -203,13 +204,13 @@ class LiDARDocking(LifecycleNode):
         scale = 400
 
         roi_points = []
-        for i, range in enumerate(scan_msg.ranges):
-            if not numpy.isfinite(range):
+        for i, distance in enumerate(scan_msg.ranges):
+            if not numpy.isfinite(distance):
                 continue
 
             angle = scan_msg.angle_min + i * scan_msg.angle_increment
-            distance_x = range * math.cos(angle)
-            distance_y = range * math.sin(angle)
+            distance_x = distance * math.cos(angle)
+            distance_y = distance * math.sin(angle)
 
             raw_x = cx + distance_x * scale
             raw_y = cy + distance_y * scale
@@ -272,7 +273,8 @@ class LiDARDocking(LifecycleNode):
         elif self.final_alignment_started:
             if abs(self.current_yaw_deg) > self.HEADING_ALIGNMENT_THRESHOLD:
                 self.align_heading()
-                self.get_logger().info(f'Final heading alignment in progress: {self.current_yaw_deg:.2f} degrees')
+                self.get_logger().info(
+                    f'Final heading alignment in progress: {self.current_yaw_deg:.2f} degrees')
                 return
             else:
                 cmd.twist.linear.x = 0.0
