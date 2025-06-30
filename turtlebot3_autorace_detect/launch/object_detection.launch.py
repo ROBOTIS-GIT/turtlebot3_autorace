@@ -23,9 +23,10 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
+    detect_package_dir = get_package_share_directory('turtlebot3_autorace_detect')
     model_path_arg = DeclareLaunchArgument(
         'model_path',
-        default_value='/home/ubuntu/best.pt',
+        default_value= os.path.join(detect_package_dir, 'model', 'best.pt'),
         description='Path to the YOLO model file'
     )
     model_path = LaunchConfiguration('model_path')
