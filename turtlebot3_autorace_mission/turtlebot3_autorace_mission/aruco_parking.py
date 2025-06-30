@@ -42,12 +42,21 @@ class ArUcoParking(LifecycleNode):
 
         self.ParkingSequence = Enum(
             'ParkingSequence',
-            'waiting search_parking_lot align_direction move_nearby_parking_lot parking stop initialization'
+            ['waiting',
+             'search_parking_lot',
+             'align_direction',
+             'move_nearby_parking_lot',
+             'parking',
+             'stop',
+             'initialization']
         )
 
         self.NearbySequence = Enum(
             'NearbySequence',
-            'initial_turn go_straight turn_right parking'
+            ['initial_turn',
+             'go_straight',
+             'turn_right',
+             'parking']
         )
 
         self.marker_frame = 'ar_marker_0'
@@ -66,7 +75,7 @@ class ArUcoParking(LifecycleNode):
         self.marker_2d_pose_y = .0
         self.marker_2d_theta = .0
 
-        self.parking_distance_to_marker = 0.1
+        self.parking_distance_to_marker = 0.18
 
         self.previous_robot_2d_theta = .0
         self.total_robot_2d_theta = .0
@@ -104,7 +113,7 @@ class ArUcoParking(LifecycleNode):
                 'state_change_trigger'
             )
 
-            self.get_logger().info('ArUco parking node configured successfully')
+            self.get_logger().info('\033[1;34mArUco Parking Node INIT\033[0m')
             return TransitionCallbackReturn.SUCCESS
         except Exception as e:
             self.get_logger().error(f'Configuration failed: {str(e)}')
@@ -117,13 +126,12 @@ class ArUcoParking(LifecycleNode):
                 return ret
 
             self.is_active = True
-            self.get_logger().info('Start parking sequence with marker 0')
             self.current_parking_sequence = self.ParkingSequence.search_parking_lot.value
             self.current_nearby_sequence = self.NearbySequence.initial_turn.value
             self.is_sequence_finished = False
             self.is_triggered = False
             self.timer = self.create_timer(0.1, self._run)
-            self.get_logger().info('ArUco parking node activated successfully')
+            self.get_logger().info('\033[1;34mArUco Parking Node ACTIVATE\033[0m')
             return TransitionCallbackReturn.SUCCESS
         except Exception as e:
             self.get_logger().error(f'Activation failed: {str(e)}')
@@ -136,7 +144,7 @@ class ArUcoParking(LifecycleNode):
                 return ret
 
             self.is_active = False
-            self.get_logger().info('ArUco parking node deactivated successfully')
+            self.get_logger().info('\033[1;34mArUco Parking Node DEACTIVATE\033[0m')
             return TransitionCallbackReturn.SUCCESS
         except Exception as e:
             self.get_logger().error(f'Deactivation failed: {str(e)}')
@@ -170,7 +178,7 @@ class ArUcoParking(LifecycleNode):
             self.is_marker_pose_received = False
             self.state_change_client = None
 
-            self.get_logger().info('ArUco parking node cleaned up successfully')
+            self.get_logger().info('\033[1;34mArUco Parking Node CLEANUP\033[0m')
             return TransitionCallbackReturn.SUCCESS
         except Exception as e:
             self.get_logger().error(f'Cleanup failed: {str(e)}')
@@ -178,7 +186,7 @@ class ArUcoParking(LifecycleNode):
 
     def on_shutdown(self, state: LifecycleState) -> TransitionCallbackReturn:
         try:
-            self.get_logger().info('ArUco parking node shutting down...')
+            self.get_logger().info('\033[1;34mArUco Parking Node SHUTDOWN\033[0m')
             return TransitionCallbackReturn.SUCCESS
         except Exception as e:
             self.get_logger().error(f'Shutdown failed: {str(e)}')

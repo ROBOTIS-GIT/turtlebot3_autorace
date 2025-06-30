@@ -74,6 +74,20 @@ def generate_launch_description():
 
         Node(
             package='turtlebot3_autorace_mission',
+            executable='door_docking_node',
+            parameters=[
+                {'use_sim_time': use_sim_time}],
+            output='screen'),
+
+        Node(
+            package='turtlebot3_autorace_mission',
+            executable='lidar_docking.py',
+            parameters=[
+                {'use_sim_time': use_sim_time}],
+            output='screen'),
+
+        Node(
+            package='turtlebot3_autorace_mission',
             executable='task_manager_node',
             parameters=[
                 {'use_sim_time': use_sim_time}],

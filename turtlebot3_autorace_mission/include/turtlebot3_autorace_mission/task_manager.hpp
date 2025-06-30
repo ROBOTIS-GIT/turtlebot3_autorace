@@ -14,16 +14,20 @@
 //
 // Author: Hyungyu Kim
 
-#ifndef TASK_MANAGER_HPP_
-#define TASK_MANAGER_HPP_
+#ifndef TURTLEBOT3_AUTORACE_MISSION__TASK_MANAGER_HPP_
+#define TURTLEBOT3_AUTORACE_MISSION__TASK_MANAGER_HPP_
 
-#include <rclcpp/rclcpp.hpp>
-#include <std_msgs/msg/bool.hpp>
-#include <std_srvs/srv/trigger.hpp>
+#include <memory>
+#include <string>
+#include <vector>
+
 #include <lifecycle_msgs/srv/change_state.hpp>
 #include <nav2_msgs/action/navigate_to_pose.hpp>
+#include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
-#include <lifecycle_msgs/srv/change_state.hpp>
+#include <std_msgs/msg/bool.hpp>
+#include <std_srvs/srv/trigger.hpp>
+
 #include "turtlebot3_autorace_msgs/srv/detection_result.hpp"
 #include "turtlebot3_autorace_msgs/srv/undocking_target.hpp"
 
@@ -34,32 +38,43 @@ public:
 
 private:
   void exec_step(int step);
-  void state_change_callback(const std::shared_ptr<rmw_request_id_t> request_header,
+  void state_change_callback(
+    const std::shared_ptr<rmw_request_id_t> request_header,
     const std::shared_ptr<std_srvs::srv::Trigger::Request> req,
     const std::shared_ptr<std_srvs::srv::Trigger::Response> res);
-  void detection_callback(const std::shared_ptr<rmw_request_id_t> request_header,
+  void detection_callback(
+    const std::shared_ptr<rmw_request_id_t> request_header,
     const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Request> req,
     const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Response> res);
-  void configure_activate_node(const std::string & node_name);
-  void shutdown_node(const std::string & node_name);
+  void configure_activate_node(
+    const std::string & node_name,
+    rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedPtr & client);
+  void deactivate_cleanup_node(
+    const std::string & node_name,
+    rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedPtr & client);
   void goal_pose_publish(double x, double y, double theta);
-  void detection_callback_order_details(const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Request> req,
+  void detection_callback_order_details(
+    const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Request> req,
     const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Response> res);
-  void detection_callback_store_sign(const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Request> req,
+  void detection_callback_store_sign(
+    const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Request> req,
+    const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Response> res);
+  void detection_callback_door_sign(
+    const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Request> req,
     const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Response> res);
   void undocking_target_send(float x, float y);
 
-  rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr nav_to_pose_client_;
   rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedPtr client_;
-  rclcpp::Client<turtlebot3_autorace_msgs::srv::UndockingTarget>::SharedPtr undocking_target_client_;
-  rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr state_check_sub_;
+  rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedPtr secondary_client_;
+  rclcpp::Client<turtlebot3_autorace_msgs::srv::UndockingTarget>::SharedPtr
+    undocking_target_client_;
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr state_change_trigger_;
   rclcpp::Service<turtlebot3_autorace_msgs::srv::DetectionResult>::SharedPtr detection_;
+  rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr nav_to_pose_client_;
 
   int step_;
   std::vector<std::string> node_names_;
   std::vector<std::vector<std::string>> order_details_;
 };
 
-
-#endif  // TASK_MANAGER_HPP_
+#endif  // TURTLEBOT3_AUTORACE_MISSION__TASK_MANAGER_HPP_

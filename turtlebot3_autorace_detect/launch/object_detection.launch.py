@@ -29,17 +29,24 @@ def generate_launch_description():
         default_value= os.path.join(detect_package_dir, 'model', 'best.pt'),
         description='Path to the YOLO model file'
     )
+    test_mode_arg = DeclareLaunchArgument(
+        'test_mode',
+        default_value='false',
+        description='Run in test mode without task manager'
+    )
     model_path = LaunchConfiguration('model_path')
+    test_mode = LaunchConfiguration('test_mode')
 
     object_detection_node = Node(
         package='turtlebot3_autorace_detect',
         executable='object_detection',
         name='object_detection_node',
         output='screen',
-        parameters=[{'model_path': model_path}]
+        parameters=[{'model_path': model_path, 'test_mode': test_mode}]
     )
 
     return LaunchDescription([
         model_path_arg,
+        test_mode_arg,
         object_detection_node,
     ])

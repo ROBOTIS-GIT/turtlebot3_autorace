@@ -14,23 +14,25 @@
 //
 // Author: Hyungyu Kim
 
-#include "turtlebot3_autorace_mission/task_manager.hpp"
 #include <lifecycle_msgs/msg/transition.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
+#include "turtlebot3_autorace_mission/task_manager.hpp"
+
+
 using NavigateToPose = nav2_msgs::action::NavigateToPose;
+
 TaskManager::TaskManager()
 : Node("task_manager"),
   step_(1)
 {
-  state_change_trigger_=this->create_service<std_srvs::srv::Trigger>(
+  state_change_trigger_ = this->create_service<std_srvs::srv::Trigger>(
     "state_change_trigger",
     std::bind(&TaskManager::state_change_callback,
       this, std::placeholders::_1,
       std::placeholders::_2,
       std::placeholders::_3)
   );
-
   undocking_target_client_ = this->create_client<turtlebot3_autorace_msgs::srv::UndockingTarget>(
     "undocking_target"
   );
@@ -45,165 +47,218 @@ TaskManager::TaskManager()
     this, "/navigate_to_pose");
   node_names_ = {
     "error",
-    "undocking_node", // 1
-    "nav2_node", // 2
-    "object_detection_node", // 3
-    "nav2_node", // 4
-    "alley_mission_node", // 5
-    "nav2_node", // 6
-    "object_detection_node", // 7
-    "nav2_node", // 8
-    "object_detection_node", // 9
-    "nav2_node", // 10
-    "object_detection_node", // 11
-    "aruco_parking", // 12
+    "undocking_node",
+    "nav2_node",
+    "object_detection_node",
+    "nav2_node",
+    "alley_mission_node",
+    "nav2_node",
+    "object_detection_node",
+    "nav2_node",
+    "object_detection_node",
+    "nav2_node",
+    "object_detection_node",
+    "aruco_parking",
+    "aruco_tracker",
+    "undocking_node",
+    "nav2_node",
+    "nav2_node",
+    "nav2_node",
+    "object_detection_node",
+    "nav2_node",
+    "object_detection_node",
+    "nav2_node",
+    "object_detection_node",
+    "door_docking_node",
+    "undocking_node"
   };
-
   exec_step(step_);
 }
 
-void TaskManager::exec_step(int step){
-  if(step == 1){
+void TaskManager::exec_step(int step)
+{
+  if(step == 1) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Undocking Starts #####\033[0m");
-    configure_activate_node("undocking_node");
+    configure_activate_node("undocking_node", client_);
     undocking_target_send(-0.7, 0.0);
-  } else if(step==2){
-    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Move forward to the ordering panel #####\033[0m");
-    goal_pose_publish(-0.1,-0.5, 0.0);
-  } else if(step==3){
+  } else if(step == 2) {
+    RCLCPP_INFO(
+      this->get_logger(),
+      "\033[1;32m##### Move forward to the ordering panel #####\033[0m");
+    goal_pose_publish(-0.1, -0.6, 0.0);
+  } else if(step == 3) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Order Details Perception #####\033[0m");
-    configure_activate_node("object_detection_node");
-  } else if(step==4){
+    configure_activate_node("object_detection_node", client_);
+  } else if(step == 4) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Move forward to the alley #####\033[0m");
-    goal_pose_publish(-0.1,-0.7, -1.57);
-  } else if(step==5){
+    goal_pose_publish(-0.1, -0.7, -1.57);
+  } else if(step == 5) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Alley Driving #####\033[0m");
-    configure_activate_node("alley_mission_node");
-  } else if(step==6) {
+    configure_activate_node("alley_mission_node", client_);
+  } else if(step == 6) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Move forward to first shop #####\033[0m");
-    goal_pose_publish(-0.14,-2.19, -1.57);
-  } else if(step==7) {
+    goal_pose_publish(-0.14, -2.19, -1.57);
+  } else if(step == 7) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Identify the type of store #####\033[0m");
-    configure_activate_node("object_detection_node");
-  } else if(step==8) {
+    configure_activate_node("object_detection_node", client_);
+  } else if(step == 8) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Move forward to second shop #####\033[0m");
-    goal_pose_publish(-1.18,-2.19, -1.57);
-  } else if(step==9) {
+    goal_pose_publish(-1.18, -2.19, -1.57);
+  } else if(step == 9) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Identify the type of store #####\033[0m");
-    configure_activate_node("object_detection_node");
-  } else if(step==10) {
+    configure_activate_node("object_detection_node", client_);
+  } else if(step == 10) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Move forward to third shop #####\033[0m");
-    goal_pose_publish(-2.26,-2.19, -1.57);
-  } else if(step==11) {
+    goal_pose_publish(-2.26, -2.19, -1.57);
+  } else if(step == 11) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Identify the type of store #####\033[0m");
-    configure_activate_node("object_detection_node");
-  } else if(step==12) {
-    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### aruco docking #####\033[0m");
-    configure_activate_node("aruco_tracker");
-    configure_activate_node("aruco_parking");
-  } else if (step==13) {
-    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### PICKUP #####\033[0m");
-    shutdown_node("aruco_tracker"); // shutdown하면 exec step이 되므로 이후 픽업 노드를 추가할 때 고려하기
-  } else if (step==14) {
+    configure_activate_node("object_detection_node", client_);
+  } else if(step == 12) {
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### ArUco docking #####\033[0m");
+    configure_activate_node("aruco_tracker", secondary_client_);
+    configure_activate_node("aruco_parking", client_);
+  } else if (step == 13) {
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Pickup #####\033[0m");
+    step_++;
+    deactivate_cleanup_node("aruco_tracker", secondary_client_);
+  } else if (step == 14) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Undocking #####\033[0m");
-    configure_activate_node("undocking_node");
+    configure_activate_node("undocking_node", client_);
     undocking_target_send(0.0, -2.2);
-  } else if (step==15) {
+  } else if (step == 15) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Move forward to bollard #####\033[0m");
-    goal_pose_publish(-2.1,-2.12, 1.57);
-  } else if (step==16) {
+    goal_pose_publish(-2.1, -2.12, 1.57);
+  } else if (step == 16) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Bollard Mission by Nav2 #####\033[0m");
-    goal_pose_publish(-2.1,-0.5, 1.57);
-  } else if (step==17) {
+    goal_pose_publish(-2.1, -0.5, 1.57);
+  } else if (step == 17) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Move forward to first door #####\033[0m");
-    goal_pose_publish(-2.4,-0.36, 1.57);
-  } else if (step==18) {
+    goal_pose_publish(-2.4, -0.36, 1.57);
+  } else if (step == 18) {
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Identify the type of door #####\033[0m");
+    configure_activate_node("object_detection_node", client_);
+  } else if (step == 19) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Move forward to second door #####\033[0m");
-    goal_pose_publish(-1.9,-0.36, 1.57);
-  } else if (step==19) {
+    goal_pose_publish(-1.9, -0.36, 1.57);
+  } else if (step == 20) {
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Identify the type of door #####\033[0m");
+    configure_activate_node("object_detection_node", client_);
+  } else if (step == 21) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Move forward to third door #####\033[0m");
-    goal_pose_publish(-1.4,-0.36, 1.57);
-  } else if (step==20) {
+    goal_pose_publish(-1.4, -0.36, 1.57);
+  } else if (step == 22) {
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Identify the type of door #####\033[0m");
+    configure_activate_node("object_detection_node", client_);
+  } else if (step == 23) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Docking at door #####\033[0m");
-    configure_activate_node("door_docking_node");
-  }  else if (step==21) {
+    configure_activate_node("door_docking_node", client_);
+  } else if (step == 24) {
     RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Undocking #####\033[0m");
-    configure_activate_node("undocking_node");
+    configure_activate_node("undocking_node", client_);
     undocking_target_send(0.0, -0.36);
+  } else if (step == 25) {
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Move forward to charge station #####\033[0m");
+    goal_pose_publish(-0.4, -0.1, 0.0);
+  } else if (step == 26) {
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Charging Station Docking #####\033[0m");
+    configure_activate_node("lidar_docking", client_);
+  } else {
+    RCLCPP_INFO(this->get_logger(), "\033[1;32m##### Mission Completed #####\033[0m");
   }
+  return;
 }
 
 void TaskManager::state_change_callback(
   const std::shared_ptr<rmw_request_id_t> request_header,
   const std::shared_ptr<std_srvs::srv::Trigger::Request> req,
-  const std::shared_ptr<std_srvs::srv::Trigger::Response> res){
+  const std::shared_ptr<std_srvs::srv::Trigger::Response> res)
+{
   (void)request_header;
   (void)req;
-  shutdown_node(node_names_[step_++]);
+  RCLCPP_INFO(this->get_logger(), "Quit Service called");
+  deactivate_cleanup_node(node_names_[step_++], client_);
   res->success = true;
 }
 
 void TaskManager::detection_callback(
   const std::shared_ptr<rmw_request_id_t> request_header,
   const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Request> req,
-  const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Response> res){
+  const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Response> res)
+{
   (void)request_header;
-  if (step_==3) {
+  if (step_ == 3) {
     detection_callback_order_details(req, res);
-  } else {
+  } else if(step_ == 7 || step_ == 9 || step_ == 11) {
     detection_callback_store_sign(req, res);
+  } else if(step_ == 18 || step_ == 20 || step_ == 22) {
+    detection_callback_door_sign(req, res);
   }
 }
 
-void TaskManager::configure_activate_node(const std::string & node_name){
-  client_ = this->create_client<lifecycle_msgs::srv::ChangeState>("/" + node_name + "/change_state");
+void TaskManager::configure_activate_node(
+  const std::string & node_name,
+  rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedPtr & client_)
+{
+  client_ = this->create_client<lifecycle_msgs::srv::ChangeState>(
+    "/" + node_name + "/change_state");
   int retry_count = 0;
   int max_retries = 10;
+
   while (!client_->wait_for_service(std::chrono::seconds(1))) {
-    RCLCPP_WARN(get_logger(), "%s", ("Waiting for /" + node_name + "/change_state service for configuring").c_str());
+    RCLCPP_WARN(get_logger(),
+      "%s",
+      ("Waiting for /" + node_name + "/change_state service for configuring").c_str());
     retry_count++;
     if (retry_count > max_retries) {
       RCLCPP_ERROR(get_logger(), "%s", (node_name + "Configuring Service not available.").c_str());
       return;
     }
   }
-
-  auto request_configure= std::make_shared<lifecycle_msgs::srv::ChangeState::Request>();
+  auto request_configure = std::make_shared<lifecycle_msgs::srv::ChangeState::Request>();
   request_configure->transition.id = lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE;
-
   client_->async_send_request(request_configure,
     [this, node_name](rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFuture result) {
       if (result.get()->success) {
-        RCLCPP_INFO(this->get_logger(), "%s", ("\033[1;34mSuccessfully configured" + node_name +"\033[0m").c_str());
+        RCLCPP_INFO(
+          this->get_logger(),
+          "%s",
+          ("\033[1;34mSuccessfully configured " + node_name + "\033[0m").c_str());
       } else {
         RCLCPP_ERROR(this->get_logger(), "%s", ("Failed to configure" + node_name).c_str());
         RCLCPP_ERROR(this->get_logger(), "Task Node will shut down");
         rclcpp::shutdown();
       }
-    });
+    }
+  );
 
   auto request_activate = std::make_shared<lifecycle_msgs::srv::ChangeState::Request>();
   request_activate->transition.id = lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE;
-
   client_->async_send_request(request_activate,
     [this, node_name](rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFuture result) {
       if (result.get()->success) {
-        RCLCPP_INFO(this->get_logger(), "%s", ("\033[1;34mSuccessfully activated " + node_name + "\033[0m").c_str());
+        RCLCPP_INFO(
+          this->get_logger(),
+          "%s",
+          ("\033[1;34mSuccessfully activated " + node_name + "\033[0m").c_str());
       } else {
         RCLCPP_ERROR(this->get_logger(), "%s", ("Failed to activate" + node_name).c_str());
         RCLCPP_ERROR(this->get_logger(), "Task Node will shut down");
-        shutdown_node("undocking_node");
         rclcpp::shutdown();
       }
     }
-);
+  );
 }
 
-void TaskManager::shutdown_node(const std::string & node_name){
+void TaskManager::deactivate_cleanup_node(
+  const std::string & node_name,
+  rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedPtr & client_)
+{
   int retry_count = 0;
   int max_retries = 10;
   while (!client_->wait_for_service(std::chrono::seconds(1))) {
-    RCLCPP_WARN(get_logger(), "%s", ("Waiting for /" + node_name + "/change_state service for shutdown").c_str());
+    RCLCPP_WARN(get_logger(),
+      "%s",
+      ("Waiting for /" + node_name + "/change_state service for shutdown").c_str());
     retry_count++;
     if (retry_count > max_retries) {
       RCLCPP_ERROR(get_logger(), "%s", (node_name + "ConfiguringService not available.").c_str());
@@ -216,7 +271,10 @@ void TaskManager::shutdown_node(const std::string & node_name){
   client_->async_send_request(request_deactivate,
     [this, node_name](rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFuture result) {
       if (result.get()->success) {
-        RCLCPP_INFO(this->get_logger(), "%s", ("\033[1;34mSuccessfully deactivated" + node_name + "\033[0m").c_str());
+        RCLCPP_INFO(
+          this->get_logger(),
+          "%s",
+          ("\033[1;31mSuccessfully deactivated" + node_name + "\033[0m").c_str());
       } else {
         RCLCPP_ERROR(this->get_logger(), "%s", ("Failed to deactivate" + node_name).c_str());
       }
@@ -228,34 +286,24 @@ void TaskManager::shutdown_node(const std::string & node_name){
   client_->async_send_request(request_cleanup,
     [this, node_name](rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFuture result) {
       if (result.get()->success) {
-        RCLCPP_INFO(this->get_logger(), "%s", ("\033[1;34mSuccessfully cleaned up " + node_name + "\033[0m").c_str());
+        RCLCPP_INFO(
+          this->get_logger(),
+          "%s",
+          ("\033[1;31mSuccessfully cleaned up " + node_name + "\033[0m").c_str());
         exec_step(step_);
       } else {
         RCLCPP_INFO(this->get_logger(), "%s", ("Failed to clean up " + node_name).c_str());
       }
     });
-
-  // auto request_shutdown = std::make_shared<lifecycle_msgs::srv::ChangeState::Request>();
-  // request_shutdown->transition.id = lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN;
-
-  // client_->async_send_request(request_shutdown,
-  //   [this, node_name](rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedFuture result) {
-  //     if (result.get()->success) {
-  //       RCLCPP_INFO(this->get_logger(), "%s", ("Successfully shutdown" + node_name).c_str());
-  //       exec_step(step_);
-  //     } else {
-  //       RCLCPP_INFO(this->get_logger(), "%s", ("Failed to shutdown" + node_name).c_str());
-  //     }
-  //   });
 }
 
 void TaskManager::goal_pose_publish(double x, double y, double theta)
 {
   RCLCPP_INFO(this->get_logger(), "Publishing goal pose: (%.2f, %.2f, %.2f)", x, y, theta);
   if (!nav_to_pose_client_->wait_for_action_server(std::chrono::seconds(1))) {
-      RCLCPP_ERROR(this->get_logger(), "NavigateToPose action server not available.");
-      return;
-    }
+    RCLCPP_ERROR(this->get_logger(), "NavigateToPose action server not available.");
+    return;
+  }
   tf2::Quaternion q;
   q.setRPY(0, 0, theta);
   auto goal_msg = NavigateToPose::Goal();
@@ -266,14 +314,6 @@ void TaskManager::goal_pose_publish(double x, double y, double theta)
   goal_msg.pose.pose.orientation = tf2::toMsg(q);
 
   auto send_goal_options = rclcpp_action::Client<NavigateToPose>::SendGoalOptions();
-  // ## FOR DEBUG ##
-  // send_goal_options.feedback_callback =
-  //   [this](rclcpp_action::ClientGoalHandle<NavigateToPose>::SharedPtr,
-  //          const std::shared_ptr<const NavigateToPose::Feedback> feedback)
-  //   {
-  //     RCLCPP_INFO(this->get_logger(), "Distance remaining: %.2f",
-  //                 feedback->distance_remaining);
-  //   };
 
   send_goal_options.result_callback =
     [this](const rclcpp_action::ClientGoalHandle<NavigateToPose>::WrappedResult & result)
@@ -309,41 +349,78 @@ void TaskManager::undocking_target_send(float x, float y)
   request->target_x = x;
   request->target_y = y;
 
-  auto future = undocking_target_client_->async_send_request(request);
-  if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), future) ==
-      rclcpp::FutureReturnCode::SUCCESS) {
-    RCLCPP_INFO(this->get_logger(), "Undocking target sent successfully.");
-  } else {
-    RCLCPP_ERROR(this->get_logger(), "Failed to send undocking target.");
-  }
+  undocking_target_client_->async_send_request(request,
+    [this](rclcpp::Client<turtlebot3_autorace_msgs::srv::UndockingTarget>::SharedFuture result) {
+      if (result.get()->success) {
+        RCLCPP_INFO(this->get_logger(), "Undocking target sent successfully.");
+      } else {
+        RCLCPP_ERROR(this->get_logger(), "Failed to send undocking target.");
+      }
+    }
+  );
 }
 
-void TaskManager::detection_callback_order_details(const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Request> req,
-    const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Response> res){
-  if (req->stores.size() >= 2 && req->rooms.size() >= 2) {
+void TaskManager::detection_callback_order_details(
+  const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Request> req,
+  const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Response> res)
+{
+  if (req->stores.size() == 3 && req->rooms.size() == 3) {
     for (size_t i = 0; i < req->stores.size(); ++i) {
       order_details_.push_back({req->stores[i], req->rooms[i]});
     }
-    RCLCPP_INFO(this->get_logger(), "First order: %s -> %s", req->stores[0].c_str(), req->rooms[0].c_str());
-    RCLCPP_INFO(this->get_logger(), "Second order: %s -> %s", req->stores[1].c_str(), req->rooms[1].c_str());
-    //RCLCPP_INFO(this->get_logger(), "Third order: %s, ->, %s", req->stores[2].c_str(), req->rooms[2].c_str());
+    RCLCPP_INFO(
+      this->get_logger(),
+      "First order: %s -> %s",
+      order_details_[0][0].c_str(),
+      order_details_[0][1].c_str());
+    RCLCPP_INFO(
+      this->get_logger(),
+      "Second order: %s -> %s",
+      order_details_[1][0].c_str(),
+      order_details_[1][1].c_str());
+    RCLCPP_INFO(
+      this->get_logger(),
+      "Third order: %s -> %s",
+      order_details_[2][0].c_str(),
+      order_details_[2][1].c_str());
     res->success = true;
-    shutdown_node(node_names_[step_++]);
+    deactivate_cleanup_node(node_names_[step_++], client_);
   } else {
     RCLCPP_ERROR(this->get_logger(), "Detection failed. Detection again.");
     res->success = false;
   }
 }
 
-void TaskManager::detection_callback_store_sign(const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Request> req,
-  const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Response> res){
-  if (req->stores.size() == 1){
+void TaskManager::detection_callback_store_sign(
+  const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Request> req,
+  const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Response> res)
+{
+  if (req->stores.size() == 1) {
     res->success = true;
-    if (req->stores[0] == order_details_[0][0]){
-      shutdown_node("object_detection_node");
+    if (req->stores[0] == order_details_[0][0]) {
+      deactivate_cleanup_node("object_detection_node", client_);
       step_ = 12;
     } else {
-      shutdown_node("object_detection_node");
+      deactivate_cleanup_node("object_detection_node", client_);
+      step_++;
+    }
+  } else {
+    RCLCPP_ERROR(this->get_logger(), "It is not unique detection result. Detection again.");
+    res->success = false;
+  }
+}
+
+void TaskManager::detection_callback_door_sign(
+  const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Request> req,
+  const std::shared_ptr<turtlebot3_autorace_msgs::srv::DetectionResult::Response> res)
+{
+  if (req->rooms.size() == 1) {
+    res->success = true;
+    if (req->rooms[0] == order_details_[0][1]) {
+      deactivate_cleanup_node("object_detection_node", client_);
+      step_ = 23;
+    } else {
+      deactivate_cleanup_node("object_detection_node", client_);
       step_++;
     }
   } else {

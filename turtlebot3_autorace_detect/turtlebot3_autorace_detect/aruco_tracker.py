@@ -74,7 +74,7 @@ class ArUcoTracker(LifecycleNode):
                 qos_profile_sensor_data
             )
 
-            self.get_logger().info('ArUco tracker node configured successfully')
+            self.get_logger().info('\033[1;34mArUco Trarcker Node INIT\033[0m')
             return TransitionCallbackReturn.SUCCESS
         except Exception as e:
             self.get_logger().error(f'Configuration failed: {str(e)}')
@@ -87,7 +87,7 @@ class ArUcoTracker(LifecycleNode):
                 return ret
 
             self.is_active = True
-            self.get_logger().info('ArUco tracker node activated successfully')
+            self.get_logger().info('\033[1;34mArUco Trarcker Node ACTIVATE\033[0m')
             return TransitionCallbackReturn.SUCCESS
         except Exception as e:
             self.get_logger().error(f'Activation failed: {str(e)}')
@@ -100,7 +100,7 @@ class ArUcoTracker(LifecycleNode):
                 return ret
 
             self.is_active = False
-            self.get_logger().info('ArUco tracker node deactivated successfully')
+            self.get_logger().info('\033[1;34mArUco Trarcker Node DEACTIVATE\033[0m')
             return TransitionCallbackReturn.SUCCESS
         except Exception as e:
             self.get_logger().error(f'Deactivation failed: {str(e)}')
@@ -114,7 +114,7 @@ class ArUcoTracker(LifecycleNode):
             self.intrinsic_mat = None
             self.distortion = None
 
-            self.get_logger().info('ArUco tracker node cleaned up successfully')
+            self.get_logger().info('\033[1;34mArUco Trarcker Node CLEANUP\033[0m')
             return TransitionCallbackReturn.SUCCESS
         except Exception as e:
             self.get_logger().error(f'Cleanup failed: {str(e)}')
@@ -122,7 +122,7 @@ class ArUcoTracker(LifecycleNode):
 
     def on_shutdown(self, state: LifecycleState) -> TransitionCallbackReturn:
         try:
-            self.get_logger().info('ArUco tracker node shutting down...')
+            self.get_logger().info('\033[1;34mArUco Trarcker Node SHUTDOWN\033[0m')
             return TransitionCallbackReturn.SUCCESS
         except Exception as e:
             self.get_logger().error(f'Shutdown failed: {str(e)}')
@@ -187,7 +187,6 @@ class ArUcoTracker(LifecycleNode):
             t_msg.transform.rotation.w = float(quat[3])
 
             self.br.sendTransform(t_msg)
-            self.get_logger().info(f'Marker {marker_id} detected')
 
 
 def main():

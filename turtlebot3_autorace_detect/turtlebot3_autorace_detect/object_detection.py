@@ -14,22 +14,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Author: YeonSoo Noh
+# Author: YeonSoo Noh, Hyungyu Kim
 
-import os
+from collections import deque
 
 import cv2
 from cv_bridge import CvBridge
 from cv_bridge import CvBridgeError
+
 import numpy as np
 import rclpy
-from collections import deque
 from rclpy.lifecycle import LifecycleNode
 from rclpy.lifecycle import State
 from rclpy.lifecycle import TransitionCallbackReturn
-from rclpy.parameter import Parameter
+from sensor_msgs.msg import CompressedImage
 from sensor_msgs.msg import Image
-from std_srvs.srv import Trigger
 from turtlebot3_autorace_msgs.srv import DetectionResult
 from ultralytics import YOLO
 
@@ -39,16 +38,21 @@ class ObjectDetectionNode(LifecycleNode):
     def __init__(self):
         super().__init__('object_detection_node')
         self.declare_parameter('model_path', '')
-        self.model_path = self.get_parameter('model_path').value
+        self.declare_parameter('test_mode', False)
 
     def on_configure(self, state: State) -> TransitionCallbackReturn:
-        self.get_logger().info("\033[1;34mObject Dectection Node INIT\033[0m")
+        self.get_logger().info('\033[1;34mObject Dectection Node INIT\033[0m')
 
+        self.model_path = self.get_parameter('model_path').value
+        self.test_mode = self.get_parameter('test_mode').value
         self.model = YOLO(self.model_path)
         self.bridge = CvBridge()
         self.result_cli = self.create_client(DetectionResult, 'detection_result')
         while not self.result_cli.wait_for_service(timeout_sec=1.0):
-          self.get_logger().warn('Service not available, waiting...')
+            if self.test_mode:
+                self.get_logger().warn('Service not available, continuing in test mode.')
+                break
+            self.get_logger().warn('Service not available, waiting...')
         self.detection_in_progress = False
         self.class_history = {
             'pizza': deque(maxlen=5),
@@ -61,30 +65,34 @@ class ObjectDetectionNode(LifecycleNode):
         return TransitionCallbackReturn.SUCCESS
 
     def on_activate(self, state: State) -> TransitionCallbackReturn:
-        self.get_logger().info("\033[1;34mObject Detection Node ACTIVATE\033[0m")
+        self.get_logger().info('\033[1;34mObject Detection Node ACTIVATE\033[0m')
         self.image_sub = self.create_subscription(
-            Image, '/camera/image_raw', self.image_callback, 10)
+            CompressedImage, '/camera/image_raw/compressed', self.image_callback, 10)
+        self.image_pub = self.create_publisher(
+            CompressedImage, '/camera/detections/compressed', 10)
         return TransitionCallbackReturn.SUCCESS
 
     def on_deactivate(self, state: State) -> TransitionCallbackReturn:
-        self.get_logger().info("\033[1;34mObject Detection Node DEACTIVATE\033[0m")
-        if self.image_sub:
+        self.get_logger().info('\033[1;34mObject Detection Node DEACTIVATE\033[0m')
+        if hasattr(self, 'image_sub') and self.image_sub is not None:
             self.destroy_subscription(self.image_sub)
             self.image_sub = None
+        if hasattr(self, 'image_pub') and self.image_pub is not None:
+            self.destroy_publisher(self.image_pub)
+            self.image_pub = None
         return TransitionCallbackReturn.SUCCESS
 
     def on_cleanup(self, state: State) -> TransitionCallbackReturn:
-        self.get_logger().info("\033[1;34mObject Detection Node CLEANUP\033[0m")
+        self.get_logger().info('\033[1;34mObject Detection Node CLEANUP\033[0m')
         self.model = None
         self.bridge = None
         self.result_cli = None
         self.class_history = None
-        self.process_detection_results = None
         self.future = None
         return TransitionCallbackReturn.SUCCESS
 
     def on_shutdown(self, state: State) -> TransitionCallbackReturn:
-        self.get_logger().info("\033[1;34mObject Detection Node SHUTDOWN\033[0m")
+        self.get_logger().info('\033[1;34mObject Detection Node SHUTDOWN\033[0m')
         return TransitionCallbackReturn.SUCCESS
 
     def image_callback(self, msg):
@@ -92,7 +100,8 @@ class ObjectDetectionNode(LifecycleNode):
             return
 
         try:
-            frame = self.bridge.imgmsg_to_cv2(msg, 'rgb8')
+            np_arr = np.frombuffer(msg.data, np.uint8)
+            frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
             results = self.model(frame, verbose=False, conf=0.3, iou=0.1)
             detected_labels = set()
             for i, cls_id in enumerate(results[0].boxes.cls.cpu().numpy()):
@@ -115,10 +124,16 @@ class ObjectDetectionNode(LifecycleNode):
             if confirmed_stores or confirmed_rooms:
                 self.process_detection_results(results)
             else:
-                self.get_logger().info("Waiting for stable detection.")
+                self.get_logger().info('Waiting for stable detection.')
 
             annotated_frame = np.array(results[0].plot())
-            annotated_frame = cv2.cvtColor(annotated_frame, cv2.COLOR_RGB2BGR)
+            success, encoded_image = cv2.imencode('.jpg', annotated_frame)
+            if success:
+                compressed_image = CompressedImage()
+                compressed_image.header = msg.header
+                compressed_image.format = 'jpeg'
+                compressed_image.data = encoded_image.tobytes()
+                self.image_pub.publish(compressed_image)
 
         except CvBridgeError as e:
             self.get_logger().error(f'CV Bridge error: {e}')
@@ -150,6 +165,11 @@ class ObjectDetectionNode(LifecycleNode):
 
         self.get_logger().info(f'Detected stores: {stores}, Detected rooms: {rooms}')
 
+        if self.test_mode:
+            self.get_logger().info('Test mode: Skipping service call.')
+            self.detection_in_progress = False
+            return
+
         req = DetectionResult.Request()
         req.stores = stores
         req.rooms = rooms
@@ -157,16 +177,6 @@ class ObjectDetectionNode(LifecycleNode):
         self.future = self.result_cli.call_async(req)
         self.detection_in_progress = True
         self.future.add_done_callback(self.future_callback)
-
-    def trigger_callback(self, future):
-        try:
-            result = future.result()
-            if result.success:
-                self.get_logger().info('State change trigger successfully sent.')
-            else:
-                self.get_logger().warn('State change trigger rejected by TaskManager.')
-        except Exception as e:
-            self.get_logger().error(f'Service call failed: {str(e)}')
 
     def future_callback(self, future):
         try:
@@ -178,6 +188,9 @@ class ObjectDetectionNode(LifecycleNode):
                 self.get_logger().warn('Detection result was rejected by TaskManager.')
         except Exception as e:
             self.get_logger().error(f'Service call failed: {str(e)}')
+        
+        self.detection_in_progress = False
+
 
 def main(args=None):
     rclpy.init(args=args)

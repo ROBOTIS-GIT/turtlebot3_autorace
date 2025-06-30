@@ -101,14 +101,17 @@ class ArmController(Node):
     def verify_position(self, target_pos):
         start_time = time.time()
         timeout = 5.0
-        
+
         while time.time() - start_time < timeout:
             if abs(self.current_position - target_pos) < self.POSITION_TOLERANCE:
-                self.get_logger().info(f'Position verified: {self.current_position:.2f} (target: {target_pos:.2f})')
+                self.get_logger().info(
+                    f'Position verified: {self.current_position:.2f} (target: {target_pos:.2f})')
                 return True
             time.sleep(0.1)
-        
-        self.get_logger().warn(f'Position verification failed: {self.current_position:.2f} (target: {target_pos:.2f})')
+
+        self.get_logger().warn(
+            f'Position verification failed: {self.current_position:.2f}'
+            f'(target: {target_pos:.2f})')
         return False
 
     def trigger_callback(self, future):

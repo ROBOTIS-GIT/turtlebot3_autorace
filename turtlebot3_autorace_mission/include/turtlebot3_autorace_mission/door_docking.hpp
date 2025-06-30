@@ -14,15 +14,17 @@
 //
 // Author: Hyungyu Kim
 
-#ifndef DOOR_DOCKING_HPP_
-#define DOOR_DOCKING_HPP_
+#ifndef TURTLEBOT3_AUTORACE_MISSION__DOOR_DOCKING_HPP_
+#define TURTLEBOT3_AUTORACE_MISSION__DOOR_DOCKING_HPP_
 
-#include "rclcpp_lifecycle/lifecycle_node.hpp"
-#include "rclcpp_lifecycle/lifecycle_publisher.hpp"
-#include "geometry_msgs/msg/twist_stamped.hpp"
-#include "sensor_msgs/msg/laser_scan.hpp"
-#include "rclcpp/rclcpp.hpp"
 #include <cmath>
+
+#include <geometry_msgs/msg/twist_stamped.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp_lifecycle/lifecycle_node.hpp>
+#include <rclcpp_lifecycle/lifecycle_publisher.hpp>
+#include <sensor_msgs/msg/laser_scan.hpp>
+
 
 using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
 
@@ -41,9 +43,10 @@ protected:
 
   void scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg);
 
-  bool reached_target_;
   rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::TwistStamped>::SharedPtr cmd_vel_pub_;
   rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_sub_;
+
+  bool reached_target_;
 };
 
-#endif  // DOOR_DOCKING_HPP_
+#endif  // TURTLEBOT3_AUTORACE_MISSION__DOOR_DOCKING_HPP_

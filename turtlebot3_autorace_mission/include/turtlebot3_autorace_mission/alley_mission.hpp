@@ -14,16 +14,15 @@
 //
 // Author: Hyungyu Kim
 
-#ifndef ALLEY_MISSION_HPP_
-#define ALLEY_MISSION_HPP_
+#ifndef TURTLEBOT3_AUTORACE_MISSION__ALLEY_MISSION_HPP_
+#define TURTLEBOT3_AUTORACE_MISSION__ALLEY_MISSION_HPP_
 
 #include <vector>
 
-#include "rclcpp/rclcpp.hpp"
-#include "geometry_msgs/msg/twist_stamped.hpp"
-#include "rclcpp_lifecycle/lifecycle_node.hpp"
-#include "tf2_ros/buffer.h"
-#include "tf2_ros/transform_listener.h"
+#include <geometry_msgs/msg/twist_stamped.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp_lifecycle/lifecycle_node.hpp>
+#include <sensor_msgs/msg/laser_scan.hpp>
 
 
 using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
@@ -41,16 +40,14 @@ protected:
   CallbackReturn on_shutdown(const rclcpp_lifecycle::State & state) override;
   CallbackReturn on_error(const rclcpp_lifecycle::State & state) override;
 
-  void publish_cmd_vel();
-
-  geometry_msgs::msg::TwistStamped cmd_vel_;
+  void scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg);
+  void align_to_wall(const sensor_msgs::msg::LaserScan::SharedPtr msg);
+  void wall_following(const sensor_msgs::msg::LaserScan::SharedPtr msg);
   rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::TwistStamped>::SharedPtr cmd_vel_pub_;
-  rclcpp::TimerBase::SharedPtr timer_;
-  tf2_ros::Buffer tf_buffer_;
-  tf2_ros::TransformListener tf_listener_;
+  rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_sub_;
 
-  size_t current_waypoint_index_;
-  std::vector<std::pair<double, double>> waypoints_;
+  bool reached_target_;
+  int status_;
 };
 
-#endif  // ALLEY_MISSION_HPP_
+#endif  // TURTLEBOT3_AUTORACE_MISSION__ALLEY_MISSION_HPP_
